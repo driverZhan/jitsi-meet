@@ -233,14 +233,8 @@
 
                 // Retrieve code_verifier and oauth_nonce from sessionStorage (set during login initiation)
                 const codeVerifier = sessionStorage.getItem('code_verifier');
-                const params = {
-                    grant_type: 'authorization_code',
-                    code: code,
-                    redirect_uri: window.location.origin + window.location.pathname,
-                    client_id: sso.clientId
-                };
-                if (codeVerifier) {
-                    params.code_verifier = codeVerifier;
+                if (!codeVerifier) {
+                    throw new Error('No PKCE code verifier found in session');
                 }
 
                 const oauthNonce = sessionStorage.getItem('oauth_nonce');
@@ -258,7 +252,13 @@
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded'
                     },
-                    body: new URLSearchParams(params)
+                    body: new URLSearchParams({
+                        grant_type: 'authorization_code',
+                        code: code,
+                        redirect_uri: window.location.origin + window.location.pathname,
+                        client_id: sso.clientId,
+                        code_verifier: codeVerifier
+                    })
                 });
 
                 if (!tokenResponse.ok) {

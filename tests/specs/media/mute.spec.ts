@@ -27,12 +27,11 @@ describe('Mute', () => {
 
     it('unmute p2 and check', () => toggleMuteAndCheck(ctx.p2, ctx.p1, false));
 
-    it('p1 mutes p2 and check', async function() {
+    it('p1 mutes p2 and check', async () => {
         const { p1, p2 } = ctx;
 
         if (!await p1.isModerator()) {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
+            return;
         }
 
         await p1.getFilmstrip().muteAudio(p2);
@@ -41,13 +40,8 @@ describe('Mute', () => {
         await p2.getFilmstrip().assertAudioMuteIconIsDisplayed(p2);
     });
 
-    it('p2 unmute after p1 mute and check', async function() {
+    it('p2 unmute after p1 mute and check', async () => {
         const { p1, p2 } = ctx;
-
-        if (!await p1.isModerator()) {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
-        }
 
         await unmuteAudioAndCheck(p2, p1);
     });

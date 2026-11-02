@@ -10,7 +10,6 @@ import { MEET_FEATURES } from '../../../base/jwt/constants';
 import { isJwtFeatureEnabled } from '../../../base/jwt/functions';
 import { isLocalParticipantModerator } from '../../../base/participants/functions';
 import { authorizeDropbox, updateDropboxToken } from '../../../dropbox/actions';
-import { isE2EEOnInMeeting } from '../../../e2ee/functions';
 import { setFollowMeRecorderExclusive } from '../../../follow-me/actions';
 import { isFollowMeActive, isFollowMeRecorderActive } from '../../../follow-me/functions';
 import { isVpaasMeeting } from '../../../jaas/functions';
@@ -46,11 +45,6 @@ export interface IProps extends WithTranslation {
      * Style of the dialogs feature.
      */
     _dialogStyles: any;
-
-    /**
-     * Whether end-to-end encryption is on, which rules out starting transcription.
-     */
-    _e2eeEnabled: boolean;
 
     /**
      * Whether any moderator has the regular Follow Me feature active.
@@ -654,7 +648,6 @@ export function mapStateToProps(state: IReduxState) {
             .map((lang: string) => `translation-languages:${lang}`),
         _canManageRecordingOrTranscription: canManageRecordingOrTranscription,
         _canStartTranscribing: canAddTranscriber(state),
-        _e2eeEnabled: isE2EEOnInMeeting(state),
         _followMeActive: isFollowMeActive(state),
         _followMeRecorderActive: isFollowMeRecorderActive(state),
         _followMeRecorderEnabled: Boolean(followMeRecorderEnabled),

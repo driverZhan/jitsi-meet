@@ -15,7 +15,6 @@ import { showToolbox } from '../../../toolbox/actions.web';
 import { isToolboxVisible } from '../../../toolbox/functions.web';
 import VideoQualityLabel from '../../../video-quality/components/VideoQualityLabel.web';
 import VisitorsCountLabel from '../../../visitors/components/web/VisitorsCountLabel';
-import VoiceAgentLabel from '../../../voice-agents/components/web/VoiceAgentLabel';
 import ConferenceTimer from '../ConferenceTimer';
 import { getConferenceInfo } from '../functions.web';
 
@@ -108,7 +107,6 @@ const COMPONENTS: Array<{
                 <RecordingLabel mode = { JitsiRecordingConstants.mode.STREAM } />
                 <TranscribingLabel />
                 <TranslationLabel />
-                <VoiceAgentLabel />
             </>
         ),
         id: 'recording'

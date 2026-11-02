@@ -60,7 +60,6 @@ export interface IPalette {
     uiBackground: string;
     warning01: string;
     warning02: string;
-    warning03: string;
 
     // Semantic tokens (component-based, more descriptive names)
     breakoutRoomArrowBackground: string;
@@ -138,7 +137,6 @@ export interface IPalette {
     preMeetingPreview: string;
     prejoinActionButtonDanger: string;
     prejoinActionButtonDisabled: string;
-    prejoinActionButtonOptionsHover: string;
     prejoinActionButtonPrimary: string;
     prejoinActionButtonPrimaryHover: string;
     prejoinActionButtonPrimaryText: string;

@@ -1,9 +1,8 @@
 import React from 'react';
-import { AccessibilityRole, GestureResponderEvent } from 'react-native';
+import { GestureResponderEvent } from 'react-native';
 
 export interface IIconButtonProps {
     accessibilityLabel?: string;
-    accessibilityRole?: AccessibilityRole;
     color?: string;
     disabled?: boolean;
     id?: string;

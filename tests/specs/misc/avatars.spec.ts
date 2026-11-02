@@ -187,14 +187,13 @@ describe('Avatar', () => {
         await unmuteVideoAndCheck(p1, p2);
     });
 
-    it('email persistence', async function() {
+    it('email persistence', async () => {
         let { p1 } = ctx;
 
         if (p1.driver.isFirefox) {
             // strangely this test when FF is involved, missing source mapping from jvb
             // and fails with an error of: expected number of remote streams:1 in 15s for participant1
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
+            return;
         }
 
         await p1.getToolbar().clickProfileButton();

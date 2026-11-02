@@ -1,4 +1,3 @@
-import { CONFERENCE_LEFT, UPDATE_CONFERENCE_METADATA } from '../base/conference/actionTypes';
 import ReducerRegistry from '../base/redux/ReducerRegistry';
 
 import {
@@ -18,7 +17,6 @@ export interface ISharedVideoState {
     confirmShowVideo?: boolean;
     muted?: boolean;
     ownerId?: string;
-    sharedVideoRestricted?: boolean;
     status?: string;
     time?: number;
     videoUrl?: string;
@@ -34,18 +32,9 @@ ReducerRegistry.register<ISharedVideoState>('features/shared-video',
 
     switch (action.type) {
     case RESET_SHARED_VIDEO_STATUS:
-        // A video stopping does not change the restriction of the room.
         return {
             ...initialState,
-            allowedUrlDomains: state.allowedUrlDomains,
-            sharedVideoRestricted: state.sharedVideoRestricted
-        };
-
-    case CONFERENCE_LEFT:
-        // The restriction belongs to the room, the next one (e.g. a breakout room) sends its own.
-        return {
-            ...state,
-            sharedVideoRestricted: false
+            allowedUrlDomains: state.allowedUrlDomains
         };
     case SET_CONFIRM_SHOW_VIDEO: {
         return {
@@ -68,16 +57,6 @@ ReducerRegistry.register<ISharedVideoState>('features/shared-video',
         return {
             ...state,
             allowedUrlDomains: action.allowedUrlDomains
-        };
-    }
-
-    case UPDATE_CONFERENCE_METADATA: {
-        const { metadata } = action;
-
-        // Metadata without permissions means that the room does not restrict anything.
-        return {
-            ...state,
-            sharedVideoRestricted: Boolean(metadata?.permissions?.sharedVideoRestricted)
         };
     }
 

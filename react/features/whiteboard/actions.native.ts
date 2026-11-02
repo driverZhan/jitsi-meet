@@ -2,7 +2,7 @@ import { createRestrictWhiteboardEvent } from '../analytics/AnalyticsEvents';
 import { sendAnalytics } from '../analytics/functions';
 import { IStore } from '../app/types';
 import {
-    popTo
+    navigate
 } from '../mobile/navigation/components/conference/ConferenceNavigationContainerRef';
 import { screen } from '../mobile/navigation/routes';
 
@@ -19,7 +19,7 @@ export * from './actions.any';
  */
 export const restrictWhiteboard = (shouldCloseWhiteboard = true) => (dispatch: IStore['dispatch']) => {
     if (shouldCloseWhiteboard) {
-        popTo(screen.conference.main);
+        navigate(screen.conference.root);
     }
     dispatch(resetWhiteboard());
     sendAnalytics(createRestrictWhiteboardEvent());

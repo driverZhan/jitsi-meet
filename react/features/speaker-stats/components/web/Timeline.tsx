@@ -1,5 +1,4 @@
 import React, { MouseEvent, useCallback, useEffect, useMemo, useRef } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { IReduxState } from '../../../app/types';
@@ -14,7 +13,6 @@ interface IProps {
 }
 
 const Timeline = ({ faceLandmarks }: IProps) => {
-    const { t } = useTranslation();
     const startTimestamp = useSelector((state: IReduxState) => getConferenceTimestamp(state)) ?? 0;
     const { left, right } = useSelector((state: IReduxState) => getTimelineBoundaries(state));
     const { timelinePanning } = useSelector((state: IReduxState) => state['features/speaker-stats']);
@@ -188,19 +186,18 @@ const Timeline = ({ faceLandmarks }: IProps) => {
             <div
                 className = 'timeline'>
                 {!hideStartAndEndSegments() && <div
-                    aria-label = { t('speakerStats.timelineStart') }
+                    aria-label = 'start'
                     style = { getStartStyle() } />}
                 {hideStartAndEndSegments() && <div
-                    aria-label = { leftCut?.faceExpression ? t(`speakerStats.${leftCut.faceExpression}`) : undefined }
                     style = { getOneSegmentStyle(leftCut?.faceExpression) } />}
                 {segments?.map(({ duration, timestamp, faceExpression }) =>
                     (<div
-                        aria-label = { faceExpression ? t(`speakerStats.${faceExpression}`) : undefined }
+                        aria-label = { faceExpression }
                         key = { timestamp }
                         style = { getStyle(duration, faceExpression) } />)) }
 
                 {!hideStartAndEndSegments() && <div
-                    aria-label = { t('speakerStats.timelineEnd') }
+                    aria-label = 'end'
                     style = { getEndStyle() } />}
             </div>
         </div>

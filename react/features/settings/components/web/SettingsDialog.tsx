@@ -10,7 +10,6 @@ import {
     IconImage,
     IconModerator,
     IconShortcuts,
-    IconSliders,
     IconUser,
     IconVideo,
     IconVolumeUp
@@ -27,7 +26,6 @@ import {
 import { checkBlurSupport, checkVirtualBackgroundEnabled } from '../../../virtual-background/functions';
 import { iAmVisitor } from '../../../visitors/functions';
 import {
-    submitExperimentalTab,
     submitModeratorTab,
     submitMoreTab,
     submitNotificationsTab,
@@ -37,7 +35,6 @@ import {
 } from '../../actions';
 import { SETTINGS_TABS } from '../../constants';
 import {
-    getExperimentalTabProps,
     getModeratorTabProps,
     getMoreTabProps,
     getNotificationsMap,
@@ -46,10 +43,8 @@ import {
     getShortcutsTabProps,
     getVirtualBackgroundTabProps
 } from '../../functions';
-import { IExperimentalTabState } from '../../types';
 
 import CalendarTab from './CalendarTab';
-import ExperimentalTab from './ExperimentalTab';
 import ModeratorTab from './ModeratorTab';
 import MoreTab from './MoreTab';
 import NotificationsTab from './NotificationsTab';
@@ -148,10 +143,6 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
     const showNotificationsSettings = Object.keys(enabledNotifications).length > 0;
     const virtualBackgroundSupported = checkBlurSupport();
     const enableVirtualBackground = checkVirtualBackgroundEnabled(state);
-    const experimentalTabProps = getExperimentalTabProps(state);
-
-    // The tab only lists config options the user may change here; without any (e.g. in Electron) it has no purpose.
-    const showExperimentalSettings = experimentalTabProps.options.length > 0;
     const tabs: IDialogTab<any>[] = [];
     const _iAmVisitor = iAmVisitor(state);
 
@@ -264,10 +255,7 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
                 return {
                     ...newProps,
                     audioTranslationEnabled: tabState?.audioTranslationEnabled,
-                    breakoutRoomJoinWithPermissionsEnabled: tabState?.breakoutRoomJoinWithPermissionsEnabled,
                     chatWithPermissionsEnabled: tabState?.chatWithPermissionsEnabled,
-                    privateChatWithPermissionsEnabled: tabState?.privateChatWithPermissionsEnabled,
-                    sharedVideoWithPermissionsEnabled: tabState?.sharedVideoWithPermissionsEnabled,
                     followMeEnabled: tabState?.followMeEnabled,
                     followMeRecorderEnabled: tabState?.followMeRecorderEnabled,
                     startAudioMuted: tabState?.startAudioMuted,
@@ -318,7 +306,6 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
 
                 return {
                     ...newProps,
-                    ctrlAltReactionShortcutsEnabled: tabState?.ctrlAltReactionShortcutsEnabled,
                     keyboardShortcutsEnabled: tabState?.keyboardShortcutsEnabled
                 };
             },
@@ -346,25 +333,6 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
             },
             submit: submitMoreTab,
             icon: IconGear
-        });
-    }
-
-    if (showExperimentalSettings) {
-        tabs.push({
-            name: SETTINGS_TABS.EXPERIMENTAL,
-            component: ExperimentalTab,
-            labelKey: 'settings.experimental',
-            props: experimentalTabProps,
-            propsUpdateFunction: (tabState: IExperimentalTabState, newProps: typeof experimentalTabProps) => {
-                // Updates tab props, keeping users selection
-
-                return {
-                    ...newProps,
-                    values: tabState?.values ?? newProps.values
-                };
-            },
-            submit: submitExperimentalTab,
-            icon: IconSliders
         });
     }
 

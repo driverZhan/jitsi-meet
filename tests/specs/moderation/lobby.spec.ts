@@ -200,12 +200,11 @@ describe('Lobby', () => {
         expect(await p3.getLobbyScreen().isLobbyRoomJoined()).toBe(false);
     });
 
-    it('change of moderators in lobby', async function() {
+    it('change of moderators in lobby', async () => {
         // The test below is only correct when the environment is configured to automatically elect a new moderator
         // when the moderator leaves. For environments where this is not the case, the test is skipped.
         if (!expectations.autoModerator) {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
+            return;
         }
         await hangupAllParticipants();
 
@@ -294,12 +293,11 @@ describe('Lobby', () => {
         await p3.waitForRemoteStreams(2);
     });
 
-    it('moderator leaves while lobby enabled', async function() {
+    it('moderator leaves while lobby enabled', async () => {
         // The test below is only correct when the environment is configured to automatically elect a new moderator
         // when the moderator leaves. For environments where this is not the case, the test is skipped.
         if (!expectations.autoModerator) {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
+            return;
         }
         const { p1, p2, p3 } = ctx;
 

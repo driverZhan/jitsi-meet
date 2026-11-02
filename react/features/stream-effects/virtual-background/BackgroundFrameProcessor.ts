@@ -279,30 +279,21 @@ export default class BackgroundFrameProcessor {
 
     /**
      * Checks whether consecutive inference failures have exceeded the threshold. When they do,
-     * stops the backend, switches to passthrough until the next init and fires the
-     * {@code onInferenceFailure} callback once if one is set.
+     * fires the {@code onInferenceFailure} callback once and switches to permanent passthrough.
      *
      * @private
      * @returns {void}
      */
     _checkFailureThreshold(): void {
-        if (this._consecutiveFailures < FAILURE_THRESHOLD) {
-            return;
+        if (this._consecutiveFailures >= FAILURE_THRESHOLD && this.onInferenceFailure) {
+            logger.error(
+                '[BackgroundFrameProcessor] Persistent inference failure'
+                + ` (${FAILURE_THRESHOLD} consecutive) — switching to passthrough`
+            );
+            this.onInferenceFailure();
+            this.onInferenceFailure = null;
+            this._isReady = false;
         }
-
-        logger.error(
-            '[BackgroundFrameProcessor] Persistent inference failure'
-            + ` (${FAILURE_THRESHOLD} consecutive) — switching to passthrough`
-        );
-
-        // Trip even without an owner callback (effects created via loadEffects have none) and stop the
-        // worker, otherwise a permanent error such as a lost WebGPU device is retried on every frame.
-        this._isReady = false;
-        this._consecutiveFailures = 0;
-        this._backend.stop().catch(() => undefined);
-
-        this.onInferenceFailure?.();
-        this.onInferenceFailure = null;
     }
 
     /**

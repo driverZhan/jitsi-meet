@@ -166,7 +166,6 @@ export const colorMap = {
     prejoinActionButtonPrimary: 'action01', // Primary action button
     prejoinActionButtonPrimaryHover: 'action01Hover', // Primary button hover
     prejoinActionButtonPrimaryText: 'text01', // Primary button text
-    prejoinActionButtonOptionsHover: 'action01Active', // Join options (arrow) button hover
     prejoinActionButtonSecondary: 'action02', // Secondary action button
     prejoinActionButtonSecondaryHover: 'action02Hover', // Secondary button hover
     prejoinActionButtonSecondaryText: 'text04', // Secondary button text
@@ -554,7 +553,6 @@ export const colorMap = {
     // Warning
     warning01: 'warning01',
     warning02: 'warning06',
-    warning03: 'warning03',
 
     // ----- Support -----
 

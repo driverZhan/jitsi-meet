@@ -1,5 +1,4 @@
 import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Image, View } from 'react-native';
 import { useSelector } from 'react-redux';
 
@@ -38,10 +37,8 @@ function ReactionMenu({
     onCancel,
     overflowMenu
 }: IProps) {
-    const { t } = useTranslation();
     const _styles: any = useSelector((state: IReduxState) => ColorSchemeRegistry.get(state, 'Toolbox'));
     const gifEnabled = useSelector(isGifEnabled);
-    const gifLabel = t('toolbar.accessibilityLabel.giphy');
 
     const openGifMenu = useCallback(() => {
         navigate(screen.conference.gifsMenu);
@@ -62,7 +59,6 @@ function ReactionMenu({
                 {
                     gifEnabled && (
                         <ReactionButton
-                            accessibilityLabel = { gifLabel }
                             onClick = { openGifMenu }
                             styles = { _styles.reactionButton }>
                             <Image // @ts-ignore

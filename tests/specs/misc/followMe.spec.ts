@@ -20,22 +20,19 @@ describe('Follow me', () => {
         await settings.submit();
     });
 
-    it('follow me checkbox visible only for moderators', async function() {
+    it('follow me checkbox visible only for moderators', async () => {
         const { p2 } = ctx;
 
-        if (await p2.isModerator()) {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
+        if (!await p2.isModerator()) {
+            await p2.getToolbar().clickSettingsButton();
+
+            const settings = p2.getSettingsDialog();
+
+            await settings.waitForDisplay();
+            expect(await settings.isFollowMeDisplayed()).toBe(false);
+
+            await settings.clickCloseButton();
         }
-
-        await p2.getToolbar().clickSettingsButton();
-
-        const settings = p2.getSettingsDialog();
-
-        await settings.waitForDisplay();
-        expect(await settings.isFollowMeDisplayed()).toBe(false);
-
-        await settings.clickCloseButton();
     });
 
     it('filmstrip commands', async () => {

@@ -5,7 +5,6 @@ import {
     DISABLE_KEYBOARD_SHORTCUTS,
     ENABLE_KEYBOARD_SHORTCUTS,
     REGISTER_KEYBOARD_SHORTCUT,
-    SET_CTRL_ALT_REACTION_SHORTCUTS_ENABLED,
     UNREGISTER_KEYBOARD_SHORTCUT
 } from './actionTypes';
 import { IKeyboardShortcutsState } from './types';
@@ -16,14 +15,12 @@ import { IKeyboardShortcutsState } from './types';
 const STORE_NAME = 'features/keyboard-shortcuts';
 
 const defaultState = {
-    ctrlAltReactionShortcutsEnabled: true,
     enabled: true,
     shortcuts: new Map(),
     shortcutsHelp: new Map()
 };
 
 PersistenceRegistry.register(STORE_NAME, {
-    ctrlAltReactionShortcutsEnabled: true,
     enabled: true
 });
 
@@ -39,11 +36,6 @@ ReducerRegistry.register<IKeyboardShortcutsState>(STORE_NAME,
         return {
             ...state,
             enabled: false
-        };
-    case SET_CTRL_ALT_REACTION_SHORTCUTS_ENABLED:
-        return {
-            ...state,
-            ctrlAltReactionShortcutsEnabled: action.enabled
         };
     case REGISTER_KEYBOARD_SHORTCUT: {
         const { alt, character, ctrl } = action.shortcut;

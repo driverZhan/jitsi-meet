@@ -1,9 +1,7 @@
 import { IStore } from '../../app/types';
 import { NoiseSuppressionEffect } from '../../stream-effects/noise-suppression/NoiseSuppressionEffect';
 import { createVirtualBackgroundEffect } from '../../stream-effects/virtual-background';
-import { backgroundEffectFailed } from '../../virtual-background/actions';
 
-import { getLocalJitsiVideoTrack } from './functions.any';
 import logger from './logger';
 
 /**
@@ -22,20 +20,6 @@ export default function loadEffects(store: IStore): Promise<any> {
 
     const backgroundPromise = virtualBackground.backgroundEffectEnabled
         ? createVirtualBackgroundEffect(virtualBackground)
-            .then(effect => {
-                if (effect) {
-                    effect.onInferenceFailure = () => {
-                        const track = getLocalJitsiVideoTrack(store.getState());
-
-                        // A stale effect no longer on the local video track has already gone passthrough.
-                        if (track?._streamEffect === effect) {
-                            store.dispatch(backgroundEffectFailed(track));
-                        }
-                    };
-                }
-
-                return effect;
-            })
             .catch((error: Error) => {
                 logger.error('Failed to obtain the background effect instance with error: ', error);
 

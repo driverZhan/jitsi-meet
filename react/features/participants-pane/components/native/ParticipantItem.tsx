@@ -11,7 +11,6 @@ import {
 import { Text } from 'react-native-paper';
 
 import Avatar from '../../../base/avatar/components/Avatar';
-import Icon from '../../../base/icons/components/Icon';
 import { AudioStateIcons, MEDIA_STATE, type MediaState, VideoStateIcons } from '../../constants';
 
 import { RaisedHandIndicator } from './RaisedHandIndicator';
@@ -96,22 +95,9 @@ function ParticipantItem({
 
     const { t } = useTranslation();
 
-    const audioIconData = audioMediaState ? AudioStateIcons[audioMediaState] : null;
-    const videoIconData = videoMediaState ? VideoStateIcons[videoMediaState] : null;
-
-    const accessibleLabels = [
-        displayName,
-        local ? `(${t('chat.you')})` : '',
-        isModerator && !disableModeratorIndicator ? t('videothumbnail.moderator') : '',
-        raisedHand ? t('participantsPane.indicators.raisedHand') : '',
-        videoIconData?.labelKey ? t(videoIconData.labelKey) : '',
-        audioIconData?.labelKey ? t(audioIconData.labelKey) : ''
-    ].filter(Boolean).join(', ');
-
     return (
         <View style = { styles.participantContainer as StyleProp<ViewStyle> } >
             <TouchableOpacity
-                accessibilityLabel = { accessibleLabels }
                 onPress = { onPress }
                 style = { styles.participantContent as StyleProp<ViewStyle> }>
                 <Avatar
@@ -138,22 +124,8 @@ function ParticipantItem({
                     !isKnockingParticipant
                     && <View style = { styles.participantStatesContainer as StyleProp<ViewStyle> }>
                         <View>{ raisedHand && <RaisedHandIndicator /> }</View>
-                        <View style = { styles.participantStateVideo }>
-                            { videoIconData && (
-                                <Icon
-                                    color = { videoIconData.color }
-                                    size = { 16 }
-                                    src = { videoIconData.src } />
-                            ) }
-                        </View>
-                        <View>
-                            { audioIconData && (
-                                <Icon
-                                    color = { audioIconData.color }
-                                    size = { 16 }
-                                    src = { audioIconData.src } />
-                            ) }
-                        </View>
+                        <View style = { styles.participantStateVideo }>{ VideoStateIcons[videoMediaState] }</View>
+                        <View>{ AudioStateIcons[audioMediaState] }</View>
                     </View>
                 }
             </TouchableOpacity>

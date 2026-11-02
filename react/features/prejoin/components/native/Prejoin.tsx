@@ -124,7 +124,6 @@ const Prejoin: React.FC<IPrejoinProps> = ({ navigation }: IPrejoinProps) => {
         if (Platform.OS === 'ios') {
             return (
                 <HeaderNavigationButton
-                    accessibilityLabel = { t('dialog.close') }
                     label = { t('dialog.close') }
                     onPress = { goBack } />
             );
@@ -132,7 +131,6 @@ const Prejoin: React.FC<IPrejoinProps> = ({ navigation }: IPrejoinProps) => {
 
         return (
             <HeaderNavigationButton
-                accessibilityLabel = { t('dialog.close') }
                 onPress = { goBack }
                 src = { IconCloseLarge } />
         );

@@ -41,9 +41,8 @@ class SharedVideoDialog extends AbstractSharedVideoDialog<any> {
      */
     _onChange(value: string) {
         this.setState({
-            error: false,
-            okDisabled: !value,
-            value
+            value,
+            okDisabled: !value
         });
     }
 

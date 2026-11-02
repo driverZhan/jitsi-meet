@@ -264,6 +264,12 @@
         "microphonePermission": "Fel vid begäran om åtkomst till mikrofon"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Samtalskontroll",
+            "connectedDevices": "Anslutna enheter",
+            "deleteDevice": "Radera enhet",
+            "pairDevice": "Para enhet"
+        },
         "noPermission": "Behörighet nekad",
         "previewUnavailable": "Förhandsgranskning inte tillgänglig",
         "selectADevice": "Välj en enhet",
@@ -1406,7 +1412,6 @@
                 "label": "Stereo"
             }
         },
-        "aiAssist": "AI-assistent",
         "audioRoute": "Välj ljudenhet",
         "audioSettings": "Ljud inställningar",
         "authenticate": "Autentisera",
@@ -1419,6 +1424,7 @@
         "closeParticipantsPane": "Stäng deltagarrutan",
         "closeReactionsMenu": "Stäng meny för reaktioner",
         "closedCaptions": "Undertexter",
+        "copilot": "Copilot",
         "disableNoiseSuppression": "Inaktivera brusreducering",
         "disableReactionSounds": "Du kan inaktivera reaktionsljud för det här mötet",
         "documentClose": "Stäng delat dokument",

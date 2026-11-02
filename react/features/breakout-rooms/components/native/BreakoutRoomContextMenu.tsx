@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { createBreakoutRoomsEvent } from '../../../analytics/AnalyticsEvents';
 import { sendAnalytics } from '../../../analytics/functions';
-import { IReduxState } from '../../../app/types';
 import { hideSheet, openDialog } from '../../../base/dialog/actions';
 import BottomSheet from '../../../base/dialog/components/native/BottomSheet';
 import Icon from '../../../base/icons/components/Icon';
@@ -16,7 +15,7 @@ import styles from '../../../participants-pane/components/native/styles';
 import { isBreakoutRoomRenameAllowed } from '../../../participants-pane/functions';
 import { BREAKOUT_CONTEXT_MENU_ACTIONS as ACTIONS } from '../../../participants-pane/types';
 import { closeBreakoutRoom, moveToRoom, removeBreakoutRoom } from '../../actions';
-import { getBreakoutRoomsConfig, isBreakoutRoomJoinAllowed } from '../../functions';
+import { getBreakoutRoomsConfig } from '../../functions';
 import { IRoom } from '../../types';
 
 import BreakoutRoomNamePrompt from './BreakoutRoomNamePrompt';
@@ -44,7 +43,6 @@ const BreakoutRoomContextMenu = ({ room, actions = ALL_ACTIONS }: IProps) => {
     const dispatch = useDispatch();
     const isLocalModerator = useSelector(isLocalParticipantModerator);
     const { hideJoinRoomButton } = useSelector(getBreakoutRoomsConfig);
-    const joinAllowed = useSelector((state: IReduxState) => isBreakoutRoomJoinAllowed(state, room));
     const _isBreakoutRoomRenameAllowed = useSelector(isBreakoutRoomRenameAllowed);
     const { t } = useTranslation();
 
@@ -77,10 +75,8 @@ const BreakoutRoomContextMenu = ({ room, actions = ALL_ACTIONS }: IProps) => {
             addScrollViewPadding = { false }
             showSlidingView = { true }>
             {
-                !hideJoinRoomButton && joinAllowed && actions.includes(ACTIONS.JOIN) && (
+                !hideJoinRoomButton && actions.includes(ACTIONS.JOIN) && (
                     <TouchableOpacity
-                        accessibilityLabel = { t('breakoutRooms.actions.join') }
-                        accessibilityRole = 'button'
                         onPress = { onJoinRoom }
                         style = { styles.contextMenuItem as ViewStyle }>
                         <Icon
@@ -93,8 +89,6 @@ const BreakoutRoomContextMenu = ({ room, actions = ALL_ACTIONS }: IProps) => {
             {
                 !room?.isMainRoom && actions.includes(ACTIONS.RENAME) && _isBreakoutRoomRenameAllowed
                 && <TouchableOpacity
-                    accessibilityLabel = { t('breakoutRooms.actions.rename') }
-                    accessibilityRole = 'button'
                     onPress = { onRenameBreakoutRoom }
                     style = { styles.contextMenuItem as ViewStyle }>
                     <Icon
@@ -107,8 +101,6 @@ const BreakoutRoomContextMenu = ({ room, actions = ALL_ACTIONS }: IProps) => {
                 !room?.isMainRoom && isLocalModerator && actions.includes(ACTIONS.REMOVE)
                 && (room?.participants && Object.keys(room.participants).length > 0
                     ? <TouchableOpacity
-                        accessibilityLabel = { t('breakoutRooms.actions.close') }
-                        accessibilityRole = 'button'
                         onPress = { onCloseBreakoutRoom }
                         style = { styles.contextMenuItem as ViewStyle }>
                         <Icon
@@ -117,8 +109,6 @@ const BreakoutRoomContextMenu = ({ room, actions = ALL_ACTIONS }: IProps) => {
                         <Text style = { styles.contextMenuItemText }>{t('breakoutRooms.actions.close')}</Text>
                     </TouchableOpacity>
                     : <TouchableOpacity
-                        accessibilityLabel = { t('breakoutRooms.actions.remove') }
-                        accessibilityRole = 'button'
                         onPress = { onRemoveBreakoutRoom }
                         style = { styles.contextMenuItem as ViewStyle }>
                         <Icon

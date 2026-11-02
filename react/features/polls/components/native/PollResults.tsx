@@ -92,13 +92,6 @@ const PollResults = (props: AbstractProps) => {
     }, [ showDetails ]);
 
 
-    const detailsLabelKey = showDetails
-        ? 'polls.results.hideDetailedResults'
-        : 'polls.results.showDetailedResults';
-    const voteLabelKey = haveVoted
-        ? 'polls.results.changeVote'
-        : 'polls.results.vote';
-
     /* eslint-disable react/jsx-no-bind */
     return (
         <View>
@@ -116,16 +109,30 @@ const PollResults = (props: AbstractProps) => {
                 renderItem = { answer => renderRow(answer.item) } />
             <View style = { pollsStyles.bottomLinks as ViewStyle }>
                 <Button
-                    accessibilityLabel = { detailsLabelKey }
-                    id = { t(detailsLabelKey) }
-                    labelKey = { detailsLabelKey }
+                    id = {
+                        showDetails
+                            ? t('polls.results.hideDetailedResults')
+                            : t('polls.results.showDetailedResults')
+                    }
+                    labelKey = {
+                        showDetails
+                            ? 'polls.results.hideDetailedResults'
+                            : 'polls.results.showDetailedResults'
+                    }
                     labelStyle = { pollsStyles.toggleText }
                     onClick = { toggleIsDetailed }
                     type = { BUTTON_TYPES.TERTIARY } />
                 <Button
-                    accessibilityLabel = { voteLabelKey }
-                    id = { t(voteLabelKey) }
-                    labelKey = { voteLabelKey }
+                    id = {
+                        haveVoted
+                            ? t('polls.results.changeVote')
+                            : t('polls.results.vote')
+                    }
+                    labelKey = {
+                        haveVoted
+                            ? 'polls.results.changeVote'
+                            : 'polls.results.vote'
+                    }
                     labelStyle = { pollsStyles.toggleText }
                     onClick = { changeVote }
                     type = { BUTTON_TYPES.TERTIARY } />

@@ -264,6 +264,12 @@
         "microphonePermission": "Errore nell'acquisizione dei permessi del microfono"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Controllo chiamata",
+            "connectedDevices": "Dispositivi connessi:",
+            "deleteDevice": "Elimina dispositivo",
+            "pairDevice": "Accoppia dispositivo"
+        },
         "noPermission": "Permesso negato",
         "previewUnavailable": "Anteprima non disponibile",
         "selectADevice": "Scegli un dispositivo",
@@ -1411,7 +1417,6 @@
                 "label": "Stereo"
             }
         },
-        "aiAssist": "Assistente IA",
         "audioRoute": "Scegli il dispositivo audio",
         "audioSettings": "Impostazioni audio",
         "authenticate": "Autenticazione",
@@ -1424,6 +1429,7 @@
         "closeParticipantsPane": "Chiudi pannello partecipanti",
         "closeReactionsMenu": "Chiudi menu reazioni",
         "closedCaptions": "Sottotitoli",
+        "copilot": "Copilot",
         "disableNoiseSuppression": "Disattiva cancellazione del rumore",
         "disableReactionSounds": "Puoi disattivare i suoni delle reazioni in questa riunione",
         "documentClose": "Chiudi documento condiviso",

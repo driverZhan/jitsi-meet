@@ -81,12 +81,9 @@ class ChatMessage extends Component<IChatMessageProps> {
             messageBubbleStyle.push(styles.activeMatchMessageBubble);
         }
 
-        // A moderation is shown over a retraction, as its reason is shown as well.
-        const messageText = message.isModerated
-            ? this.props.t('chat.moderatedMessage')
-            : message.isDeleted
-                ? this.props.t(localMessage ? 'chat.deletedMessageByMe' : 'chat.deletedMessage')
-                : getMessageText(this.props.message);
+        const messageText = message.isDeleted
+            ? this.props.t(localMessage ? 'chat.deletedMessageByMe' : 'chat.deletedMessage')
+            : getMessageText(this.props.message);
 
         return (
             <View
@@ -100,10 +97,9 @@ class ChatMessage extends Component<IChatMessageProps> {
                             { gifEnabled && isGifMessage(messageText)
                                 ? <GifMessage message = { messageText } />
                                 : this._renderMessageTextComponent(messageText) }
-                            { this._renderModerationReason() }
                             { this._renderPrivateNotice() }
                         </View>
-                        { !message.isDeleted && !message.isModerated && this._renderPrivateReplyButton() }
+                        { !message.isDeleted && this._renderPrivateReplyButton() }
                     </View>
                     { this._renderTimestamp() }
                 </View>
@@ -233,25 +229,6 @@ class ChatMessage extends Component<IChatMessageProps> {
     }
 
     /**
-     * Renders the reason a moderator gave for removing the message, if any.
-     *
-     * @returns {React.ReactElement<*> | null}
-     */
-    _renderModerationReason() {
-        const { message, t } = this.props;
-
-        if (!message.isModerated || !message.moderationReason) {
-            return null;
-        }
-
-        return (
-            <Text style = { styles.privateNotice }>
-                { t('chat.moderationReason', { reason: message.moderationReason }) }
-            </Text>
-        );
-    }
-
-    /**
      * Renders the private reply button, if necessary.
      *
      * @returns {React.ReactElement<*> | null}
@@ -307,8 +284,7 @@ function _mapStateToProps(state: IReduxState, { message }: IChatMessageProps) {
     return {
         canReply: getCanReplyToMessage(state, message),
         gifEnabled: isGifEnabled(state),
-        // A deleted or moderated message shows a placeholder, which is not searched, so do not highlight it.
-        highlightQuery: message.isDeleted || message.isModerated ? '' : getChatSearchQuery(state),
+        highlightQuery: getChatSearchQuery(state),
         isActiveMatch: Boolean(activeMatch && activeMatch.messageId === message.messageId),
         knocking: state['features/lobby'].knocking
     };

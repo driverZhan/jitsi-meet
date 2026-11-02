@@ -1,5 +1,6 @@
 import '../base/devices/reducer';
 import '../base/premeeting/reducer';
+import '../custom-panel/reducer';
 import '../base/tooltip/reducer';
 import '../e2ee/reducer';
 import '../face-landmarks/reducer';
@@ -19,6 +20,7 @@ import '../screenshot-capture/reducer';
 import '../talk-while-muted/reducer';
 import '../time-timer/reducer';
 import '../virtual-background/reducer';
+import '../web-hid/reducer';
 import '../file-sharing/reducer';
 
 import './reducers.any';

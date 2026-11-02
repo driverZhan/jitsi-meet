@@ -170,21 +170,21 @@ const MessageMenu = ({ canEdit, message, isFromVisitor, isLobbyMessage, isModera
                 <div
                     className = { classes.menuItem }
                     onClick = { handleEditClick }>
-                    {t('chat.edit')}
+                    {t('Edit')}
                 </div>
             )}
             {enablePrivateChat && (
                 <div
                     className = { classes.menuItem }
                     onClick = { handlePrivateClick }>
-                    {t('chat.privateMessage')}
+                    {t('Private Message')}
                 </div>
             )}
             {!isFileMessage && (
                 <div
                     className = { classes.menuItem }
                     onClick = { handleCopyClick }>
-                    {t('chat.copy')}
+                    {t('Copy')}
                 </div>
             )}
             {isModerator
@@ -235,7 +235,7 @@ const MessageMenu = ({ canEdit, message, isFromVisitor, isLobbyMessage, isModera
                     className = { cx(classes.copiedMessage, { [classes.showCopiedMessage]: showCopiedMessage }) }
                     style = {{ top: `${popupPosition.top}px`,
                         left: `${popupPosition.left}px` }}>
-                    {t('chat.messageCopied')}
+                    {t('Message Copied')}
                 </div>,
                 document.body
             )}

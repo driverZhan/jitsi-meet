@@ -1,5 +1,6 @@
 import { IStore } from '../app/types';
 import { IStateful } from '../base/app/types';
+import { getWebHIDFeatureConfig } from '../base/config/functions.web';
 import {
     addPendingDeviceRequest,
     getAvailableDevices,
@@ -25,6 +26,7 @@ import { getLocalJitsiAudioTrackSettings } from '../base/tracks/functions.any';
 import { isNoiseSuppressionEnabled } from '../noise-suppression/functions';
 import { isPrejoinPageVisible } from '../prejoin/functions';
 import { SS_DEFAULT_FRAME_RATE, SS_SUPPORTED_FRAMERATES } from '../settings/constants';
+import { isDeviceHidSupported } from '../web-hid/functions';
 
 /**
  * Returns the properties for the audio device selection dialog from Redux state.
@@ -46,6 +48,7 @@ export function getAudioDeviceSelectionDialogProps(stateful: IStateful, isDispla
     const inputDeviceChangeSupported = JitsiMeetJS.mediaDevices.isDeviceChangeAvailable('input');
     const speakerChangeSupported = JitsiMeetJS.mediaDevices.isDeviceChangeAvailable('output');
     const userSelectedMic = getUserSelectedMicDeviceId(state);
+    const deviceHidSupported = isDeviceHidSupported() && getWebHIDFeatureConfig(state);
     const noiseSuppressionEnabled = isNoiseSuppressionEnabled(state);
     const hideNoiseSuppression = isPrejoinPageVisible(state) || isDisplayedOnWelcomePage;
     const audioSettings = state['features/settings'].audioSettings ?? getLocalJitsiAudioTrackSettings(state);
@@ -77,6 +80,7 @@ export function getAudioDeviceSelectionDialogProps(stateful: IStateful, isDispla
         hideAudioInputPreview: disableAudioInputChange || !JitsiMeetJS.isCollectingLocalStats() || disablePreviews,
         hideAudioOutputPreview: !speakerChangeSupported || disablePreviews,
         hideAudioOutputSelect: !speakerChangeSupported,
+        hideDeviceHIDContainer: !deviceHidSupported,
         hideNoiseSuppression,
         noiseSuppressionEnabled,
         selectedAudioInputId,

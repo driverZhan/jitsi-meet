@@ -23,7 +23,7 @@ const allure = require('allure-commandline');
 // we need it to be able to reuse jitsi-meet code in tests
 require.extensions['.web.ts'] = require.extensions['.ts'];
 
-export const chromeArgs = [
+const chromeArgs = [
     '--allow-insecure-localhost',
     '--use-fake-ui-for-media-stream',
     '--use-fake-device-for-media-stream',
@@ -60,7 +60,7 @@ if (process.env.VIDEO_CAPTURE_FILE) {
     chromeArgs.push(`--use-file-for-fake-video-capture=${process.env.VIDEO_CAPTURE_FILE}`);
 }
 
-export const chromePreferences = {
+const chromePreferences = {
     'intl.accept_languages': 'en-US'
 };
 
@@ -205,7 +205,7 @@ function generateCapabilitiesFromSpecs(): { capabilities: Record<string, any>; e
 
 const { capabilities, excludedSpecs } = generateCapabilitiesFromSpecs();
 
-export const TEST_RESULTS_DIR = 'test-results';
+const TEST_RESULTS_DIR = 'test-results';
 
 const keepAlive: Array<any> = [];
 
@@ -235,51 +235,6 @@ const CONCURRENCY_LOG_PATH = path.join(TEST_RESULTS_DIR, 'concurrency.jsonl');
  */
 function completionSentinelPath(cid: string): string {
     return path.join(TEST_RESULTS_DIR, `completed-${cid}.json`);
-}
-
-/**
- * How many WebDriver BiDi commands and results to keep per browser instance for the failure report.
- */
-const BIDI_TRACE_SIZE = 2000;
-
-/**
- * How much of each traced BiDi command or result to keep. Script calls carry the whole wrapped function
- * source, which is noise here; the method, target context and result are what matter.
- */
-const BIDI_TRACE_LINE_LENGTH = 800;
-
-/**
- * The last BiDi commands and results of each browser instance, attached to the report when a test fails.
- *
- * The classic WebDriver commands are already in the report (wdio logs them into the junit output), but the
- * BiDi ones are not: the webdriver logger writes them to the worker log, which only ever receives
- * launcher-level lines (see completionSentinelPath). Script calls and frame switches go over BiDi, and a
- * failure like a frame switch landing on a browsing context that never answers cannot be understood
- * without seeing which context ids were requested and what the browser reported.
- */
-const bidiTraces = new Map<string, string[]>();
-
-/**
- * Starts recording the BiDi traffic of a browser instance into its ring buffer.
- *
- * @param instance - The multiremote instance name.
- * @param browser - The browser instance.
- */
-function traceBidi(instance: string, browser: WebdriverIO.Browser) {
-    const trace: string[] = [];
-    const record = (direction: string, payload: unknown) => {
-        trace.push(`${new Date().toISOString()} ${direction} ${
-            JSON.stringify(payload).slice(0, BIDI_TRACE_LINE_LENGTH)}`);
-
-        if (trace.length > BIDI_TRACE_SIZE) {
-            trace.splice(0, trace.length - BIDI_TRACE_SIZE);
-        }
-    };
-
-    bidiTraces.set(instance, trace);
-
-    browser.on('bidiCommand', (command: unknown) => record('>>', command));
-    browser.on('bidiResult', (result: unknown) => record('<<', result));
 }
 
 /**
@@ -480,10 +435,6 @@ export const config: WebdriverIO.MultiremoteConfig = {
 
             return `${instance}:${browserName}/${browserVersion}`;
         }).join(' ')}`);
-
-        multiRemoteBrowser.instances.forEach((instance: string) => {
-            traceBidi(instance, multiRemoteBrowser.getInstance(instance));
-        });
 
         const globalAny: any = global;
 
@@ -729,21 +680,7 @@ export const config: WebdriverIO.MultiremoteConfig = {
             // make sure all browsers are at the main app in iframe (if used), so we collect debug info
             await Promise.all(multiRemoteBrowser.instances.map(async (instance: string) => {
                 // @ts-ignore
-                const participant = ctx[instance];
-
-                // This hook runs inside the mocha budget of the test that just failed. When the failure was
-                // switchToIFrame() giving up on a dead iframe context (3 attempts of 30s each), trying again here
-                // would spend the same again and let the mocha timeout replace the real error and the debug info
-                // with a bare "Timeout of 180000ms exceeded". Collect whatever the current context offers instead.
-                if (!participant || participant.isIframeUnreachable) {
-                    return;
-                }
-
-                try {
-                    await participant.switchToIFrame();
-                } catch (e) {
-                    console.error(`Failed to switch ${instance} into the iframe to collect debug info`, e);
-                }
+                await ctx[instance]?.switchToIFrame();
             }));
 
             const allProcessing: Promise<any>[] = [];
@@ -786,15 +723,6 @@ export const config: WebdriverIO.MultiremoteConfig = {
                         content: pretty(source),
                         type: 'text/plain' });
                 }));
-
-                const bidiTrace = bidiTraces.get(instance);
-
-                if (bidiTrace?.length) {
-                    attachments.push({
-                        filename: `${instance}-bidi-trace`,
-                        content: bidiTrace.join('\n'),
-                        type: 'text/plain' });
-                }
             });
 
             await Promise.allSettled(allProcessing);

@@ -547,8 +547,7 @@ export function _conferenceWillJoin(conference: IJitsiConference) {
                 .map(t => t.jitsiTrack);
 
         if (localTracks.length && !iAmVisitor(state)) {
-            _addLocalTracksToConference(conference, localTracks)
-                .catch((err: Error) => logger.error('Failed to add local tracks on conference join', err));
+            _addLocalTracksToConference(conference, localTracks);
         }
 
         dispatch(conferenceWillJoin(conference));

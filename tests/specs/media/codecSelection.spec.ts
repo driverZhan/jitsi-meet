@@ -46,7 +46,7 @@ describe('Codec selection', () => {
         ]);
     });
 
-    it('asymmetric codecs with AV1', async function() {
+    it('asymmetric codecs with AV1', async () => {
         await ensureThreeParticipants({
             configOverwrite: {
                 videoQuality: {
@@ -56,17 +56,10 @@ describe('Codec selection', () => {
         });
         const { p1, p2, p3 } = ctx;
 
-        const majorVersion = parseInt(p1.driver.capabilities.browserVersion || '0', 10);
-
-        // Skip on Firefox 156: it can't decode layered AV1 (L2T3_KEY) and stalls, so AV1 is disabled
-        // when a Firefox client is present. https://bugzilla.mozilla.org/show_bug.cgi?id=2071030
-        if (p1.driver.isFirefox && majorVersion === 156) {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
-        }
-
         // Check if media is playing on p3.
         expect(await p3.execute(() => JitsiMeetJS.app.testing.isLargeVideoReceived())).toBe(true);
+
+        const majorVersion = parseInt(p1.driver.capabilities.browserVersion || '0', 10);
 
         // Check if p1 is encoding in VP9, p2 in VP8 and p3 in AV1 as per their codec preferences.
         // Except on older versions of Firefox because they don't support VP9 encode.
@@ -80,7 +73,7 @@ describe('Codec selection', () => {
         ]);
     });
 
-    it('codec switch over', async function() {
+    it('codec switch over', async () => {
         await hangupAllParticipants();
 
         await ensureTwoParticipants({
@@ -94,8 +87,7 @@ describe('Codec selection', () => {
 
         // Disable this test on Firefox because it doesn't support VP9 encode.
         if (p1.driver.isFirefox) {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-this
-            this.skip();
+            return;
         }
 
         // Check if p1 and p2 are encoding in VP9 which is the default codec.

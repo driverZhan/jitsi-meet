@@ -159,18 +159,18 @@ PODS:
   - hermes-engine (0.16.0):
     - hermes-engine/Pre-built (= 0.16.0)
   - hermes-engine/Pre-built (0.16.0)
-  - JitsiWebRTC (155.0.1)
-  - libwebp (1.6.0):
-    - libwebp/demux (= 1.6.0)
-    - libwebp/mux (= 1.6.0)
-    - libwebp/sharpyuv (= 1.6.0)
-    - libwebp/webp (= 1.6.0)
-  - libwebp/demux (1.6.0):
+  - JitsiWebRTC (124.0.2)
+  - libwebp (1.5.0):
+    - libwebp/demux (= 1.5.0)
+    - libwebp/mux (= 1.5.0)
+    - libwebp/sharpyuv (= 1.5.0)
+    - libwebp/webp (= 1.5.0)
+  - libwebp/demux (1.5.0):
     - libwebp/webp
-  - libwebp/mux (1.6.0):
+  - libwebp/mux (1.5.0):
     - libwebp/demux
-  - libwebp/sharpyuv (1.6.0)
-  - libwebp/webp (1.6.0):
+  - libwebp/sharpyuv (1.5.0)
+  - libwebp/webp (1.5.0):
     - libwebp/sharpyuv
   - nanopb (2.30908.0):
     - nanopb/decode (= 2.30908.0)
@@ -178,7 +178,7 @@ PODS:
   - nanopb/decode (2.30908.0)
   - nanopb/encode (2.30908.0)
   - ObjectiveDropboxOfficial (6.2.3)
-  - PromisesObjC (2.4.1)
+  - PromisesObjC (2.4.0)
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -2059,7 +2059,7 @@ PODS:
     - Yoga
   - react-native-orientation-locker (1.7.0):
     - React-Core
-  - react-native-pager-view (9.0.4):
+  - react-native-pager-view (8.0.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -2116,7 +2116,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context (5.9.1):
+  - react-native-safe-area-context (5.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2134,8 +2134,8 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.9.1)
-    - react-native-safe-area-context/fabric (= 5.9.1)
+    - react-native-safe-area-context/common (= 5.6.1)
+    - react-native-safe-area-context/fabric (= 5.6.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -2146,7 +2146,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/common (5.9.1):
+  - react-native-safe-area-context/common (5.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2174,7 +2174,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/fabric (5.9.1):
+  - react-native-safe-area-context/fabric (5.6.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2348,8 +2348,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-webrtc (155.0.1):
-    - JitsiWebRTC (~> 155.0.0)
+  - react-native-webrtc (124.0.8):
+    - JitsiWebRTC (~> 124.0.0)
     - React-Core
   - react-native-webview (13.16.0):
     - boost
@@ -3027,7 +3027,7 @@ PODS:
     - React-Core
   - RNDeviceInfo (14.1.1):
     - React-Core
-  - RNGestureHandler (3.2.1):
+  - RNGestureHandler (3.0.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -3058,7 +3058,7 @@ PODS:
   - RNGoogleSignin (10.1.0):
     - GoogleSignIn (~> 7.0)
     - React-Core
-  - RNScreens (4.23.0):
+  - RNScreens (4.17.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3085,10 +3085,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.23.0)
+    - RNScreens/common (= 4.17.1)
     - SocketRocket
     - Yoga
-  - RNScreens/common (4.23.0):
+  - RNScreens/common (4.17.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3608,11 +3608,11 @@ SPEC CHECKSUMS:
   GTMAppAuth: f69bd07d68cd3b766125f7e072c45d7340dea0de
   GTMSessionFetcher: 5aea5ba6bd522a239e236100971f10cb71b96ab6
   hermes-engine: 2dff4c2486b64d959bc9dd3797d9a386d3296d2d
-  JitsiWebRTC: a8ac2b2b54c523fb156016de4ab86b6666dc99d9
-  libwebp: af5937a13536ef73f3784d69cc342b98961acf33
+  JitsiWebRTC: b47805ab5668be38e7ee60e2258f49badfe8e1d0
+  libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   ObjectiveDropboxOfficial: fe206ce8c0bc49976c249d472db7fdbc53ebbd53
-  PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RCT-Folly: 36c4f904fb6cd0219dcb76b94e9502d2a72fab0b
   RCTDeprecation: 5c945c659e2d68c1428f4a732c83198a4ad6a659
   RCTRequired: c98eb09689f6a2a2c75f6fd419fa94fe71a672c9
@@ -3655,13 +3655,13 @@ SPEC CHECKSUMS:
   react-native-keep-awake: 129cb4bd75d0f304a479b4c4527d2994fe18e43c
   react-native-netinfo: 57447b5a45c98808f8eae292cf641f3d91d13830
   react-native-orientation-locker: cc6f357b289a2e0dd2210fea0c52cb8e0727fdaa
-  react-native-pager-view: 05affeb838b6ec0ff63f46b426242e692a065587
+  react-native-pager-view: 05683d783242b28d372d6fde6c11605b1c24e140
   react-native-performance: b48d1aba7501a54af5e1a7efb0dab1ab25dc734f
-  react-native-safe-area-context: 6cf08f4151132f9cf2adb948dc6c4ac387f8d30f
+  react-native-safe-area-context: c6e2edd1c1da07bdce287fa9d9e60c5f7b514616
   react-native-screen-corner-radius: ebd0d3258fcc894571b41d25ee3db7569d375153
   react-native-slider: 34064ca1a6864d7b263e44dd76a2d794e8d26744
   react-native-video: ce907959c67ad2abaa0411082db621036944737a
-  react-native-webrtc: f55aa2ad5ed12a04bb1fad72c7f57c401ada7277
+  react-native-webrtc: da75ba1f85a36981cbcb3fdae7dfbab7ad63c040
   react-native-webview: 654f794a7686b47491cf43aa67f7f428bea00eed
   react-native-worklets-core: 28a6e2121dcf62543b703e81bc4860e9a0150cee
   React-NativeModulesApple: 4426a35571bd5b935a22766733cd8bcedb52f8de
@@ -3702,9 +3702,9 @@ SPEC CHECKSUMS:
   RNCClipboard: 4b58c780f63676367640f23c8e114e9bd0cf86ac
   RNDefaultPreference: ee13d69e6693d193cd223d10e15e5b3c012d31ba
   RNDeviceInfo: bcce8752b5043a623fe3c26789679b473f705d3c
-  RNGestureHandler: a99489f6311d5e15dff575db28abc8f4e7a7802a
+  RNGestureHandler: 8f606e053c7823429953e994c8feab9f3f57be7f
   RNGoogleSignin: 30e1aee80140dc0706cd78a4951c411376c88329
-  RNScreens: afaf526a9c804c3b4503f950cf3e67ed81e29ada
+  RNScreens: 833237c48c756d40764540246a501b47dadb2cac
   RNSound: b6bd5e049ad15c0b03f9dda1f817d0bb1d5e87cb
   RNSVG: 9037a5826c3e0ad3f7e2aee7607b64d6710f048e
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748

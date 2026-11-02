@@ -11,7 +11,6 @@ import CalendarList from '../../calendar-sync/components/CalendarList.web';
 import RecentList from '../../recent-list/components/RecentList.web';
 import SettingsButton from '../../settings/components/web/SettingsButton';
 import { SETTINGS_TABS } from '../../settings/constants';
-import WelcomePageNotification from '../../system-wide-user-notification/components/web/WelcomePageNotification';
 
 import { AbstractWelcomePage, IProps, _mapStateToProps } from './AbstractWelcomePage';
 import Tabs from './Tabs';
@@ -234,7 +233,7 @@ class WelcomePage extends AbstractWelcomePage<IProps> {
                                     <form onSubmit = { this._onFormSubmit }>
                                         <input
                                             aria-disabled = 'false'
-                                            aria-label = { t('welcomepage.accessibilityLabel.roomname') }
+                                            aria-label = 'Meeting name input'
                                             autoFocus = { true }
                                             className = 'enter-room-input'
                                             id = 'enter_room_field'
@@ -249,7 +248,7 @@ class WelcomePage extends AbstractWelcomePage<IProps> {
 
                                 <button
                                     aria-disabled = 'false'
-                                    aria-label = { t('welcomepage.startMeeting') }
+                                    aria-label = 'Start meeting'
                                     className = 'welcome-page-button'
                                     id = 'enter_room_button'
                                     onClick = { this._onFormSubmit }
@@ -283,7 +282,6 @@ class WelcomePage extends AbstractWelcomePage<IProps> {
 
                 <div className = 'welcome-cards-container'>
                     <div className = 'welcome-card-column'>
-                        <WelcomePageNotification />
                         <div className = 'welcome-tabs welcome-card welcome-card--blue'>
                             {this._renderTabs()}
                         </div>

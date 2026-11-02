@@ -273,6 +273,12 @@
         "microphonePermission": "माइक्रोफ़ोन अनुमति प्राप्त करने में त्रुटि"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "कॉल नियंत्रण",
+            "connectedDevices": "कनेक्टेड डिवाइस:",
+            "deleteDevice": "डिवाइस हटाएँ",
+            "pairDevice": "डिवाइस जोड़ें"
+        },
         "noPermission": "अनुमति नहीं दी गई",
         "previewUnavailable": "पूर्वदर्शन अनुपलब्ध",
         "selectADevice": "डिवाइस का चयन करें",
@@ -1462,7 +1468,6 @@
                 "label": "स्टीरियो"
             }
         },
-        "aiAssist": "एआई सहायक",
         "audioRoute": "साउंड डिवाइस का चयन करें",
         "audioSettings": "ऑडियो सेटिंग्स",
         "audioTranslation": "ऑडियो का अनुवाद करें",
@@ -1477,6 +1482,7 @@
         "closeParticipantsPane": "प्रतिभागी पैनल बंद करें",
         "closeReactionsMenu": "प्रतिक्रियाएं मेनू बंद करें",
         "closedCaptions": "क्लोज्ड कैप्शन",
+        "copilot": "कोपायलट",
         "disableNoiseSuppression": "अतिरिक्त शोर दमन अक्षम करें",
         "disableReactionSounds": "आप इस मीटिंग के लिए प्रतिक्रिया ध्वनियाँ अक्षम कर सकते हैं",
         "documentClose": "साझा किए गए दस्तावेज़ को बंद करें",
@@ -1646,10 +1652,13 @@
         "mute": "प्रतिभागी मौन है",
         "muted": "म्यूटेड",
         "pinToStage": "स्टेज पर पिन करें",
+        "receivingTranslatedAudio": "आप अनुवादित ऑडियो प्राप्त कर रहे हैं",
         "remoteControl": "स्टार्ट / स्टॉप रिमोट कंट्रोल",
         "screenSharing": "प्रतिभागी स्क्रीन साझा कर रहे हैं",
         "show": "स्टेज पर दिखाएं",
         "showSelfView": "स्व-दृश्य दिखाएं",
+        "translationEnabledForYou": "आपके लिए अनुवाद सक्षम है",
+        "translationOnAndReceiving": "अनुवाद चालू · प्राप्त हो रहा है",
         "unpinFromStage": "अनपिन करें",
         "verify": "प्रतिभागी को सत्यापित करें",
         "videoMuted": "कैमरा अक्षम",

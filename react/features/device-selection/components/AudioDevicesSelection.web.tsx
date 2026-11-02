@@ -22,6 +22,7 @@ import logger from '../logger';
 
 import AudioInputPreview from './AudioInputPreview.web';
 import AudioOutputPreview from './AudioOutputPreview.web';
+import DeviceHidContainer from './DeviceHidContainer.web';
 import DeviceSelector from './DeviceSelector.web';
 
 
@@ -92,6 +93,11 @@ interface IProps extends AbstractDialogTabProps, WithTranslation {
      * rendered.
      */
     hideAudioOutputSelect: boolean;
+
+    /**
+     * Whether or not the hid device container should display.
+     */
+    hideDeviceHIDContainer: boolean;
 
     /**
      * Whether to hide noise suppression checkbox or not.
@@ -302,6 +308,7 @@ class AudioDevicesSelection extends AbstractDialogTab<IProps, {}> {
             hasAudioPermission,
             hideAudioInputPreview,
             hideAudioOutputPreview,
+            hideDeviceHIDContainer,
             hideNoiseSuppression,
             isAdvancedAudioSettingsConfigEnabled,
             iAmVisitor,
@@ -390,6 +397,9 @@ class AudioDevicesSelection extends AbstractDialogTab<IProps, {}> {
                             className = { classes.outputButton }
                             deviceId = { selectedAudioOutputId } />}
                 </div>
+
+                {!hideDeviceHIDContainer && !iAmVisitor
+                    && <DeviceHidContainer />}
             </div>
         );
     }

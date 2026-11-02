@@ -1,5 +1,4 @@
 import { IReduxState } from '../app/types';
-import { IConfig } from '../base/config/configType';
 import { AUDIO_TRANSLATION_ENABLED } from '../base/flags/constants';
 import { getFeatureFlag } from '../base/flags/functions';
 import { MEET_FEATURES } from '../base/jwt/constants';
@@ -7,8 +6,7 @@ import { isJwtFeatureEnabled } from '../base/jwt/functions';
 import { isLocalParticipantModerator } from '../base/participants/functions';
 import { ITrack } from '../base/tracks/types';
 
-import { DEFAULT_TRANSLATION_LANGUAGES, DUCKED_ORIGINAL_VOLUME } from './constants';
-import logger from './logger';
+import { DUCKED_ORIGINAL_VOLUME, TranslationTreatment } from './constants';
 
 /**
  * Whether audio translation is enabled for the room. Driven by the {@code audioTranslation} RoomMetadata flag,
@@ -22,32 +20,107 @@ export function isAudioTranslationRoomEnabled(state: IReduxState): boolean {
 }
 
 /**
- * Whether audio translation is in progress in the meeting, for the conference label. Only control-plane
- * signals count: languages participants declare, the listener counts speakers publish in room metadata, and
- * the component's listeners push.
+ * Whether the given participant is currently translating the local participant's audio, per the directed
+ * {@code translationListeners} list pushed by the audio-translation component.
+ *
+ * @param {IReduxState} state - The redux state.
+ * @param {string} participantId - The participant (endpoint) id to check.
+ * @returns {boolean}
+ */
+export function isParticipantAudioTranslationActive(state: IReduxState, participantId: string): boolean {
+    return state['features/audio-translation'].translationListeners.includes(participantId);
+}
+
+/**
+ * The target language encoded in a translated source name — the substring after the last {@code .}.
+ *
+ * @param {string} sourceName - The translated source name.
+ * @returns {string}
+ */
+export function getSourceLanguage(sourceName: string): string {
+    const dotIndex = sourceName.lastIndexOf('.');
+
+    return dotIndex === -1 ? '' : sourceName.substring(dotIndex + 1);
+}
+
+/**
+ * The owner endpoint id encoded in a translated source name — the substring before the first {@code -}.
+ * Translated sources follow the {@code <endpointId>-a<idx>.<lang>} convention (endpoint ids are dash/dot-free).
+ * Returns an empty string for a source without a dash.
+ *
+ * @param {string} sourceName - The translated source name.
+ * @returns {string}
+ */
+export function getSourceOwnerEndpointId(sourceName: string): string {
+    const dashIndex = sourceName.indexOf('-');
+
+    return dashIndex === -1 ? '' : sourceName.substring(0, dashIndex);
+}
+
+/**
+ * Whether we are hearing the given participant translated. The bridge floods sending changes to every
+ * endpoint, so {@code receivingSources} is every translated source in flight anywhere, not just ours; a
+ * source counts as ours only when its language matches the one we selected for this participant.
+ *
+ * @param {IReduxState} state - The redux state.
+ * @param {string} participantId - The participant (endpoint) id to check.
+ * @returns {boolean}
+ */
+export function isReceivingTranslationFrom(state: IReduxState, participantId: string): boolean {
+    const language = getEffectiveTranslationLanguage(state, participantId);
+
+    // The bridge announces sending changes to every endpoint, so a source being in flight does not mean we
+    // subscribed to it; require our own selection for this speaker to match the source's language.
+    if (!language) {
+        return false;
+    }
+
+    return state['features/audio-translation'].receivingSources
+        .some(sourceName => getSourceOwnerEndpointId(sourceName) === participantId
+            && sourceName.endsWith(`.${language}`));
+}
+
+/**
+ * The audio-translation status treatment for a participant, combining whether translation is enabled for the
+ * local user ({@link isParticipantAudioTranslationActive}) and whether translated audio is being received
+ * ({@link isReceivingTranslationFrom}).
+ *
+ * @param {IReduxState} state - The redux state.
+ * @param {string} participantId - The participant (endpoint) id to check.
+ * @returns {TranslationTreatment}
+ */
+export function getTranslationTreatment(state: IReduxState, participantId: string): TranslationTreatment {
+    const enabled = isParticipantAudioTranslationActive(state, participantId);
+    const receiving = isReceivingTranslationFrom(state, participantId);
+
+    if (enabled && receiving) {
+        return TranslationTreatment.BOTH;
+    }
+    if (enabled) {
+        return TranslationTreatment.ENABLED;
+    }
+    if (receiving) {
+        return TranslationTreatment.RECEIVING;
+    }
+
+    return TranslationTreatment.NONE;
+}
+
+/**
+ * Whether audio translation is currently active anywhere in the meeting: a remote participant is translating
+ * the local user, translated audio is being received, or the local user has translation on.
  *
  * @param {IReduxState} state - The redux state.
  * @returns {boolean}
  */
 export function isAudioTranslationActiveInMeeting(state: IReduxState): boolean {
-    const { language, participantLanguages, translationListeners } = state['features/audio-translation'];
-    const listenerCounts = state['features/base/conference'].metadata?.audioTranslationListenerCounts ?? {};
+    const { language, participantLanguages, receivingSources, translationListeners }
+        = state['features/audio-translation'];
 
     return translationListeners.length > 0
+        || receivingSources.length > 0
         || Boolean(language)
-        || Object.values(participantLanguages).some(lang => lang !== null)
-        || Object.values(listenerCounts).some(counts => Object.values(counts).some(count => count > 0));
-}
-
-/**
- * Whether any speaker's translated audio is currently playing out in the meeting. The bridge floods sending
- * changes to every endpoint, so this is conference-wide rather than specific to what we subscribed to.
- *
- * @param {IReduxState} state - The redux state.
- * @returns {boolean}
- */
-export function isTranslationPlayingOut(state: IReduxState): boolean {
-    return state['features/audio-translation'].receivingSources.length > 0;
+        || Object.values(participantLanguages).some(lang => lang !== null);
 }
 
 /**
@@ -62,8 +135,8 @@ export function canManageAudioTranslation(state: IReduxState): boolean {
 }
 
 /**
- * Whether the audio-translation UI should be available to the local user: the feature must be enabled in config
- * and supported by the deployment, and either the user can manage it or it is enabled for the room.
+ * Whether the audio-translation UI should be available to the local user: the feature must be deployed
+ * ({@code config.audioTranslation.enabled}) and either the user can manage it or it is enabled for the room.
  *
  * @param {IReduxState} state - The redux state.
  * @returns {boolean}
@@ -75,12 +148,6 @@ export function isAudioTranslationAvailable(state: IReduxState): boolean {
     }
 
     if (!state['features/base/config'].audioTranslation?.enabled) {
-        return false;
-    }
-
-    // The component is advertised over service discovery, so an enabled config does not mean it is deployed.
-    // Only an explicit false hides it, so an older lib-jitsi-meet without the check stays unaffected.
-    if (state['features/base/conference'].conference?.isAudioTranslationSupported?.() === false) {
         return false;
     }
 
@@ -164,188 +231,6 @@ export function shouldDuckOriginalAudio(state: IReduxState, sourceName?: string,
 }
 
 /**
- * Configuration problems already logged by {@link orderAudioTranslationLanguages}, so each is reported once rather
- * than on every render.
- */
-const reportedConfigProblems = new Set<string>();
-
-/**
- * Whether a configured code can be requested as a translation language today. Prosody's audio-translation
- * component ({@code mod_audio_translation_component.lua}, {@code is_valid_language}) accepts only ASCII letters,
- * at most 20 of them, and rejects the whole request with {@code bad-request} on the first invalid entry, so one bad
- * code configured for a meeting-wide language fails translation for every speaker. The lib-jitsi-meet source-name
- * parser accepts a region or script subtag ('pt-BR'), so the prosody check is what has to change before such
- * codes can be offered.
- *
- * @param {string} code - The language code.
- * @returns {boolean}
- */
-function isUsableAudioTranslationCode(code: string): boolean {
-    return /^[a-z]{1,20}$/i.test(code);
-}
-
-/**
- * The target languages offered in the audio-translation picker, in order:
- * {@code config.audioTranslation.translationLanguages} (else the built-in default list every provider supports),
- * with the codes named in {@code translationLanguagesHead} moved to the top. The head only reorders: a head entry
- * is matched to the offered list case-insensitively and takes the list's spelling, and one that is not in the list
- * is ignored, so it can neither add a language the deployment's provider may not accept nor change the exact code
- * sent. The currently selected language, if any, is kept in the list even when the configuration no longer offers
- * it, so the picker can still show what is active (the rows match it by exact string). Codes are kept as spelled
- * (they go to the bridge and on to the translation provider as-is) and deduplicated case-insensitively; blanks are
- * dropped, and codes prosody would refuse are dropped with a warning (see {@link isUsableAudioTranslationCode}).
- * The defaults apply only when {@code translationLanguages} is unset ({@code undefined}, or {@code null}, which is
- * how a {@code configOverwrite} resets a key): a list that is set but unusable (not an array, empty, or every
- * entry dropped) is a misconfiguration, logged once, and offers nothing rather than 13 languages the deployer did
- * not choose and the provider may not accept.
- *
- * @param {Object | undefined} config - The {@code audioTranslation} config block ({@code IConfig['audioTranslation']}).
- * @param {string | null | undefined} selectedLanguage - The language currently active for the picker's target.
- * @returns {Array<string>} The language codes, in picker order.
- */
-export function orderAudioTranslationLanguages(
-        config: IConfig['audioTranslation'],
-        selectedLanguage?: string | null): Array<string> {
-    const key = (code: string) => code.toLowerCase();
-    const reportOnce = (what: string, message: string) => {
-        if (!reportedConfigProblems.has(what)) {
-            reportedConfigProblems.add(what);
-            logger.warn(message);
-        }
-    };
-    const clean = (codes: unknown, what: 'language' | 'head entry'): Array<string> => {
-        const seen = new Set<string>();
-        const out: Array<string> = [];
-
-        for (const code of Array.isArray(codes) ? codes : []) {
-            const trimmed = typeof code === 'string' ? code.trim() : '';
-
-            if (!trimmed || seen.has(key(trimmed))) {
-                continue;
-            }
-            if (!isUsableAudioTranslationCode(trimmed)) {
-                reportOnce(`${what}:${trimmed}`, `Ignoring audio-translation ${what} "${trimmed}": prosody accepts `
-                    + 'only codes of 1-20 ASCII letters');
-                continue;
-            }
-            seen.add(key(trimmed));
-            out.push(trimmed);
-        }
-
-        return out;
-    };
-    const configured = config?.translationLanguages;
-    let list: Array<string>;
-
-    if (configured === undefined || configured === null) {
-        list = DEFAULT_TRANSLATION_LANGUAGES.map(({ code }) => code);
-    } else {
-        list = clean(configured, 'language');
-        if (list.length === 0) {
-            // Keyed on the value, so a different bad list on a later join in the same session is reported too.
-            const shown = JSON.stringify(configured);
-
-            reportOnce(`list:${shown}`, 'config.audioTranslation.translationLanguages is set but offers no usable '
-                + `language (${shown}); the picker offers none`);
-        }
-    }
-
-    // Head entries take the list's spelling, so the head cannot change the code that is sent.
-    const byKey = new Map(list.map(code => [ key(code), code ]));
-    const head = clean(config?.translationLanguagesHead, 'head entry')
-        .map(code => byKey.get(key(code)))
-        .filter((code): code is string => Boolean(code));
-    const headKeys = new Set(head.map(key));
-    const selected = selectedLanguage && !list.includes(selectedLanguage) ? [ selectedLanguage ] : [];
-
-    return [ ...head, ...selected, ...list.filter(code => !headKeys.has(key(code))) ];
-}
-
-/**
- * Own-locale language names already resolved through {@code Intl.DisplayNames}, by code. The lookups are cheap but
- * run per row per render, and the answer for a code never changes within a session.
- */
-const displayNameCache = new Map<string, string | undefined>();
-
-/**
- * The name of a language in that language, from the platform's CLDR data via {@code Intl.DisplayNames}, or
- * undefined when the API is missing (Hermes implements no {@code Intl.DisplayNames}, so this is always undefined
- * on mobile), the code is not a valid tag, the platform has no locale data for that language, or CLDR has no name
- * for it ({@code fallback: 'none'}). The locale-data check matters: without it the API quietly resolves to the
- * viewer's default locale and returns the name in the viewer's language ('Klingon' for 'tlh' on an English
- * browser), which would differ per viewer and skip the documented English fallback. CLDR gives Latin-script names
- * in lower case ('español'), so the first letter is upper-cased in the language's own locale.
- *
- * @param {string} code - The language code.
- * @returns {string | undefined}
- */
-function getOwnLocaleLanguageName(code: string): string | undefined {
-    if (displayNameCache.has(code)) {
-        return displayNameCache.get(code);
-    }
-
-    let name: string | undefined;
-
-    if (typeof Intl !== 'undefined' && typeof Intl.DisplayNames === 'function') {
-        try {
-            if (Intl.DisplayNames.supportedLocalesOf([ code ]).length > 0) {
-                const raw = new Intl.DisplayNames([ code ], { fallback: 'none', type: 'language' }).of(code);
-
-                if (raw) {
-                    name = raw.charAt(0).toLocaleUpperCase(code) + raw.slice(1);
-                }
-            }
-        } catch (_) {
-            // An invalid language tag throws RangeError; fall through to the i18n lookup.
-        }
-    }
-    displayNameCache.set(code, name);
-
-    return name;
-}
-
-/**
- * The picker label for an audio-translation language code: the hand-written native-script label of the default
- * list when the code is on it (the same on every platform); else the language's own name from
- * {@code Intl.DisplayNames} where the platform has it (browsers; not Hermes, see {@link getOwnLocaleLanguageName});
- * else the English name from the {@code translation-languages} i18n namespace (lang/translation-languages.json);
- * else the code itself.
- *
- * @param {string} code - The language code.
- * @param {Function} t - The i18n translate function.
- * @returns {string}
- */
-export function getAudioTranslationLanguageLabel(code: string, t: (key: string) => string): string {
-    const builtIn = DEFAULT_TRANSLATION_LANGUAGES.find(entry => entry.code === code);
-
-    if (builtIn) {
-        return builtIn.label;
-    }
-
-    const ownName = getOwnLocaleLanguageName(code);
-
-    if (ownName) {
-        return ownName;
-    }
-
-    // Try the code as configured first, then lower-cased, which is how translation-languages.json keys the plain
-    // codes the picker can offer (isUsableAudioTranslationCode admits no subtags, so there is no region or script
-    // casing to normalise).
-    const lower = code.toLowerCase();
-
-    for (const candidate of lower === code ? [ code ] : [ code, lower ]) {
-        const translated = t(`translation-languages:${candidate}`);
-
-        // i18next returns the key without its namespace when there is no translation.
-        if (translated && translated !== candidate) {
-            return translated;
-        }
-    }
-
-    return code;
-}
-
-/**
  * The ducked volume (0..1) from config.audioTranslation.duckedVolume; invalid values fall back to default.
  *
  * @param {IReduxState} state - The redux state.
@@ -373,3 +258,44 @@ export function getDuckedVolumeForParticipant(state: IReduxState, participantId?
     return typeof userVolume === 'number' ? Math.min(userVolume, duckedVolume) : duckedVolume;
 }
 
+/**
+ * The number of participants still hearing the given speaker's translated audio, as published by that
+ * speaker. 0 when nothing is pending or the speaker's client does not publish the count.
+ *
+ * @param {IReduxState} state - The redux state.
+ * @param {string} participantId - The speaker's participant id.
+ * @returns {number}
+ */
+export function getTranslationDeliveryPendingCount(state: IReduxState, participantId: string): number {
+    const counts = state['features/base/conference'].metadata?.audioTranslationListenerCounts?.[participantId];
+
+    if (!counts) {
+        return 0;
+    }
+
+    // Sum the subscribers of only the languages the bridge is still sending for this speaker: the in-flight
+    // language count alone undercounts (one source serves every listener of that language) and the speaker's
+    // subscriber total overcounts (a language whose stream already finished).
+    return state['features/audio-translation'].receivingSources.reduce((total, sourceName) =>
+        getSourceOwnerEndpointId(sourceName) === participantId
+            ? total + (counts[getSourceLanguage(sourceName)] ?? 0)
+            : total, 0);
+}
+
+/**
+ * Whether translated audio for the given speaker is still being delivered, so others should wait before
+ * speaking. Falls back to any in-flight translated source owned by the speaker, so the ring still shows when
+ * the speaker's client does not publish a count.
+ *
+ * @param {IReduxState} state - The redux state.
+ * @param {string} participantId - The speaker's participant id.
+ * @returns {boolean}
+ */
+export function isTranslationDeliveryPending(state: IReduxState, participantId: string): boolean {
+    if (getTranslationDeliveryPendingCount(state, participantId) > 0) {
+        return true;
+    }
+
+    return state['features/audio-translation'].receivingSources
+        .some(sourceName => getSourceOwnerEndpointId(sourceName) === participantId);
+}

@@ -5,10 +5,10 @@
 -- are exempt. Anonymous users (no token) are allowed through. When
 -- token_verification_require_token_for_moderation is set, also blocks room
 -- config IQs (e.g. granting moderator status) from unauthenticated users.
--- Records the verified conferences on the session (jitsi_meet_verified_rooms)
--- and answers the 'jitsi-verify-session-rooms' event, so that a session whose
--- JWT claims are refreshed after the join (mod_auth_token, on stream
--- resumption) is re-checked against them.
+-- Records the verified conference on the session (jitsi_meet_verified_room) and
+-- answers the 'jitsi-verify-session-rooms' event, so that a session whose JWT
+-- claims are refreshed after the join (mod_auth_token, on stream resumption) is
+-- re-checked against it.
 -- Token authentication
 -- Copyright (C) 2021-present 8x8, Inc.
 
@@ -17,7 +17,6 @@ local host = module.host;
 local st = require "util.stanza";
 local jid_split = require 'util.jid'.split;
 local jid_bare = require 'util.jid'.bare;
-local jid_host = require 'util.jid'.host;
 
 local util = module:require 'util';
 local is_admin = util.is_admin;
@@ -49,8 +48,9 @@ if token_util == nil then
 end
 
 module:log("debug",
-    "%s - starting MUC token verifier app_id: %s allow empty: %s",
-    tostring(host), tostring(token_util.appId), tostring(token_util.allowEmptyToken));
+    "%s - starting MUC token verifier app_id: %s app_secret: %s allow empty: %s",
+    tostring(host), tostring(token_util.appId), tostring(token_util.appSecret),
+    tostring(token_util.allowEmptyToken));
 
 -- option to disable room modification (sending muc config form) for guest that do not provide token
 local require_token_for_moderation;
@@ -66,7 +66,7 @@ load_config();
 local function verify_user(session, stanza)
     if DEBUG then
         module:log("debug", "Session token: %s, session room: %s",
-            tostring(util.strip_jwt_signature(session.auth_token)), tostring(session.jitsi_meet_room));
+            tostring(session.auth_token), tostring(session.jitsi_meet_room));
     end
 
     -- token not required for admin users
@@ -97,10 +97,8 @@ local function verify_user(session, stanza)
             reason = 'Room and token mismatched';
         end
 
-        module:log('error', 'User %s not allowed to join: %s token: %s token room: %s token sub: %s err: %s reason: %s',
-                        user_jid, tostring(stanza.attr.to), tostring(util.strip_jwt_signature(session.auth_token)),
-                        tostring(session.jitsi_meet_room),
-                        tostring(session.jitsi_meet_domain), err, reason);
+        module:log('error', 'Token %s not allowed to join: %s err: %s reason: %s',
+                        tostring(session.auth_token), tostring(stanza.attr.to), err, reason);
 
         local response = st.error_reply(stanza, 'cancel', 'not-allowed', reason);
         if err then
@@ -112,16 +110,10 @@ local function verify_user(session, stanza)
     end
     if DEBUG then module:log("debug", "allowed: %s to enter/create room: %s", user_jid, stanza.attr.to); end
 
-    -- Remember every conference this session was verified for, so claims that
-    -- are refreshed later (mod_auth_token, on stream resumption) can be checked
-    -- against all of them without going through a join again. A session can be
-    -- an occupant of several rooms at once.
-    local verified_rooms = session.jitsi_meet_verified_rooms;
-    if not verified_rooms then
-        verified_rooms = {};
-        session.jitsi_meet_verified_rooms = verified_rooms;
-    end
-    verified_rooms[jid_bare(stanza.attr.to)] = true;
+    -- Remember the conference this session was verified for, so claims that are
+    -- refreshed later (mod_auth_token, on stream resumption) can be checked
+    -- against it without going through a join again.
+    session.jitsi_meet_verified_room = jid_bare(stanza.attr.to);
 
     return true;
 end
@@ -146,7 +138,7 @@ module:hook("muc-occupant-pre-join", function(event)
     measure_success(1);
 end, 99);
 
--- Verifies the token claims currently on a session against every conference it
+-- Verifies the token claims currently on a session against the conference it
 -- was verified for on join. Fired by mod_auth_token when a connection resuming
 -- a hibernating session (XEP-0198) presents a different token, which refreshes
 -- the claims of the live session: the hooks above only run at join time, so
@@ -155,30 +147,25 @@ end, 99);
 -- verified on join.
 module:hook_global('jitsi-verify-session-rooms', function(event)
     local session = event.session;
-    local verified_rooms = session.jitsi_meet_verified_rooms;
+    local room_jid = session.jitsi_meet_verified_room;
 
-    if not verified_rooms then
+    if not room_jid then
         return;
     end
 
-    local get_room_from_jid = prosody.hosts[host].modules.muc.get_room_from_jid;
+    -- Being an occupant is deliberately not required: a session that moved into
+    -- a breakout room has left the main room it joined, and that main room is
+    -- still the conference its claims have to cover. Only a room that is gone
+    -- (everyone left while the session was hibernating) is skipped.
+    if not prosody.hosts[host].modules.muc.get_room_from_jid(room_jid) then
+        return;
+    end
 
-    for room_jid in pairs(verified_rooms) do
-        -- The event is global: rooms on another MUC component are checked by the
-        -- instance loaded there.
-        -- Being an occupant is deliberately not required: a session that moved
-        -- into a breakout room has left the main room it joined, and that main
-        -- room is still the conference its claims have to cover. Only a room
-        -- that is gone (everyone left while the session was hibernating) is
-        -- skipped.
-        if jid_host(room_jid) == host and get_room_from_jid(room_jid) then
-            local res, err, reason = token_util:verify_room(session, room_jid);
+    local res, err, reason = token_util:verify_room(session, room_jid);
 
-            if not res then
-                measure_fail(1);
-                return { res = false; room = room_jid; error = err; reason = reason; };
-            end
-        end
+    if not res then
+        measure_fail(1);
+        return { res = false; room = room_jid; error = err; reason = reason; };
     end
 
     measure_success(1);

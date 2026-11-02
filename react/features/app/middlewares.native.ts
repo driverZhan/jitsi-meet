@@ -1,5 +1,4 @@
 import '../base/config/middleware';
-import '../custom-panel/middleware.native';
 import '../dynamic-branding/middleware';
 import '../gifs/middleware';
 import '../mobile/audio-mode/middleware';

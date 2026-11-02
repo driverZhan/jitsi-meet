@@ -27,13 +27,8 @@ endif
 
 all: compile deploy
 
-# Type checking is done once here rather than inside ts-loader, which would repeat
-# it for every bundle (see webpack.config.js).
-typecheck:
-	npm run tsc:web
-
-compile: clean typecheck
-	NODE_OPTIONS=--max-old-space-size=4096 \
+compile: clean
+	NODE_OPTIONS=--max-old-space-size=8192 \
 	$(WEBPACK)
 
 clean:
@@ -60,8 +55,6 @@ deploy-appbundle:
 		$(BUILD_DIR)/face-landmarks-worker.min.js.map \
 		$(BUILD_DIR)/noise-suppressor-worklet.min.js \
 		$(BUILD_DIR)/noise-suppressor-worklet.min.js.map \
-		$(BUILD_DIR)/preload.min.js \
-		$(BUILD_DIR)/preload.min.js.map \
 		$(BUILD_DIR)/screenshot-capture-worker.min.js \
 		$(BUILD_DIR)/screenshot-capture-worker.min.js.map \
 		$(BUILD_DIR)/vb-inference-worker.min.js \

@@ -1,4 +1,3 @@
-import { DefaultTheme } from '@react-navigation/native';
 import { TransitionPresets } from '@react-navigation/stack';
 import { Platform } from 'react-native';
 
@@ -31,9 +30,7 @@ export const fullScreenOptions = {
  * Navigation container theme.
  */
 export const navigationContainerTheme = {
-    ...DefaultTheme,
     colors: {
-        ...DefaultTheme.colors,
         background: BaseTheme.palette.uiBackground
     }
 };
@@ -83,8 +80,8 @@ export const chatTabBarOptions = {
  */
 export const presentationScreenOptions = {
     ...modalPresentation,
-    headerBackButtonDisplayMode: 'minimal' as const,
-    headerLeft: screenHeaderCloseButton(goBack),
+    headerBackTitleVisible: false,
+    headerLeft: () => screenHeaderCloseButton(goBack),
     headerStatusBarHeight: 0,
     headerStyle: {
         backgroundColor: BaseTheme.palette.ui01
@@ -114,7 +111,7 @@ export const chatScreenOptions = presentationScreenOptions;
  */
 export const dialInSummaryScreenOptions = {
     ...presentationScreenOptions,
-    headerLeft: screenHeaderCloseButton(goBackToWelcomeScreen)
+    headerLeft: () => screenHeaderCloseButton(goBackToWelcomeScreen)
 };
 
 /**
@@ -131,11 +128,6 @@ export const liveStreamScreenOptions = presentationScreenOptions;
  * Screen options for participants modal.
  */
 export const participantsScreenOptions = presentationScreenOptions;
-
-/**
- * Screen options for custom panel modal.
- */
-export const customPanelScreenOptions = presentationScreenOptions;
 
 /**
  * Screen options for speaker stats modal.
@@ -167,7 +159,7 @@ export const subtitlesScreenOptions = presentationScreenOptions;
  */
 export const lobbyScreenOptions = {
     ...presentationScreenOptions,
-    headerLeft: lobbyScreenHeaderCloseButton()
+    headerLeft: () => lobbyScreenHeaderCloseButton()
 };
 
 /**
@@ -175,7 +167,7 @@ export const lobbyScreenOptions = {
  */
 export const lobbyChatScreenOptions = {
     ...presentationScreenOptions,
-    headerLeft: screenHeaderCloseButton(goBackToLobbyScreen)
+    headerLeft: () => screenHeaderCloseButton(goBackToLobbyScreen)
 };
 
 /**
@@ -234,7 +226,7 @@ export const profileSettingsScreenOptions = {
     headerTitleStyle: {
         color: BaseTheme.palette.text01
     },
-    headerBackButtonDisplayMode: 'minimal' as const
+    headerBackTitleVisible: false
 };
 
 /**

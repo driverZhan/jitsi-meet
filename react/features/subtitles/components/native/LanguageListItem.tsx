@@ -51,8 +51,6 @@ const LanguageListItem = ({ t, lang, selected, onLanguageSelected
                 }
             </View>
             <TouchableHighlight
-                accessibilityRole = 'button'
-                accessibilityState = {{ selected }}
                 onPress = { onLanguageSelectedWrapper }
                 underlayColor = { 'transparent' } >
                 <Text

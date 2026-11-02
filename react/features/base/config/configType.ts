@@ -1,4 +1,3 @@
-import { ISystemWideUserNotificationConfig } from '../../system-wide-user-notification/types';
 import { ToolbarButton } from '../../toolbox/types';
 import { ILoggingConfig } from '../logging/types';
 import { IAudioSettings } from '../settings/reducer';
@@ -87,12 +86,6 @@ export type Sounds = 'ASKED_TO_UNMUTE_SOUND' |
     'RECORDING_OFF_SOUND' |
     'RECORDING_ON_SOUND' |
     'TALK_WHILE_MUTED_SOUND';
-
-export interface ICustomPanelConfig {
-    advisorAvailabilityUrl?: string;
-    enabled?: boolean;
-    url?: string;
-}
 
 export interface IDeeplinkingPlatformConfig {
     appName: string;
@@ -231,9 +224,8 @@ export interface IConfig {
      */
     audioTranslation?: {
         duckedVolume?: number;
+        enableSendingChangeEvents?: boolean;
         enabled?: boolean;
-        translationLanguages?: Array<string>;
-        translationLanguagesHead?: Array<string>;
     };
     /**
      * @deprecated Use `transcription.autoTranscribeOnRecord` instead.
@@ -295,7 +287,6 @@ export interface IConfig {
         };
     };
     corsAvatarURLs?: Array<string>;
-    customPanel?: ICustomPanelConfig;
     customParticipantMenuButtons?: Array<{ icon: string; id: string; text: string; }>;
     customToolbarButtons?: Array<{ backgroundColor?: string; icon: string; id: string; text: string; }>;
     deeplinking?: IDeeplinkingConfig;
@@ -444,6 +435,7 @@ export interface IConfig {
     enableSaveLogs?: boolean;
     enableTalkWhileMuted?: boolean;
     enableTcc?: boolean;
+    enableWebHIDFeature?: boolean;
     /**
      * @deprecated Use `welcomePage.disabled` instead.
      */
@@ -713,9 +705,7 @@ export interface IConfig {
     };
     serviceUrl?: string;
     sharedVideoAllowedURLDomains?: Array<string>;
-    showBreakoutRoomJoinPermissionsModeratorSetting?: boolean;
     showChatPermissionsModeratorSetting?: boolean;
-    showSharedVideoPermissionsModeratorSetting?: boolean;
     sipInviteUrl?: string;
     speakerStats?: {
         disableSearch?: boolean;
@@ -736,7 +726,6 @@ export interface IConfig {
     startWithVideoMuted?: boolean;
     stereo?: boolean;
     subject?: string;
-    systemWideUserNotification?: ISystemWideUserNotificationConfig;
     testing?: {
         assumeBandwidth?: boolean;
         debugAudioLevels?: boolean;
@@ -832,14 +821,6 @@ export interface IConfig {
         hideVisitorCountForVisitors?: boolean;
         queueService: string;
         showJoinMeetingDialog?: boolean;
-    };
-    /**
-     * Voice agents (bot participants). Every participant is subscribed to an agent's audio automatically;
-     * set requireConsent to true to prompt each participant before the agent may hear them or be heard.
-     */
-    voiceAgents?: {
-        consentLearnMoreLink?: string;
-        requireConsent?: boolean;
     };
     watchRTCConfigParams?: IWatchRTCConfiguration;
     webhookProxyUrl?: string;

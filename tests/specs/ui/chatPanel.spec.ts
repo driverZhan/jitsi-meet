@@ -24,7 +24,7 @@ describe('Chat panel', () => {
         await chatPanel.pressShortcut();
         expect(await chatPanel.isOpen()).toBe(true);
     });
-    it('use button to close', async () => {
+    it('use button to open', async () => {
         const { p1 } = ctx;
 
         await p1.getToolbar().clickCloseChatButton();

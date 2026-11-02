@@ -4,11 +4,7 @@ import { connect } from 'react-redux';
 import { IReduxState } from '../../../app/types';
 import { MEDIA_TYPE } from '../../../base/media/constants';
 import { PARTICIPANT_ROLE } from '../../../base/participants/constants';
-import {
-    getParticipantByIdOrUndefined,
-    isScreenShareParticipantById,
-    isVoiceAgentParticipant
-} from '../../../base/participants/functions';
+import { getParticipantByIdOrUndefined, isScreenShareParticipantById } from '../../../base/participants/functions';
 import {
     getVideoTrackByParticipant,
     isLocalTrackMuted,
@@ -19,6 +15,7 @@ import { getIndicatorsTooltipPosition } from '../../functions.web';
 import AudioMutedIndicator from './AudioMutedIndicator';
 import ModeratorIndicator from './ModeratorIndicator';
 import ScreenShareIndicator from './ScreenShareIndicator';
+import TranslationIndicator from './TranslationIndicator';
 
 /**
  * The type of the React {@code Component} props of {@link StatusIndicators}.
@@ -39,6 +36,11 @@ interface IProps {
      * Indicates if the screen share indicator should be visible or not.
      */
     _showScreenShareIndicator: Boolean;
+
+    /**
+     * Indicates if the translation indicator should be visible or not.
+     */
+    _showTranslationIndicator: Boolean;
 
     /**
      * The ID of the participant for which the status bar is rendered.
@@ -68,6 +70,8 @@ class StatusIndicators extends Component<IProps> {
             _showAudioMutedIndicator,
             _showModeratorIndicator,
             _showScreenShareIndicator,
+            _showTranslationIndicator,
+            participantID,
             thumbnailType
         } = this.props;
         const tooltipPosition = getIndicatorsTooltipPosition(thumbnailType);
@@ -76,6 +80,9 @@ class StatusIndicators extends Component<IProps> {
             <>
                 { _showAudioMutedIndicator && <AudioMutedIndicator tooltipPosition = { tooltipPosition } /> }
                 { _showModeratorIndicator && <ModeratorIndicator tooltipPosition = { tooltipPosition } />}
+                { _showTranslationIndicator && <TranslationIndicator
+                    participantId = { participantID }
+                    tooltipPosition = { tooltipPosition } /> }
                 { _showScreenShareIndicator && <ScreenShareIndicator tooltipPosition = { tooltipPosition } /> }
             </>
         );
@@ -91,11 +98,12 @@ class StatusIndicators extends Component<IProps> {
  * @returns {{
  *     _showAudioMutedIndicator: boolean,
  *     _showModeratorIndicator: boolean,
- *     _showScreenShareIndicator: boolean
+ *     _showScreenShareIndicator: boolean,
+ *     _showTranslationIndicator: boolean
  * }}
 */
 function _mapStateToProps(state: IReduxState, ownProps: any) {
-    const { participantID, audio, moderator, screenshare } = ownProps;
+    const { participantID, audio, moderator, screenshare, translation } = ownProps;
 
     // Only the local participant won't have id for the time when the conference is not yet joined.
     const participant = getParticipantByIdOrUndefined(state, participantID);
@@ -106,10 +114,8 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
 
     if (participant?.local) {
         isAudioMuted = isLocalTrackMuted(tracks, MEDIA_TYPE.AUDIO);
-    } else if (!participant?.fakeParticipant
-            || isScreenShareParticipantById(state, participantID)
-            || isVoiceAgentParticipant(participant)) {
-        // remote participants excluding shared video (an agent has an audio track like anyone else)
+    } else if (!participant?.fakeParticipant || isScreenShareParticipantById(state, participantID)) {
+        // remote participants excluding shared video
         const track = getVideoTrackByParticipant(state, participant);
 
         isScreenSharing = track?.videoType === 'desktop';
@@ -122,7 +128,8 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
         _showAudioMutedIndicator: isAudioMuted && audio,
         _showModeratorIndicator:
             !disableModeratorIndicator && participant && participant.role === PARTICIPANT_ROLE.MODERATOR && moderator,
-        _showScreenShareIndicator: isScreenSharing && screenshare
+        _showScreenShareIndicator: isScreenSharing && screenshare,
+        _showTranslationIndicator: Boolean(translation)
     };
 }
 

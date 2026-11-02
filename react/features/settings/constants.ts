@@ -1,7 +1,6 @@
 export const SETTINGS_TABS = {
     AUDIO: 'audio_tab',
     CALENDAR: 'calendar_tab',
-    EXPERIMENTAL: 'experimental_tab',
     MORE: 'more_tab',
     MODERATOR: 'moderator-tab',
     NOTIFICATIONS: 'notifications_tab',

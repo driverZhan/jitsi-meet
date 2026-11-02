@@ -12,7 +12,6 @@ import { isSpotTV } from '../base/util/spot';
 import { isInBreakoutRoom as isInBreakoutRoomF } from '../breakout-rooms/functions';
 import { isEnabled as isDropboxEnabled } from '../dropbox/functions';
 import { extractFqnFromPath } from '../dynamic-branding/functions.any';
-import { isE2EEOnInMeeting } from '../e2ee/functions';
 import { isVpaasMeeting } from '../jaas/functions';
 import { canAddTranscriber, isRecorderTranscriptionsRunning } from '../transcribing/functions';
 import { iAmVisitor } from '../visitors/functions';
@@ -238,7 +237,7 @@ export function canStopRecording(state: IReduxState) {
 export function shouldAutoTranscribeOnRecord(state: IReduxState) {
     const { transcription } = state['features/base/config'];
 
-    return (transcription?.autoTranscribeOnRecord ?? true) && canAddTranscriber(state) && !isE2EEOnInMeeting(state);
+    return (transcription?.autoTranscribeOnRecord ?? true) && canAddTranscriber(state);
 }
 
 /**

@@ -53,8 +53,6 @@ const ContextMenuLobbyParticipantReject = ({ participant: p }: IProps) => {
             renderHeader = { renderMenuHeader }
             showSlidingView = { Boolean(knockParticipantIsAvailable) }>
             <TouchableOpacity
-                accessibilityLabel = { t('participantsPane.actions.reject') }
-                accessibilityRole = 'button'
                 onPress = { reject }
                 style = { styles.contextMenuItem as ViewStyle }>
                 <Icon

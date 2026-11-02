@@ -10,8 +10,8 @@ import { translate } from '../../../base/i18n/functions';
 import { IconFaceSmile, IconSend } from '../../../base/icons/svg';
 import Button from '../../../base/ui/components/web/Button';
 import Input from '../../../base/ui/components/web/Input';
-import { CHAT_SIZE } from '../../constants';
-import { areSmileysDisabled, isSendGroupChatDisabled, isSendPrivateChatDisabled } from '../../functions';
+import { CHAR_LIMIT, CHAT_SIZE } from '../../constants';
+import { areSmileysDisabled, isSendGroupChatDisabled } from '../../functions';
 import { IMessage } from '../../types';
 
 import SmileysPanel from './SmileysPanel';
@@ -65,11 +65,6 @@ interface IProps extends WithTranslation {
     _isSendGroupChatDisabled: boolean;
 
     /**
-     * Whether the local participant is not allowed to send private messages.
-     */
-    _isSendPrivateChatDisabled: boolean;
-
-    /**
      * The id of the message recipient, if any.
      */
     _privateMessageRecipientId?: string;
@@ -114,21 +109,6 @@ interface IState {
      * Whether or not the smiley selector is visible.
      */
     showSmileysPanel: boolean;
-}
-
-/**
- * Returns whether the local participant cannot send what this input would send:
- * a private message when a recipient is selected, a group message if not.
- *
- * @param {IProps} props - The props of the component.
- * @returns {boolean}
- */
-function _isSendDisabled({
-    _isSendGroupChatDisabled,
-    _isSendPrivateChatDisabled,
-    _privateMessageRecipientId
-}: IProps): boolean {
-    return _privateMessageRecipientId ? _isSendPrivateChatDisabled : _isSendGroupChatDisabled;
 }
 
 /**
@@ -202,7 +182,7 @@ class ChatInput extends Component<IProps, IState> {
      */
     override render() {
         const classes = withStyles.getClasses(this.props);
-        const hideInput = _isSendDisabled(this.props);
+        const hideInput = this.props._isSendGroupChatDisabled && !this.props._privateMessageRecipientId;
 
         if (hideInput) {
             return (
@@ -264,13 +244,17 @@ class ChatInput extends Component<IProps, IState> {
      * @returns {void}
      */
     _onSubmitMessage() {
-        const { onSend } = this.props;
+        const {
+            _isSendGroupChatDisabled,
+            _privateMessageRecipientId,
+            onSend
+        } = this.props;
 
-        if (_isSendDisabled(this.props)) {
+        if (_isSendGroupChatDisabled && !_privateMessageRecipientId) {
             return;
         }
 
-        const trimmed = this.state.message.trim();
+        const trimmed = this.state.message.trim().slice(0, CHAR_LIMIT);
 
         if (trimmed) {
             onSend(trimmed);
@@ -335,7 +319,7 @@ class ChatInput extends Component<IProps, IState> {
      * @returns {void}
      */
     _onMessageChange(value: string) {
-        this.setState({ message: value });
+        this.setState({ message: value.slice(0, CHAR_LIMIT) });
     }
 
     /**
@@ -386,12 +370,12 @@ class ChatInput extends Component<IProps, IState> {
  */
 const mapStateToProps = (state: IReduxState) => {
     const { privateMessageRecipient, width } = state['features/chat'];
+    const isGroupChatDisabled = isSendGroupChatDisabled(state);
 
     return {
         _areSmileysDisabled: areSmileysDisabled(state),
         _privateMessageRecipientId: privateMessageRecipient?.id,
-        _isSendGroupChatDisabled: isSendGroupChatDisabled(state),
-        _isSendPrivateChatDisabled: isSendPrivateChatDisabled(state),
+        _isSendGroupChatDisabled: isGroupChatDisabled,
         _chatWidth: width.current ?? CHAT_SIZE,
     };
 };

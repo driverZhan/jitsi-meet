@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { IReduxState } from '../../../app/types';
@@ -18,12 +18,7 @@ const ModeratorSection = () => {
     const dispatch = useDispatch();
     const {
         audioModerationEnabled,
-        breakoutRoomJoinWithPermissionsEnabled,
         chatWithPermissionsEnabled,
-        privateChatWithPermissionsEnabled,
-        sharedVideoWithPermissionsEnabled,
-        showSharedVideoWithPermissions,
-        showBreakoutRoomJoinWithPermissions,
         followMeActive,
         followMeEnabled,
         followMeRecorderActive,
@@ -60,51 +55,14 @@ const ModeratorSection = () => {
     }, [ dispatch, updateSettings, setStartReactionsMuted ]);
 
     const { conference } = useSelector((state: IReduxState) => state['features/base/conference']);
-
-    // The permissions that were set but that the server has not confirmed yet. The metadata changes only
-    // when the server confirms it, thus a second toggle before that would put back the old value of the first.
-    const pendingPermissions = useRef<Record<string, boolean | undefined>>({});
-
-    // The values that were not confirmed belong to the previous room, e.g. when moving to a breakout room.
-    useEffect(() => {
-        pendingPermissions.current = {};
-    }, [ conference ]);
-
-    useEffect(() => {
-        const confirmed = conference?.getMetadataHandler().getMetadata().permissions || {};
-
-        for (const key of Object.keys(pendingPermissions.current)) {
-            if (Boolean(confirmed[key]) === Boolean(pendingPermissions.current[key])) {
-                delete pendingPermissions.current[key];
-            }
-        }
-    }, [ conference, chatWithPermissionsEnabled, privateChatWithPermissionsEnabled, sharedVideoWithPermissionsEnabled,
-        breakoutRoomJoinWithPermissionsEnabled ]);
-
-    const setPermission = useCallback((key: string, enabled?: boolean) => {
-        pendingPermissions.current[key] = enabled;
+    const onChatWithPermissionsToggled = useCallback((enabled?: boolean) => {
+        const currentPermissions = conference?.getMetadataHandler().getMetadata().permissions || {};
 
         conference?.getMetadataHandler().setMetadata('permissions', {
-            ...conference?.getMetadataHandler().getMetadata().permissions,
-            ...pendingPermissions.current
+            ...currentPermissions,
+            groupChatRestricted: enabled
         });
-    }, [ conference ]);
-
-    const onChatWithPermissionsToggled = useCallback((enabled?: boolean) => {
-        setPermission('groupChatRestricted', enabled);
-    }, [ setPermission ]);
-
-    const onPrivateChatWithPermissionsToggled = useCallback((enabled?: boolean) => {
-        setPermission('privateChatRestricted', enabled);
-    }, [ setPermission ]);
-
-    const onSharedVideoWithPermissionsToggled = useCallback((enabled?: boolean) => {
-        setPermission('sharedVideoRestricted', enabled);
-    }, [ setPermission ]);
-
-    const onBreakoutRoomJoinWithPermissionsToggled = useCallback((enabled?: boolean) => {
-        setPermission('breakoutRoomJoinRestricted', enabled);
-    }, [ setPermission ]);
+    }, [ dispatch, conference ]);
 
     const followMeRecorderChecked = followMeRecorderEnabled && !followMeRecorderActive;
 
@@ -145,40 +103,13 @@ const ModeratorSection = () => {
                 state: chatWithPermissionsEnabled,
                 onChange: onChatWithPermissionsToggled
             },
-            {
-                label: 'settings.privateChatWithPermissions',
-                state: privateChatWithPermissionsEnabled,
-                onChange: onPrivateChatWithPermissionsToggled
-            },
-            {
-                label: 'settings.sharedVideoWithPermissions',
-                state: sharedVideoWithPermissionsEnabled,
-                onChange: onSharedVideoWithPermissionsToggled
-            },
-            {
-                label: 'settings.breakoutRoomJoinWithPermissions',
-                state: breakoutRoomJoinWithPermissionsEnabled,
-                onChange: onBreakoutRoomJoinWithPermissionsToggled
-            },
         ];
 
-        return moderation.filter(({ label }) => {
-            // Remove the entries by name. A pop() here took out whichever
-            // entry came last, which is not the reactions one.
-            if (label === 'settings.startReactionsMuted') {
-                return !disableReactionsModeration;
-            }
+        if (disableReactionsModeration) {
+            moderation.pop();
+        }
 
-            if (label === 'settings.sharedVideoWithPermissions') {
-                return showSharedVideoWithPermissions;
-            }
-
-            if (label === 'settings.breakoutRoomJoinWithPermissions') {
-                return showBreakoutRoomJoinWithPermissions;
-            }
-
-            return true;
-        });
+        return moderation;
     }, [ startAudioMuted,
         startVideoMuted,
         followMeEnabled,
@@ -189,16 +120,6 @@ const ModeratorSection = () => {
         onFollowMeToggled,
         onFollowMeRecorderToggled,
         onStartReactionsMutedToggled,
-        onChatWithPermissionsToggled,
-        onPrivateChatWithPermissionsToggled,
-        onSharedVideoWithPermissionsToggled,
-        chatWithPermissionsEnabled,
-        privateChatWithPermissionsEnabled,
-        sharedVideoWithPermissionsEnabled,
-        showSharedVideoWithPermissions,
-        onBreakoutRoomJoinWithPermissionsToggled,
-        breakoutRoomJoinWithPermissionsEnabled,
-        showBreakoutRoomJoinWithPermissions,
         startReactionsMuted ]);
 
     return (

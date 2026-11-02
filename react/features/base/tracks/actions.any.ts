@@ -271,12 +271,12 @@ export function noDataFromSource(track: any) {
 }
 
 /**
- * Displays a no data from source error if needed.
+ * Displays a no data from source video error if needed.
  *
  * @param {JitsiLocalTrack} jitsiTrack - The track.
  * @returns {Function}
  */
-export function showNoDataFromSourceError(jitsiTrack: any) {
+export function showNoDataFromSourceVideoError(jitsiTrack: any) {
     return (dispatch: IStore['dispatch'], getState: IStore['getState']) => {
         let notificationInfo;
 
@@ -289,21 +289,10 @@ export function showNoDataFromSourceError(jitsiTrack: any) {
         if (track.isReceivingData) {
             notificationInfo = undefined;
         } else {
-            let notificationAction;
-
-            if (track.mediaType === MEDIA_TYPE.AUDIO) {
-                notificationAction = dispatch(showNotification({
-                    descriptionKey: 'dialog.micNotSendingData',
-                    titleKey: 'dialog.micNotSendingDataTitle'
-                }, NOTIFICATION_TIMEOUT_TYPE.LONG));
-
-                dispatch(setNoSrcDataNotificationUid(notificationAction?.uid));
-            } else {
-                notificationAction = dispatch(showErrorNotification({
-                    descriptionKey: 'dialog.cameraNotSendingData',
-                    titleKey: 'dialog.cameraNotSendingDataTitle'
-                }));
-            }
+            const notificationAction = dispatch(showErrorNotification({
+                descriptionKey: 'dialog.cameraNotSendingData',
+                titleKey: 'dialog.cameraNotSendingDataTitle'
+            }));
 
             notificationInfo = {
                 uid: notificationAction?.uid
@@ -449,7 +438,7 @@ export function trackAdded(track: any) {
                     noDataFromSourceNotificationInfo = { uid: notificationAction?.uid };
                 } else {
                     const timeout = setTimeout(() => dispatch(
-                        showNoDataFromSourceError(track)),
+                        showNoDataFromSourceVideoError(track)),
                         NOTIFICATION_TIMEOUT.MEDIUM);
 
                     noDataFromSourceNotificationInfo = { timeout };

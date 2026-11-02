@@ -235,6 +235,12 @@
         "microphonePermission": "Feil ved innhenting av mikrofontillatelse"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Samtalekontroll",
+            "connectedDevices": "Tilkoblede enheter:",
+            "deleteDevice": "Slett enhet",
+            "pairDevice": "Koble til enhet"
+        },
         "noPermission": "Tillatelse ikke gitt",
         "previewUnavailable": "Forhåndsvisning ikke tilgjengelig",
         "selectADevice": "Velg en enhet",

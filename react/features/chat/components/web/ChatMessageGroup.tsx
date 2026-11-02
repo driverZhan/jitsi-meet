@@ -81,8 +81,7 @@ const ChatMessageGroup = ({ className = '', editingMessage, messages, onCancelEd
                 {messages.map((message, i) => (
                     <ChatMessage
                         className = { className }
-                        isEditing = { Boolean(editingMessage?.messageId)
-                            && editingMessage?.messageId === message.messageId }
+                        isEditing = { editingMessage?.messageId === message.messageId }
                         key = { i }
                         message = { message }
                         onCancelEdit = { onCancelEdit }

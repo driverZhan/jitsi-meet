@@ -77,6 +77,7 @@ function DialogPortal({ children, className, style, getRef, setSize, targetSelec
 
     useEffect(() => {
         if (portalTarget && getRef) {
+            getRef(portalTarget);
             portalTarget.style.zIndex = `${ZINDEX_DIALOG_PORTAL}`;
         }
     }, [ portalTarget, getRef ]);
@@ -106,9 +107,6 @@ function DialogPortal({ children, className, style, getRef, setSize, targetSelec
         if (document.body) {
             document.body.appendChild(portalTarget);
             observer.observe(target ?? portalTarget);
-
-            // Hand out the reference only once the target is attached to the document.
-            getRef?.(portalTarget);
         }
 
         return () => {
@@ -116,7 +114,6 @@ function DialogPortal({ children, className, style, getRef, setSize, targetSelec
             if (document.body) {
                 document.body.removeChild(portalTarget);
             }
-            getRef?.(null);
         };
     }, [ videoSpaceWidth ]);
 

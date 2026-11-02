@@ -273,6 +273,12 @@
         "microphonePermission": "Mikrofon-Zugriffsberechtigungen konnten nicht abgerufen werden"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Anrufsteuerung",
+            "connectedDevices": "Verbundene Geräte:",
+            "deleteDevice": "Gerät löschen",
+            "pairDevice": "Gerät verbinden"
+        },
         "noPermission": "Berechtigungen nicht erteilt",
         "previewUnavailable": "Keine Vorschau verfügbar",
         "selectADevice": "Ein Gerät wählen",
@@ -1460,7 +1466,6 @@
                 "label": "Stereo"
             }
         },
-        "aiAssist": "KI-Assistent",
         "audioRoute": "Audiogerät auswählen",
         "audioSettings": "Ton-Einstellungen",
         "audioTranslation": "Audio-Übersetzung",
@@ -1475,6 +1480,7 @@
         "closeParticipantsPane": "Anwesenheitsliste schließen",
         "closeReactionsMenu": "Interaktionsmenü schließen",
         "closedCaptions": "Untertitel",
+        "copilot": "Copilot",
         "disableNoiseSuppression": "Rauschunterdrückung deaktivieren",
         "disableReactionSounds": "Sie können die Interaktionstöne für diese Konferenz deaktivieren",
         "documentClose": "Geteiltes Dokument schließen",
@@ -1644,10 +1650,13 @@
         "mute": "Person ist stummgeschaltet",
         "muted": "Stummgeschaltet",
         "pinToStage": "Anheften",
+        "receivingTranslatedAudio": "Sie empfangen übersetzten Ton",
         "remoteControl": "Fernsteuerung",
         "screenSharing": "Person teilt den Bildschirm",
         "show": "Im Vordergrund anzeigen",
         "showSelfView": "Eigene Ansicht anzeigen",
+        "translationEnabledForYou": "Übersetzung für Sie aktiviert",
+        "translationOnAndReceiving": "Übersetzung eingeschaltet · empfange",
         "unpinFromStage": "Lösen",
         "verify": "Person verifizieren",
         "videoMuted": "Kamera ausgeschaltet",

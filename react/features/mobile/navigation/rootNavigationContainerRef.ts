@@ -35,17 +35,6 @@ export function replaceRoot(name: string, params?: Object) {
 }
 
 /**
- * Pops the root navigation stack back to an existing screen.
- *
- * @param {string} name - Destination route name.
- * @param {Object} params - Params to pass to the destination route.
- * @returns {void}
- */
-export function popToRoot(name: string, params?: Object) {
-    return rootNavigationRef.current?.dispatch(StackActions.popTo(name, params));
-}
-
-/**
  * User defined navigation action included inside the reference to the container.
  *
  * @returns {Function}
@@ -65,8 +54,7 @@ export function goBackToRoot(stateful: IStateful, dispatch: IStore['dispatch']) 
     const state = toState(stateful);
 
     if (isWelcomePageEnabled(state)) {
-        // popTo, because navigate no longer pops back to an existing screen.
-        popToRoot(screen.welcome.main);
+        navigateRoot(screen.welcome.main);
     } else {
         // For JitsiSDK, WelcomePage is not available
         _sendReadyToClose(dispatch);

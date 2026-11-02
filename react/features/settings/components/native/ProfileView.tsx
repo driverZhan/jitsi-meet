@@ -41,7 +41,6 @@ const ProfileView = ({ isInWelcomePage }: {
     );
     const participant = useSelector((state: IReduxState) => getLocalParticipant(state));
     const { locationURL } = useSelector((state: IReduxState) => state['features/base/connection']);
-    const showAuthButton = !isInWelcomePage && !locationURL?.hostname?.includes('8x8.vc');
 
     const [ displayName, setDisplayName ] = useState(reduxDisplayName);
     const [ email, setEmail ] = useState(reduxEmail);
@@ -76,7 +75,6 @@ const ProfileView = ({ isInWelcomePage }: {
 
     const headerLeft = () => (
         <HeaderNavigationButton
-            accessibilityLabel = { t('dialog.Back') }
             color = { BaseThemeNative.palette.link01 }
             onPress = { goBack }
             src = { IconArrowLeft }
@@ -88,7 +86,6 @@ const ProfileView = ({ isInWelcomePage }: {
         if (isAutenticated) {
             return (
                 <HeaderNavigationButton
-                    accessibilityLabel = { t('toolbar.logout') }
                     label = { t('toolbar.logout') }
                     onPress = { onLogout }
                     style = { styles.logBtn }
@@ -98,7 +95,6 @@ const ProfileView = ({ isInWelcomePage }: {
 
         return (
             <HeaderNavigationButton
-                accessibilityLabel = { t('toolbar.login') }
                 label = { t('toolbar.login') }
                 onPress = { onLogin }
                 style = { styles.logBtn }
@@ -109,7 +105,9 @@ const ProfileView = ({ isInWelcomePage }: {
     useLayoutEffect(() => {
         navigation.setOptions({
             headerLeft,
-            headerRight: showAuthButton ? headerRight : undefined
+            headerRight: !isInWelcomePage
+                && !locationURL?.hostname?.includes('8x8.vc')
+                && headerRight
         });
     }, [ navigation ]);
 

@@ -1,7 +1,6 @@
 /* eslint-disable lines-around-comment */
 
 import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { View, ViewStyle } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -35,7 +34,6 @@ import styles from './styles';
  * @returns { JSX.Element} - The participants pane footer component.
  */
 const ParticipantsPaneFooter = (): JSX.Element => {
-    const { t } = useTranslation();
     const dispatch = useDispatch();
     const isBreakoutRoomsSupported = useSelector((state: IReduxState) =>
         state['features/base/conference'].conference?.getBreakoutRooms()?.isSupported()
@@ -83,7 +81,6 @@ const ParticipantsPaneFooter = (): JSX.Element => {
                 {
                     showMoreActions && (
                         <IconButton
-                            accessibilityLabel = { t('participantsPane.actions.moreModerationActions') }
                             onPress = { openMoreMenu }
                             src = { IconDotsHorizontal }
                             style = { styles.moreButton }

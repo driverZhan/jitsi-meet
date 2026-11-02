@@ -139,23 +139,6 @@ export default class InsertableStreamsPipeline {
         this._trackReader = reader;
         const writer = generator.writable.getWriter();
 
-        // Returns false if the writer is closed; the caller must break the loop to
-        // avoid an infinite cycle of failed writes burning CPU on a dead generator.
-        const tryWrite = async (f: VideoFrame, label: string): Promise<boolean> => {
-            try {
-                await writer.write(f);
-
-                return true;
-            } catch (err) {
-                if (err instanceof DOMException && err.name === 'InvalidStateError') {
-                    return false;
-                }
-                logger.error(label, err);
-
-                return true;
-            }
-        };
-
         try {
             while (this._isRunning) {
                 const { value: frame, done } = await reader.read();
@@ -165,12 +148,12 @@ export default class InsertableStreamsPipeline {
                 }
 
                 if (!this._processor) {
-                    const alive = await tryWrite(frame, '[InsertableStreamsPipeline] Write error');
-
-                    frame.close();
-                    if (!alive) {
-                        break;
+                    try {
+                        await writer.write(frame);
+                    } catch (err) {
+                        logger.error('[InsertableStreamsPipeline] Write error', err);
                     }
+                    frame.close();
                     continue;
                 }
 
@@ -182,8 +165,6 @@ export default class InsertableStreamsPipeline {
                     logger.error('[InsertableStreamsPipeline] Frame processing error', err);
                 }
 
-                let alive = true;
-
                 if (resultCanvas) {
                     // Construct the frame outside the try so the catch path doesn't have a
                     // partially-initialised reference, and close it in finally so the frame is
@@ -193,19 +174,22 @@ export default class InsertableStreamsPipeline {
                     );
 
                     try {
-                        alive = await tryWrite(outFrame, '[InsertableStreamsPipeline] Write error');
+                        await writer.write(outFrame);
+                    } catch (err) {
+                        logger.error('[InsertableStreamsPipeline] Write error', err);
                     } finally {
                         outFrame.close();
                     }
                 } else {
                     // Passthrough — write the raw frame to the generator.
-                    alive = await tryWrite(frame, '[InsertableStreamsPipeline] Passthrough write error');
+                    try {
+                        await writer.write(frame);
+                    } catch (err) {
+                        logger.error('[InsertableStreamsPipeline] Passthrough write error', err);
+                    }
                 }
 
                 frame.close();
-                if (!alive) {
-                    break;
-                }
             }
         } catch (err) {
             // When stop() cancels the reader, reader.read() rejects — that is expected.

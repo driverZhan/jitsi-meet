@@ -26,27 +26,24 @@ export async function joinWithJibri(roomJid) {
 }
 
 /**
- * Connects as the transcriber, joins roomJid with an 8 hex digit nick (as
- * Jigasi does; 'transcriber' is a reserved resource), and returns the client.
- * Authenticates as transcriber@recorder.localhost.
+ * Connects as the transcriber, joins roomJid with nick 'transcriber', and
+ * returns the client. Authenticates as transcriber@recorder.localhost.
  * The bare JID starts with 'transcriber@recorder.' so is_transcriber() returns
  * true, matching the default transcriber_prefixes in util.lib.lua.
  *
  * The caller is responsible for disconnecting the returned client.
  *
  * @param {string} roomJid  full room JID, e.g. 'room@conference.localhost'
- * @param {object} [opts]
- * @param {Array}  [opts.extensions]  presence children, forwarded to joinRoom
  * @returns {Promise<XmppTestClient>}
  */
-export async function joinWithTranscriber(roomJid, { extensions } = {}) {
+export async function joinWithTranscriber(roomJid) {
     const c = await createXmppClient({
         domain: 'recorder.localhost',
         username: 'transcriber',
         password: 'transcribersecret'
     });
 
-    await c.joinRoom(roomJid, 'a1b2c3d4', { extensions });
+    await c.joinRoom(roomJid, 'transcriber');
 
     return c;
 }
@@ -304,42 +301,19 @@ export async function createXmppClient({ host = 'localhost', domain, params, use
          * @param {string} roomJid         e.g. 'room@conference.localhost'
          * @param {string} action          'start' | 'stop' | 'status' etc.
          * @param {string} recordingMode   'file' (recording) | 'stream' (livestreaming)
-         * @param {object} [opts]
-         * @param {string} [opts.appData]  Raw app_data attribute value, sent as is.
          */
-        sendJibriIq(roomJid, action, recordingMode, { appData } = {}) {
-            // `pre-iq/full` (mod_filter_iq_jibri, mod_jibri_session) fires on this
-            // client's own VirtualHost. Directed to focus's occupant full JID so
-            // the MUC records it and forwards it to the focus.
-            return this.sendJibriIqTo(`${roomJid}/focus`, {
-                action,
-                // eslint-disable-next-line camelcase
-                recording_mode: recordingMode,
-                // eslint-disable-next-line camelcase
-                ...appData === undefined ? {} : { app_data: appData }
-            });
-        },
-
-        /**
-         * Sends a Jibri IQ (http://jitsi.org/protocol/jibri) with the given
-         * <jibri/> attributes to any full JID, e.g. the start iq jicofo sends
-         * to a jibri, which names the room in its `room` attribute.
-         * Fire-and-forget; assert on the recipient's stanza queue (waitForIq).
-         * The /jibri-iqs HTTP endpoint only records iqs addressed to an
-         * occupant on conference.localhost, so it never sees an iq sent to a
-         * jibri's own JID.
-         *
-         * @param {string} to           Destination full JID.
-         * @param {object} jibriAttrs   Attributes of the <jibri/> element.
-         */
-        sendJibriIqTo(to, jibriAttrs) {
+        sendJibriIq(roomJid, action, recordingMode) {
+            // Directed to focus's occupant full JID so `pre-iq/full` fires on the
+            // main VirtualHost where mod_filter_iq_jibri is loaded.
             return xmpp.send(
                 xml('iq', { type: 'set',
-                    to,
+                    to: `${roomJid}/focus`,
                     id: `jibri-${++_counter}` },
                     xml('jibri', {
                         xmlns: 'http://jitsi.org/protocol/jibri',
-                        ...jibriAttrs
+                        action,
+                        // eslint-disable-next-line camelcase
+                        recording_mode: recordingMode
                     })
                 )
             );
@@ -623,57 +597,6 @@ export async function createXmppClient({ host = 'localhost', domain, params, use
                 xml('message', { to,
                     id: `msg-${++_counter}` })
             );
-        },
-
-        /**
-         * Sends a one-to-one <message type='chat'> with a body to an arbitrary
-         * JID. Fire-and-forget: resolves with the stanza id once the stanza is
-         * written.
-         *
-         * Use it for what a Jitsi client never sends, most usefully a message
-         * addressed to the real JID of another client instead of to a MUC.
-         *
-         * @param {string} to     Destination JID.
-         * @param {string} [body] Message body text.
-         * @returns {Promise<string>} the stanza id.
-         */
-        async sendDirectChat(to, body) {
-            const id = `dm-${++_counter}`;
-            const children = body === undefined ? [] : [ xml('body', {}, body) ];
-
-            await xmpp.send(
-                xml('message', { to,
-                    type: 'chat',
-                    id },
-                ...children)
-            );
-
-            return id;
-        },
-
-        /**
-         * Sends a MUC private message to an occupant of the room. Fire-and-forget:
-         * resolves with the stanza id once the stanza is written. The MUC does not
-         * reflect a private message back to the sender, so wait for the message on
-         * the recipient, or for an error reply on the sender.
-         *
-         * @param {string} roomJid  e.g. 'room@conference.localhost'
-         * @param {string} nick     MUC nick of the recipient.
-         * @param {string} [body]   message body text; omit to send body-less.
-         * @returns {Promise<string>} the stanza id.
-         */
-        async sendPrivateChat(roomJid, nick, body) {
-            const id = `pm-${++_counter}`;
-            const children = body === undefined ? [] : [ xml('body', {}, body) ];
-
-            await xmpp.send(
-                xml('message', { to: `${roomJid}/${nick}`,
-                    type: 'chat',
-                    id },
-                ...children)
-            );
-
-            return id;
         },
 
         /**

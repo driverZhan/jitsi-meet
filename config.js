@@ -160,17 +160,6 @@ var config = {
     // Shows/hides the moderator setting for chat permissions.
     // showChatPermissionsModeratorSetting: false,
 
-    // Shows/hides the moderator setting that restricts video sharing to the participants with the
-    // `share-video` permission. The restriction is enforced by the mod_filter_messages prosody module,
-    // thus enable this only when that module is loaded.
-    // showSharedVideoPermissionsModeratorSetting: false,
-
-    // Shows/hides the moderator setting that restricts joining a breakout room to the room a moderator
-    // assigns. The restriction is enforced by the mod_muc_breakout_rooms prosody module, thus enable this
-    // only when the server runs a version of that module that supports it. Older clients still show Join while
-    // the restriction is on: the server refuses that join and lib-jitsi-meet moves them back to the main room.
-    // showBreakoutRoomJoinPermissionsModeratorSetting: false,
-
     // screenshotCapture : {
     //      Enables the screensharing capture feature.
     //      enabled: false,
@@ -230,9 +219,6 @@ var config = {
 
     // Start calls with audio muted. Unlike the option above, this one is only
     // applied locally. FIXME: having these 2 options is confusing.
-    // This option is not read from config.js by the main app; the value comes
-    // from the URL hash (#config.startWithAudioMuted=true) or the user's saved
-    // settings.
     // startWithAudioMuted: false,
 
     // Enabling it (with #params) will disable local audio output of remote
@@ -265,28 +251,10 @@ var config = {
     //     // element volume cannot be lowered there.
     //     duckedVolume: 0.15,
     //
-    //     // Target languages offered in the audio-translation picker, as the codes the
-    //     // deployment's speech-to-speech translation provider accepts (they are sent to the
-    //     // bridge verbatim, and the translated track is named <source>.<code>). Defaults to the
-    //     // 13 languages every provider supports: en, es, pt, fr, de, it, ru, zh, ja, ko, hi, id,
-    //     // vi. Extend this only if the translation service accepts more: a language the
-    //     // provider rejects is dropped server-side and the picker entry produces no audio.
-    //     // A code must be 1-20 ASCII letters: prosody's audio-translation component refuses any
-    //     // other language with bad-request, and one bad code in a meeting-wide request fails
-    //     // translation for every speaker, so region or script tags ('pt-BR') and codes like
-    //     // 'pt_BR' are dropped from the list with a warning. A list that is
-    //     // set but leaves nothing usable offers no language at all, with a warning, rather
-    //     // than the defaults. Codes outside the default list are labelled with the language's
-    //     // own name where the platform has Intl.DisplayNames (browsers; the mobile apps do not),
-    //     // else with the English name from lang/translation-languages.json. Same keys as
-    //     // transcription.translationLanguages.
-    //     translationLanguages: [ 'en', 'es', 'fr', 'nl' ],
-    //
-    //     // Languages from the offered list to pin to the top of the picker, in this order. Unlike
-    //     // transcription.translationLanguagesHead this only reorders: a head entry that is not
-    //     // in the offered list is ignored, so it cannot add a language the provider may reject,
-    //     // and it takes the list's spelling.
-    //     translationLanguagesHead: [ 'en' ],
+    //     // Whether to process the bridge's translated-source sending notifications, which drive the
+    //     // per-participant "receiving translated audio" indicator. Off by default until the bridge
+    //     // emits stop notifications as well as start ones.
+    //     enableSendingChangeEvents: false,
     // },
 
     // Noise suppression configuration. By default rnnoise is used. Optionally Krisp
@@ -421,9 +389,6 @@ var config = {
 
     // Start calls with video muted. Unlike the option above, this one is only
     // applied locally. FIXME: having these 2 options is confusing.
-    // This option is not read from config.js by the main app; the value comes
-    // from the URL hash (#config.startWithVideoMuted=true) or the user's saved
-    // settings.
     // startWithVideoMuted: false,
 
     // Desktop sharing
@@ -480,15 +445,6 @@ var config = {
     //    // skipConsentInMeeting: true,
     //    // Link for the recording consent dialog's "Learn more" link.
     //    // consentLearnMoreLink: 'https://jitsi.org/meet/consent',
-    // },
-
-    // Voice agents: server-side AI participants provisioned through the voice-agent API.
-    // voiceAgents: {
-    //     // Ask each participant before an agent may hear them (they are muted until they decide, and only
-    //     // participants who allow the agent hear it). By default agents are let in without asking.
-    //     // requireConsent: false,
-    //     // Link for the consent dialog's "Learn more" link.
-    //     // consentLearnMoreLink: 'https://jitsi.org/meet/consent',
     // },
 
     // recordingService: {
@@ -663,6 +619,7 @@ var config = {
     //          ultraHd: 4000000,
     //          ssHigh: 2500000
     //      },
+    //      scalabilityModeEnabled: true,
     //      useSimulcast: false,
     //      useKSVC: true
     //    },
@@ -674,7 +631,8 @@ var config = {
     //          fullHd: 3000000,
     //          ultraHd: 6000000,
     //          ssHigh: 2500000
-    //      }
+    //      },
+    //      scalabilityModeEnabled: true
     //    },
     //    vp8: {
     //      maxBitratesVideo: {
@@ -684,7 +642,8 @@ var config = {
     //          fullHd: 3000000,
     //          ultraHd: 6000000,
     //          ssHigh: 2500000
-    //      }
+    //      },
+    //      scalabilityModeEnabled: false
     //    },
     //    vp9: {
     //      maxBitratesVideo: {
@@ -695,6 +654,7 @@ var config = {
     //          ultraHd: 5000000,
     //          ssHigh: 2500000
     //      },
+    //      scalabilityModeEnabled: true,
     //      useSimulcast: false,
     //      useKSVC: true
     //    },
@@ -756,7 +716,7 @@ var config = {
     // Use TURN/UDP servers for the jitsi-videobridge connection (by default
     // we filter out TURN/UDP because it is usually not needed since the
     // bridge itself is reachable via UDP)
-    // useTurnUdp: false,
+    // useTurnUdp: false
 
     // Enable support for encoded transform in supported browsers. This allows
     // E2EE to work in Safari if the corresponding flag is enabled in the browser.
@@ -787,6 +747,9 @@ var config = {
 
     // Require users to always specify a display name.
     // requireDisplayName: true,
+
+    // Enables webhid functionality for Audio.
+    // enableWebHIDFeature: false,
 
     // DEPRECATED! Use 'welcomePage.disabled' instead.
     // Whether to use a welcome page or not. In case it's false a random room
@@ -878,10 +841,7 @@ var config = {
 
     // Picture-in-Picture configuration.
     // pip: {
-    //     // Enable Picture-in-Picture for browser meetings. Opt-in, defaults to false. Leave it unset to let
-    //     // users turn browser PiP on or off for themselves from the Experimental tab of the settings dialog;
-    //     // their browser remembers the choice. A value set here, through URL parameters or the iframe API is
-    //     // final and hides that setting.
+    //     // Enable Picture-in-Picture for browser meetings. Opt-in, defaults to false.
     //     enableBrowserPiP: false,
     //     // Disable Picture-in-Picture entirely. Defaults to false.
     //     disabled: false,
@@ -1151,21 +1111,6 @@ var config = {
     // An array with custom option buttons for the toolbar
     // type:  Array<{ icon: string; id: string; text: string; backgroundColor?: string; }>
     // customToolbarButtons: [],
-
-    // The custom panel (AI Assist), rendered in a side panel on web and on its own screen
-    // on mobile. It needs `enabled`, `url`, `advisorAvailabilityUrl` and a JWT.
-    // `url` has no default: without one the panel stays hidden on both platforms.
-    // `advisorAvailabilityUrl` is called after joining with the JWT and the meeting id; the
-    // button shows only if it confirms an advisor is deployed for the meeting.
-    // Both can also come from `customPanelUrl: { url, advisorAvailabilityUrl }` in the
-    // dynamic branding data, which takes precedence over the values set here.
-    // NOTE: `url` and `advisorAvailabilityUrl` cannot be overwritten through
-    // `configOverwrite`, because both receive the meeting JWT. Only `enabled` is whitelisted.
-    // customPanel: {
-    //     enabled: false,
-    //     url: 'https://example.com/ai-assist',
-    //     advisorAvailabilityUrl: 'https://example.com/advisor-resolve',
-    // },
 
     // Stats
     //
@@ -1533,9 +1478,6 @@ var config = {
         logoClickUrl: 'https://example-company.org',
         // The url used for the image used as logo
         logoImageUrl: 'https://example.com/logo-img.png',
-        // The url loaded in the custom panel (AI Assist). It overwrites `customPanel.url`
-        // from this file. The panel also needs `customPanel.enabled` set to true.
-        customPanelUrl: 'https://example.com/ai-assist',
         // Endpoint that enables support for salesforce integration with in-meeting resource linking
         // This is required for:
         // listing the most recent records - salesforceUrl/records/recents
@@ -1553,13 +1495,11 @@ var config = {
         // Object containing customized icons that should replace the default ones.
         // The keys need to be the exact same icon names used in here:
         // https://github.com/jitsi/jitsi-meet/blob/master/react/features/base/icons/svg/index.ts
-        // The values are either URLs of svg files or the svg xml markup itself. Inline markup is
-        // applied without any extra request, so the icons show up faster.
         // To avoid having the icons trimmed or displayed in an unexpected way, please provide svg
-        // xml icons in the size that the default icons come in.
+        // files containing svg xml icons in the size that the default icons come in.
         customIcons: {
             IconArrowUp: 'https://example.com/arrow-up.svg',
-            IconDownload: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">...</svg>',
+            IconDownload: 'https://example.com/download.svg',
             IconRemoteControlStart: 'https://example.com/remote-start.svg',
         },
         // Object containing a theme's properties. It also supports partial overwrites of the main theme.
@@ -1985,26 +1925,6 @@ var config = {
 
     // List of notifications to be disabled. Works in tandem with the above setting.
     // disabledNotifications: [],
-
-    // A notification shown to every user, with a button which opens a link. It is shown when the user joins a
-    // meeting, until the user clicks "Don't show again", and on the welcome page.
-    // systemWideUserNotification: {
-    //     // Identifies the notification. The users who chose not to see it again see it again when the id changes.
-    //     // Defaults to the url.
-    //     id: 'announcement-1',
-    //     // The link opened by the button.
-    //     url: 'https://example.com/announcement',
-    //     // The texts, by language code. A missing language or text falls back to English. The button and
-    //     // dontShowAgain texts have defaults.
-    //     labels: {
-    //         en: {
-    //             title: 'Things are changing',
-    //             description: 'Read about what is new.',
-    //             button: 'Learn more',
-    //             dontShowAgain: 'Don\'t show again',
-    //         },
-    //     },
-    // },
 
     // filmstrip: {
     //     // Disable the vertical/horizontal filmstrip.

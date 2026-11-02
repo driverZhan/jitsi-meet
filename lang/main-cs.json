@@ -235,6 +235,12 @@
         "microphonePermission": "Aplikace nemá oprávnění přistupovat k mikrofonu"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Ovládání hovorů",
+            "connectedDevices": "Připojená zařízení:",
+            "deleteDevice": "Smazat zařízení",
+            "pairDevice": "Spárovat zařízení"
+        },
         "noPermission": "Oprávnění není uděleno",
         "previewUnavailable": "Náhled není dostupný",
         "selectADevice": "Zvolte zařízení",

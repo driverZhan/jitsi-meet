@@ -44,8 +44,6 @@ const DEFAULT_STATE: ISettingsState = {
     userSelectedMicDeviceId: undefined,
     userSelectedAudioOutputDeviceLabel: undefined,
     userSelectedCameraDeviceLabel: undefined,
-    userSelectedConfig: {},
-    userSelectedLanguage: undefined,
     userSelectedNotifications: {
         'notify.chatMessages': true
     },
@@ -91,15 +89,6 @@ export interface ISettingsState {
     userSelectedAudioOutputDeviceLabel?: string;
     userSelectedCameraDeviceId?: string;
     userSelectedCameraDeviceLabel?: string;
-
-    /**
-     * Config values the user has chosen, keyed by the id of the config option (see {@code CONFIG_OPTIONS} of the
-     * settings feature).
-     */
-    userSelectedConfig?: {
-        [optionId: string]: boolean;
-    };
-    userSelectedLanguage?: string;
     userSelectedMicDeviceId?: string;
     userSelectedMicDeviceLabel?: string;
     userSelectedNotifications?: {

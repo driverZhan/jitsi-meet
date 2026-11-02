@@ -43,20 +43,14 @@
         "disabledForRoom": "S'ha desactivat la traducció d'àudio per a aquesta reunió.",
         "errorForbidden": "No teniu permís per a usar la traducció d'àudio.",
         "errorGeneric": "No s'ha pogut habilitar la traducció d'àudio. Torneu-ho a provar.",
-        "errorLimitReached": "No s'ha pogut traduir tothom alhora. En el seu lloc, activeu la traducció per als participants individuals.",
-        "errorRoomDisabled": "La traducció d'àudio està desactivada per a aquesta reunió. Habiliteu-la a la configuració del moderador.",
         "errorSpeakerUnavailable": "No es pot traduir aquest participant — ja no és a la reunió.",
-        "labelTooltip": "S'està traduint…",
-        "labelTooltipPlaying": "L'àudio traduït encara s'està reproduint — espereu abans de parlar",
-        "stoppedForE2EE": "La traducció en temps real s'ha desactivat perquè el xifratge d'extrem a extrem està activat.",
-        "unavailableWithE2EE": "La traducció en temps real no està disponible mentre estigui activat el xifratge d'extrem a extrem."
+        "labelTooltip": "S'està traduint…"
     },
     "bandwidthSettings": {
         "assumedBandwidthBps": "p. ex. 10000000 per a 10 Mbps",
         "assumedBandwidthBpsWarning": "Els valors més alts poden causar problemes de xarxa.",
         "customValue": "valor personalitzat",
         "customValueEffect": "per a establir el valor real de bps",
-        "leaveEmpty": "deixeu en blanc",
         "leaveEmptyEffect": "per a permetre que es facin estimacions",
         "possibleValues": "Valors possibles",
         "setAssumedBandwidthBps": "Amplada de banda assumida (bps)",
@@ -118,15 +112,12 @@
         }
     },
     "chat": {
-        "copy": "Copia",
         "delete": "Suprimeix",
         "deleteMessage": "Suprimeix",
         "deletedMessage": "Aquest missatge s'ha suprimit.",
         "deletedMessageByMe": "Heu suprimit aquest missatge.",
         "disabled": "L'enviament de missatges de xat està desactivat.",
-        "edit": "Edita",
         "edited": "(editat)",
-        "editingMessage": "Edició",
         "enter": "Entra a la sala",
         "error": "Error: no s'ha enviat el missatge. Raó: {{error}}",
         "everyone": "Tothom",
@@ -139,7 +130,6 @@
         "message": "Missatge",
         "messageAccessibleTitle": "{{user}} diu:",
         "messageAccessibleTitleMe": "jo dic:",
-        "messageCopied": "Missatge copiat",
         "messageTo": "Missatge privat per a {{recipient}}",
         "messagebox": "Escriviu un missatge",
         "moderatedMessage": "Eliminat per un moderador.",
@@ -162,7 +152,6 @@
             "titleWithPollsAndCCAndFileSharing": "Introduïu un sobrenom per a usar al xat, enquestes, subtítols i fitxers"
         },
         "noMessagesMessage": "Encara no hi ha cap missatge en aquesta reunió. Comenceu una conversa aquí!",
-        "privateMessage": "Missatge privat",
         "privateNotice": "Missatge privat per a {{recipient}}",
         "search": {
             "close": "Tanca la cerca",
@@ -265,8 +254,7 @@
         "yes": "sí"
     },
     "customPanel": {
-        "close": "Tanca",
-        "title": "Assistent d'IA"
+        "close": "Tanca"
     },
     "dateUtils": {
         "earlier": "Abans",
@@ -276,7 +264,6 @@
     "deepLinking": {
         "appNotInstalled": "Cal l'app {{app}} per a entrar a aquesta reunió des del telèfon.",
         "description": "No ha passat res? Hem intentat iniciar la reunió en l'aplicació d'escriptori {{app}}. Torna a intentar-ho en l'aplicació web {{app}}.",
-        "descriptionNew": "No ha passat res? Hem intentat obrir la reunió a l'aplicació d'escriptori {{app}}. <br /><br />Podeu tornar-ho a provar o obrir-la a la web.",
         "descriptionWithoutWeb": "No ha passat res? Hem intentat iniciar la reunió en l'aplicació d'escriptori {{app}}.",
         "downloadApp": "Baixa l'aplicació",
         "downloadMobileApp": "Baixa des de l'App Store",
@@ -305,6 +292,12 @@
         "microphonePermission": "S'ha produït un error en obtenir el permís del micròfon"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Control de trucades",
+            "connectedDevices": "Dispositius connectats:",
+            "deleteDevice": "Suprimeix el dispositiu",
+            "pairDevice": "Enllaça el dispositiu"
+        },
         "noPermission": "No s'ha concedit el permís",
         "previewUnavailable": "La previsualització no és disponible",
         "selectADevice": "Seleccioneu un aparell",
@@ -349,7 +342,6 @@
         "applyChanges": "Aplica els canvis",
         "authenticationRequired": "Cal autenticació",
         "cameraCaptureDialog": {
-            "description": "Feu i envieu una imatge amb la càmera mòbil",
             "ok": "Obre la càmera",
             "reject": "Ara no",
             "title": "Fes una foto"
@@ -385,10 +377,7 @@
         "displayNameRequired": "Hola! Com us dieu?",
         "done": "Fet",
         "e2eeDescription": "El xifratge d'extrem a extrem és EXPERIMENTAL. Tingueu present que l'activació del xifratge d'extrem a extrem desactivarà serveis proporcionats en la banda del servidor, com ara: enregistrament, transmissió en directe i participació telefònica. A més, la reunió només funcionarà per a les persones que usin navegadors que compatibles amb fluxos inseribles.",
-        "e2eeDisabledDueToAgentDescription": "El xifratge d'extrem a extrem no es pot activar mentre un agent d'IA està a la reunió.",
         "e2eeDisabledDueToMaxModeDescription": "No es pot activar el xifratge d'extrem a extrem a causa del gran nombre de participants en la conferència.",
-        "e2eeDisabledDueToTranscriptionDescription": "El xifratge d'extrem a extrem no es pot activar mentre es transcriu la reunió.",
-        "e2eeDisabledDueToTranslationDescription": "El xifratge d'extrem a extrem no es pot activar mentre s'usa la traducció en temps real.",
         "e2eeLabel": "Activa el xifratge d'extrem a extrem",
         "e2eeWarning": "ATENCIÓ: sembla que no tots els participants d'aquesta reunió tenen suport per a xifratge d'extrem a extrem. Si l'activeu no podran veure-us ni escoltar-vos.",
         "e2eeWillDisableDueToMaxModeDescription": "ATENCIÓ: el xifratge d'extrem a extrem es desactivarà automàticament si s'afegeixen més participants a la conferència.",
@@ -423,7 +412,6 @@
         "lockTitle": "El blocatge ha fallat",
         "login": "Inicia sessió",
         "loginFailed": "Ha fallat l'inici de sessió.",
-        "loginNotCompleted": "No s'ha completat l'inici de sessió, de manera que no esteu connectat a aquesta reunió.",
         "loginOnResume": "La vostra sessió d'autenticació ha caducat. Heu de tornar a iniciar la sessió per a continuar la reunió.",
         "loginPopupBlocked": "El navegador ha bloquejat la finestra emergent d'inici de sessió.",
         "loginQuestion": "Esteu segur que voleu iniciar la sessió i sortir de la conferència?",
@@ -447,7 +435,6 @@
         "muteEveryoneDialogModerationOn": "Els participants poden enviar una sol·licitud per a parlar en qualsevol moment.",
         "muteEveryoneElseDialog": "Una vegada silenciats, no podreu activar-ne els micròfons, però podran activar-lo ells mateixos en qualsevol moment.",
         "muteEveryoneElseTitle": "Voleu silenciar tothom excepte {{whom}}?",
-        "muteEveryoneElsesDesktopDialog": "Un cop s'hagi aturat la compartició, no podreu reiniciar-la, però ho poden fer en qualsevol moment.",
         "muteEveryoneElsesDesktopTitle": "Voleu aturar la compartició de pantalla de tothom excepte {{whom}}?",
         "muteEveryoneElsesVideoDialog": "Una vegada s'ha desactivat la càmera, no la podreu tornar a activar, però els participants la poden tornar a activar en qualsevol moment.",
         "muteEveryoneElsesVideoTitle": "Voleu aturar el vídeo de tothom excepte {{whom}}?",
@@ -482,7 +469,6 @@
         "passwordNotSupportedTitle": "No se suporta la $t(lockRoomPassword)",
         "passwordRequired": "Es requereix una $t(lockRoomPassword)",
         "pendingDealsDescription": "Aquestes oportunitats poden estar relacionades amb aquesta reunió",
-        "pendingDescription": "Hem trobat aquestes coincidències potencials basades en els correus electrònics dels participants",
         "permissionCameraRequiredError": "Es requereix el permís de la càmera per a participar en conferències amb vídeo. Concediu-lo a Configuració",
         "permissionErrorTitle": "Cal permís",
         "permissionMicRequiredError": "Es requereix el permís del micròfon per a participar en conferències amb àudio. Concediu-lo a Configuració",
@@ -515,7 +501,6 @@
         "screenSharingFailed": "Ep! Alguna cosa ha anat malament, no hem pogut iniciar la compartició de pantalla!",
         "screenSharingFailedTitle": "La compartició de pantalla ha fallat!",
         "screenSharingPermissionDeniedError": "Ep! Alguna cosa ha anat malament amb els permisos de compartició de pantalla. Torna a carregar-la i prova-ho una altra vegada.",
-        "screenshareStoppedDiskSpace": "Això passa si useu la barra d'eines flotant del macOS per a aturar la compartició de pantalla. També pot ser degut a poc espai de disc.",
         "screenshareStoppedTitle": "La compartició de pantalla s'ha aturat mitjançant el sistema",
         "searchInSalesforce": "Cerca a Salesforce",
         "searchResults": "Resultats de la cerca({{count}})",
@@ -532,7 +517,6 @@
         "sessTerminatedReason": "Ha finalitzat la reunió",
         "sessionRestarted": "La trucada s'ha reiniciat a causa d'un problema de connexió.",
         "shareAudio": "Continua",
-        "shareAudioAltText": "per a compartir el contingut desitjat, navegueu a la pestanya del navegador, seleccioneu el contingut, activeu la marca de selecció «comparteix àudio» i feu clic al botó «comparteix»",
         "shareAudioTitle": "Com compartir l'àudio",
         "shareAudioWarningD1": "cal que atureu la compartició de pantalla abans de compartir l'àudio.",
         "shareAudioWarningD2": "cal que reinicieu la compartició de pantalla i marqueu l'opció «Comparteix l'àudio».",
@@ -554,14 +538,12 @@
         "sharedVideoLinkPlaceholder": "Enllaç de YouTube o enllaç directe del vídeo",
         "show": "Mostra",
         "start": "Inicia",
-        "startBoth": "Inicia els dos",
         "startLiveStreaming": "Inicia la transmissió en directe",
         "startRecording": "Inicia l'enregistrament",
         "startRemoteControlErrorMessage": "S'ha produït un error en intentar iniciar la sessió de control remot!",
         "startTranscribing": "Comença a transcriure",
         "startTranscription": "Inicia la transcripció",
         "stop": "Atura",
-        "stopBoth": "Atura els dos",
         "stopLiveStreaming": "Atura la transmissió en directe",
         "stopRecording": "Atura l'enregistrament",
         "stopRecordingWarning": "Esteu segur de voler aturar l'enregistrament?",
@@ -576,18 +558,14 @@
         "tokenAuthFailed": "No esteu autoritzat a afegir-vos a aquesta trucada.",
         "tokenAuthFailedReason": {
             "audInvalid": "El valor «aud» no és vàlid. Hauria de ser «jitsi».",
-            "contextNotFound": "Manca l'objecte «context» del payload.",
             "expInvalid": "El valor «exp» no és vàlid.",
             "featureInvalid": "Funció no vàlida: {{feature}}, probablement encara no està implementada.",
-            "featureValueInvalid": "El valor de la característica no és vàlid: {{feature}}.",
-            "featuresNotFound": "Manca l'objecte «features» del payload.",
             "headerNotFound": "Falta la capçalera.",
             "issInvalid": "El valor «iss» no és vàlid. Hauria de ser «chat».",
             "kidMismatch": "L'ID de la clau (kid) no coincideix amb el sub.",
             "kidNotFound": "Falta l'ID de la clau (kid).",
             "nbfFuture": "El valor «nbf» és en el futur.",
             "nbfInvalid": "El valor «nbf» no és vàlid.",
-            "payloadNotFound": "Falta el payload.",
             "tokenExpired": "El testimoni ha caducat."
         },
         "tokenAuthFailedTitle": "L'autenticació ha fallat",
@@ -641,7 +619,6 @@
         "downloadFailedTitle": "Ha fallat la baixada",
         "downloadFile": "Baixa",
         "downloadStarted": "S'ha iniciat la baixada del fitxer",
-        "dragAndDrop": "Arrossegueu i deixeu anar fitxers aquí o en qualsevol lloc de la pantalla",
         "fileAlreadyUploaded": "El fitxer ja s'ha pujat a aquesta reunió.",
         "fileRemovedByOther": "S'ha eliminat el fitxer «{{ fileName }}»",
         "fileTooLargeDescription": "Assegureu-vos que el fitxer no superi {{ maxFileSize }}.",
@@ -708,7 +685,6 @@
         "password": "$t(lockRoomPasswordUppercase): ",
         "reachedLimit": "Heu arribat al límit del vostre pla.",
         "sip": "Adreça SIP",
-        "sipAudioOnly": "Adreça SIP només d'àudio",
         "title": "Comparteix",
         "tooltip": "Comparteix l'enllaç i la informació de marcatge d'aquesta reunió",
         "upgradeOptions": "Vegeu les opcions d'actualització",
@@ -760,7 +736,6 @@
         "changeSignIn": "Canvia entre comptes.",
         "choose": "Trieu una transmissió en directe",
         "chooseCTA": "Trieu una opció de transmissió. Ara mateix teniu sessió iniciada com a {{email}}.",
-        "chooseCTAWithChangeSignIn": "Trieu una opció de estríming. Esteu connectat com a {{email}}. <0>Canvia de compte.</0>",
         "enterStreamKey": "Introduïu la clau YouTube de transmissió en directe aquí.",
         "error": "La transmissió en directe ha fallat. Torneu-ho a intentar més tard.",
         "errorAPI": "S'ha produït un error en accedir a les vostres emissions de Youtube. Torneu a iniciar sessió una altra vegada.",
@@ -778,7 +753,6 @@
         "on": "Ha començat la transmissió en directe",
         "onBy": "{{name}} ha iniciat la transmissió en directe",
         "pending": "S'està iniciant la transmissió en directe…",
-        "policyError": "Heu intentat d'iniciar una emissió en directe massa ràpid. Torneu-ho a provar més tard!",
         "serviceName": "Servei de transmissió en directe",
         "sessionAlreadyActive": "Aquesta sessió ja s'està enregistrant o s'està emetent en directe.",
         "signIn": "Inicia sessió amb Google",
@@ -789,7 +763,6 @@
         "streamIdHelp": "Què és això?",
         "title": "Transmissió en directe",
         "unavailableTitle": "La transmissió en directe no és disponible",
-        "youTubeGoLiveWarning": "Recordeu de fer clic a «Ves en directe» a YouTube Studio si l'inici o l'aturada automàtics estan desactivats. En cas contrari, l'emissió no es començarà a enregistrar.",
         "youtubeTerms": "Condicions de servei de YouTube"
     },
     "lobby": {
@@ -827,8 +800,7 @@
         "notificationTitle": "Sala d'espera",
         "passwordJoinButton": "Entra",
         "title": "Sala d'espera",
-        "toggleLabel": "Activa la sala d'espera",
-        "waitForModerator": "La conferència encara no ha començat perquè encara no ha arribat cap moderador. Si voleu convertir-vos en moderador, inicieu sessió. En cas contrari, espereu."
+        "toggleLabel": "Activa la sala d'espera"
     },
     "localRecording": {
         "clientState": {
@@ -858,8 +830,6 @@
         "sessionToken": "Identificador de la sessió",
         "start": "Inicia l'enregistrament",
         "stop": "Atura l'enregistrament",
-        "stopping": "Atura l'enregistrament",
-        "wait": "Espereu mentre desem l'enregistrament",
         "yes": "Sí"
     },
     "lockRoomPassword": "contrasenya",
@@ -876,12 +846,9 @@
         "noParticipants": "No hi ha participants",
         "openFailed": "Alguna cosa ha anat malament. Torneu-ho a provar.",
         "openFailedTitle": "No s'ha pogut obrir la segona pantalla",
-        "permissionDenied": "Permet que aquest lloc gestioni les finestres i torni a intentar-ho.",
-        "popupBlocked": "Permet finestres emergents per a aquest lloc i torna-ho a provar.",
         "removeFromSecondScreen": "Elimina de la segona pantalla",
         "sendToSecondScreen": "Mostra en la segona pantalla",
         "sharedVideoError": "No s'ha pogut reproduir el vídeo compartit en aquesta pantalla",
-        "sharedVideoInactive": "Comparteix un vídeo a la reunió per a mostrar-lo a la segona pantalla",
         "showOnStage": "Mostra {{name}} en la segona pantalla",
         "unpinFromStage": "Atura la presentació de {{name}} a la segona pantalla",
         "whiteboardInactive": "Obre la pissarra a la reunió per a mostrar-la a la segona pantalla",
@@ -899,22 +866,13 @@
         "chatMessages": "Missatges de xat",
         "confirmAccountError": "No s'ha pogut confirmar el compte",
         "confirmAccountSuccess": "Compte confirmat",
-        "confirmDealError": "No s'ha pogut confirmar el repte",
-        "confirmDealSuccess": "Repte confirmat",
         "connectedOneMember": "{{name}} ha entrat a la reunió",
         "connectedThreePlusMembers": "{{name}} i molts altres han entrat a la reunió",
         "connectedTwoMembers": "{{first}} i {{second}} han entrat a la reunió",
         "connectionFailed": "Ha fallat la connexió. Torneu-ho a provar més tard!",
         "dataChannelClosed": "Qualitat del vídeo deteriorada",
         "dataChannelClosedDescription": "El canal pont s'ha desconnectat i per la qualitat de vídeo està limitada al valor inferior.",
-        "dataChannelClosedDescriptionWithAudio": "El canal pont està caigut i, per tant, poden produir-se interrupcions en l'àudio i el vídeo.",
-        "dataChannelClosedWithAudio": "La qualitat de l'àudio i el vídeo pot estar afectada",
-        "desktopMutedRemotelyTitle": "{{participantDisplayName}} ha aturat la compartició de pantalla",
-        "disabledIframe": "La incrustació només està destinada a propòsits de demostració, de manera que aquesta crida es desconnectarà d'aquí a {{timeout}} minuts.",
-        "disabledIframeSecondaryNative": "Incrustar {{domain}} només està destinat a propòsits de demostració, de manera que aquesta crida es desconnectarà d'aquí a {{timeout}} minuts.",
-        "disabledIframeSecondaryWeb": "Incrustar {{domain}} només està destinat a propòsits de demostració, de manera que aquesta crida es desconnectarà d'aquí en {{timeout}} minuts. Useu <a href='{{jaasDomain}}' rel='noopener noreferrer' target='_blank'>Jitsi com a servei</a> per a la incrustació en producció!",
         "disconnected": "desconnectat",
-        "dismissError": "Ha fallat en descartar els suggeriments",
         "dismissSuccess": "Suggeriments descartats",
         "displayNotifications": "Mostra les notificacions sobre",
         "dontRemindMe": "No em recordis",
@@ -923,9 +881,6 @@
         "gifsMenu": "GIPHY",
         "groupTitle": "Notificacions",
         "hostAskedUnmute": "El moderador vol que parleu",
-        "invalidTenant": "Inquilí no vàlid",
-        "invalidTenantHyphenDescription": "L'inquilí que useu no és vàlid (comença o acaba amb «-»).",
-        "invalidTenantLengthDescription": "L'inquilí que feu servir és massa llarg.",
         "invitedOneMember": "S'ha convidat {{name}}",
         "invitedThreePlusMembers": "S'han convidat {{name}} i {{count}} participants més",
         "invitedTwoMembers": "S'han convidat {{first}} i {{second}}",
@@ -974,8 +929,6 @@
         "participantsWantToJoin": "Volen entrar a la reunió",
         "passwordRemovedRemotely": "Un altre participant ha eliminat $t(lockRoomPasswordUppercase)",
         "passwordSetRemotely": "Un altre participant ha establert la $t(lockRoomPassword)",
-        "pipOpenFailedDescription": "El vostre navegador no ha permès que s'obri la finestra d'Imatge sobre Imatge.",
-        "pipOpenFailedTitle": "No s'ha pogut obrir la imatge sobre imatge",
         "raiseHandAction": "Alça la mà",
         "raisedHand": "Vol parlar.",
         "raisedHands": "{{participantName}} i {{raisedHands}} persones més",
@@ -983,12 +936,7 @@
         "reactionSoundsForAll": "Desactiva el so per a tothom",
         "screenShareNoAudio": "No s'ha marcat la compartició d'àudio en la pantalla de selecció de la finestra.",
         "screenShareNoAudioTitle": "No s'ha pogut compartir l'àudio del sistema!",
-        "screenSharingAudioOnlyDescription": "Tingueu en compte que en compartir la pantalla esteu afectant el mode «Millor rendiment» i usareu més amplada de banda.",
-        "screenSharingAudioOnlyTitle": "Mode «Millor rendiment»",
         "selfViewTitle": "Sempre podeu activar la vista pròpia des de la configuració",
-        "settingsIncompleteDescription": "No s'han pogut carregar alguns paràmetres de la sessió i s'han usat els valors per defecte.",
-        "settingsIncompleteTitle": "La configuració de la reunió pot ser incompleta",
-        "sharedVideoRestricted": "Un moderador ha desactivat la compartició de vídeo per als no moderadors",
         "somebody": "Algú",
         "startSilentDescription": "Torneu a entrar per a activar l'àudio",
         "startSilentTitle": "Hi heu entrat sense cap sortida d'àudio!",
@@ -997,7 +945,6 @@
         "suggestRecordingAction": "Inicia",
         "suggestRecordingDescription": "Voleu iniciar un enregistrament?",
         "suggestRecordingTitle": "Enregistra aquesta reunió",
-        "unlinkFromSalesforceError": "No s'ha pogut desenllaçar de Salesforce",
         "unlinkFromSalesforceSuccess": "Desvinculat de Salesforce",
         "unmute": "Activa el so",
         "unmuteScreen": "Inicia la compartició de pantalla",
@@ -1056,14 +1003,6 @@
             "visitors": "Espectadors {{count}}",
             "visitorsList": "Espectadors ({{count}})",
             "waitingLobby": "A la sala d'espera ({{count}})"
-        },
-        "indicators": {
-            "audioDominantSpeaker": "Altaveu actiu",
-            "audioForceMuted": "Àudio silenciat, no es pot activar el so",
-            "audioMuted": "Àudio silenciat",
-            "raisedHand": "Mà alçada",
-            "videoForceMuted": "Càmera desactivada, no es pot activar",
-            "videoMuted": "La càmera està desactivada"
         },
         "search": "Cerca participants",
         "searchDescription": "Comenceu a escriure per a filtrar els participants",
@@ -1221,7 +1160,6 @@
         "busyTitle": "Tots els enregistradors estan ocupats",
         "copyLink": "Copia l'enllaç",
         "dropbox": "Dropbox",
-        "dropboxSignInPrompt": "Connecteu-vos per a desar l'enregistrament",
         "error": "L'enregistrament ha fallat. Torneu-ho a intentar més tard.",
         "errorFetchingLink": "S'ha produït un error en obtenir l'enllaç de l'enregistrament.",
         "expandedOff": "S'ha aturat l'enregistrament",
@@ -1249,7 +1187,6 @@
         "loggedIn": "Sessió iniciada com a {{userName}}",
         "noMicPermission": "No s'ha pogut crear la pista del micròfon. Si us plau, concediu permís per a usar el micròfon.",
         "noStreams": "No s'ha detectat flux d'àudio ni vídeo.",
-        "notSignedIn": "No heu iniciat la sessió",
         "off": "S'ha aturat l'enregistrament",
         "offBy": "{{name}} ha aturat l'enregistrament",
         "offByWithTranscription": "{{name}} ha aturat l'enregistrament i la transcripció",
@@ -1257,12 +1194,9 @@
         "on": "L'enregistrament ha començat",
         "onBy": "{{name}} ha iniciat l'enregistrament",
         "onByWithTranscription": "{{name}} ha iniciat l'enregistrament. També es disposarà d'una transcripció després de la reunió.",
-        "onWithTranscription": "S'ha iniciat l'enregistrament. També es disposarà d'una transcripció després de la reunió.",
         "onlyRecordSelf": "Enregistra només el meu àudio i vídeo",
         "pending": "S'està preparant per a enregistrar la reunió…",
-        "policyError": "Heu intentat iniciar un enregistrament massa ràpid. Torneu-ho a provar més tard!",
         "recordAudioAndVideo": "Enregistra àudio i vídeo",
-        "recordTranscription": "Enregistra la transcripció",
         "recordingOptions": "Opcions d'enregistrament",
         "saveLocalRecording": "Desa el fitxer de l'enregistrament en local (beta)",
         "serviceDescriptionCloud": "Enregistrament al núvol",
@@ -1290,14 +1224,12 @@
         "insecureRoomNameWarningWeb": "El nom de la sala no és segur. Els participants no desitjats poden unir-se a la vostra reunió. {{recommendAction}} Més informació sobre com assegurar la vostra reunió <a href=\"{{securityUrl}}\" target=\"_blank\">aquí</a>.",
         "title": "Opcions de seguretat",
         "unsafeRoomActions": {
-            "meeting": "Considereu d'assegurar la vostra reunió usant el botó de seguretat.",
             "prejoin": "Considereu usar un nom de reunió més únic.",
             "welcome": "Considereu usar un nom de reunió més únic o trieu un dels suggeriments."
         }
     },
     "settings": {
         "audio": "Àudio",
-        "audioTranslation": "Habilita la traducció d'àudio",
         "buttonLabel": "Paràmetres",
         "calendar": {
             "about": "La integració de l'agenda {{appName}} s'usa per a accedir de forma segura a la vostra agenda perquè pugui llegir els esdeveniments pròxims.",
@@ -1311,9 +1243,7 @@
         "desktopShareHighFpsWarning": "Una velocitat de fotogrames més alta per a compartir escriptori pot afectar l'amplada de banda. Heu de reiniciar la compartició de pantalla perquè la nova configuració tingui efecte.",
         "desktopShareWarning": "Cal que reinicieu la compartició de pantalla perquè la nova configuració tingui efecte.",
         "devices": "Aparells",
-        "enableCtrlAltReactionShortcuts": "Habilita les alternatives Ctrl+Alt per a les dreceres de reacció",
         "followMe": "Tothom que em segueix",
-        "followMeRecorder": "L'enregistrador em segueix",
         "framesPerSecond": "fotogrames per segon",
         "incomingMessage": "Missatge entrant",
         "language": "Llengua",
@@ -1330,16 +1260,13 @@
         "participantKnocking": "El participant ha entrat a la sala d'espera",
         "participantLeft": "Un participant ha sortit de la reunió",
         "playSounds": "Reprodueix el so",
-        "privateChatWithPermissions": "Desactiva el xat privat per als no moderadors",
         "reactions": "Reaccions de la reunió",
         "sameAsSystem": "Igual que del sistema ({{label}}) ",
         "selectAudioOutput": "Sortida d'àudio",
         "selectCamera": "Càmera",
         "selectMic": "Micròfon",
         "selfView": "Vista pròpia",
-        "sharedVideoWithPermissions": "Desactiva la compartició de vídeo per als no moderadors",
         "shortcuts": "Dreceres",
-        "showSubtitlesOnStage": "Mostra els subtítols a la pantalla",
         "speakers": "Altaveus",
         "startAudioMuted": "Tothom comença silenciat",
         "startReactionsMuted": "Silencia els sons de reaccions per a tothom",
@@ -1404,9 +1331,7 @@
         "seconds": "{{count}}s",
         "speakerStats": "Estadístiques de l'interlocutor",
         "speakerTime": "Temps de l'interlocutor",
-        "surprised": "Sorpresa",
-        "timelineEnd": "Final",
-        "timelineStart": "Inici"
+        "surprised": "Sorpresa"
     },
     "startupoverlay": {
         "genericTitle": "La reunió requereix usar el micròfon i la càmera.",
@@ -1418,15 +1343,10 @@
         "text": "Premeu el botó <i>Torna a entrar</i> per a tornar a connectar.",
         "title": "La videotrucada s'ha interromput perquè l'ordinador ha entrat en mode repòs."
     },
-    "systemWideUserNotification": {
-        "button": "Més informació",
-        "dontShowAgain": "No tornis a mostrar"
-    },
     "termsView": {
         "title": "Condicions"
     },
     "timeTimer": {
-        "endedOver": "Heu superat la planificació {{time}}.",
         "endedTitle": "Ha finalitzat el temporitzador"
     },
     "toggleTopPanelLabel": "Mostra o amaga el panell superior",
@@ -1486,10 +1406,8 @@
             "mute": "Silencia o activa el so",
             "muteEveryone": "Silencia tothom",
             "muteEveryoneElse": "Silencia tots els altres participants",
-            "muteEveryoneElsesDesktopStream": "Atura la compartició de pantalla de tots els altres",
             "muteEveryoneElsesVideoStream": "Atura el vídeo a tots els altres",
             "muteEveryonesVideoStream": "Atura el vídeo a tothom",
-            "muteGUMPending": "Connexió del micròfon",
             "noiseSuppression": "Supressió de soroll",
             "openChat": "Obre el xat",
             "participants": "Obre el tauler de participants. {{participantsCount}} participants",
@@ -1525,16 +1443,12 @@
             "unmute": "Activa el micròfon",
             "videoblur": "Activa o desactiva el desenfocament del vídeo",
             "videomute": "Activa o desactiva la càmera",
-            "videomuteGUMPending": "Connexió de la càmera",
             "videounmute": "Inicia la càmera"
         },
         "addPeople": "Afegeix persones a la trucada",
         "advancedAudioSettings": {
             "aec": {
                 "label": "Cancel·lació d'eco acústic"
-            },
-            "agc": {
-                "label": "Control automàtic de guany"
             },
             "ns": {
                 "label": "Supressió del soroll"
@@ -1543,7 +1457,6 @@
                 "label": "Estèreo"
             }
         },
-        "aiAssist": "Assistent d'IA",
         "audioRoute": "Seleccioneu l'aparell de so",
         "audioSettings": "Paràmetres d'àudio",
         "audioTranslation": "Tradueix l'àudio",
@@ -1565,7 +1478,6 @@
         "download": "Baixeu les nostres aplicacions",
         "e2ee": "Xifratge d'extrem a extrem",
         "embedMeeting": "Insereix la reunió",
-        "enableNoiseSuppression": "Habilita la supressió de soroll extra",
         "endConference": "Finalitza la reunió per a tothom",
         "enterFullScreen": "Mostra en pantalla completa",
         "enterTileView": "Mostra en mode mosaic",
@@ -1597,7 +1509,6 @@
         "mute": "Silencia o activa el so",
         "muteEveryone": "Silencia tothom",
         "muteEveryonesVideo": "Desactiva la càmera de tothom",
-        "muteGUMPending": "Connexió del micròfon",
         "noAudioSignalDesc": "Si no l'heu silenciat intencionadament en la configuració del sistema o per maquinari, considereu canviar l'aparell.",
         "noAudioSignalDescSuggestion": "Si no l'heu silenciat intencionadament en la configuració del sistema o per maquinari, considereu canviar a l'aparell suggerit.",
         "noAudioSignalDialInDesc": "També podeu marcar usant:",
@@ -1610,7 +1521,6 @@
         "openReactionsMenu": "Obre el menú de reaccions",
         "participants": "Participants",
         "pip": "Entra en el mode imatge en imatge",
-        "pipClose": "Tanca el mode Imatge en imatge",
         "polls": "Enquestes",
         "privateMessage": "Envia un missatge privat",
         "profile": "Edita el perfil",
@@ -1649,14 +1559,11 @@
         "unmute": "Activa el micròfon",
         "videoSettings": "Paràmetres de vídeo",
         "videomute": "Inicia o atura la càmera",
-        "videomuteGUMPending": "Connexió de la càmera",
         "videounmute": "Inicia la càmera"
     },
     "transcribing": {
-        "alsoRecord": "Voleu enregistrar també aquesta reunió?",
         "ccButtonTooltip": "Inicia o atura els subtítols",
         "expandedLabel": "La transcripció està activada",
-        "expandedOff": "La transcripció s'ha aturat",
         "failed": "Ha fallat la transcripció",
         "labelTooltip": "S'està transcrivint aquest reunió",
         "labelTooltipExtra": "A més, després es disposarà d'una transcripció.",
@@ -1670,14 +1577,11 @@
         "sourceLanguageHere": "aquí",
         "start": "Activa els subtítols",
         "stop": "Desactiva els subtítols",
-        "stoppedForE2EE": "Els subtítols s'han desactivat perquè el xifratge d'extrem a extrem està activat.",
         "subtitles": "Subtítols",
         "subtitlesOff": "Inactiu",
         "tr": "TR",
-        "translateTo": "Tradueix a:",
-        "unavailableWithE2EE": "La transcripció no està disponible mentre estigui activat el xifratge d'extrem a extrem."
+        "translateTo": "Tradueix a:"
     },
-    "unpinParticipant": "{{participantName}} - No fixis",
     "userMedia": {
         "grantPermissions": "Concediu permisos per a usar la càmera i el micròfon."
     },
@@ -1726,11 +1630,11 @@
         "grantModerator": "Concedir drets de moderador",
         "hideSelfView": "Amaga la vista pròpia",
         "kick": "Expulsa",
-        "mirrorVideo": "Clona el meu vídeo",
         "moderator": "Moderador",
         "mute": "El participant està silenciat",
         "muted": "Silenciat",
         "pinToStage": "Fixa a l'escena",
+        "receivingTranslatedAudio": "Esteu rebent àudio traduït",
         "remoteControl": "Inicia o atura el control remot",
         "screenSharing": "El participant està compartint la pantalla",
         "show": "Mostra-ho en l'escena",
@@ -1742,8 +1646,7 @@
     },
     "virtualBackground": {
         "accessibilityLabel": {
-            "currentBackground": "Fons actual: {{background}}",
-            "selectBackground": "Trieu un fons"
+            "currentBackground": "Fons actual: {{background}}"
         },
         "addBackground": "Afegeix un fons",
         "apply": "Aplica",
@@ -1761,7 +1664,6 @@
         "image6": "Bosc",
         "image7": "Sortida de sol",
         "none": "Cap",
-        "oldestBackgroundRemoved": "S'ha eliminat el fons personalitzat més antic per a afegir-hi el nou.",
         "pleaseWait": "Espereu…",
         "removeBackground": "Elimina el fons",
         "slightBlur": "Desenfocament lleu",
@@ -1781,29 +1683,11 @@
         "labelTooltip": "Nombre d'espectadors: {{count}}",
         "notification": {
             "demoteDescription": "Enviat aquí per {{actor}}, aixequeu la mà per a participar",
-            "noMainParticipantsDescription": "Un participant ha d'iniciar la reunió. Torneu-ho a provar d'aquí a una mica.",
-            "noMainParticipantsTitle": "Aquesta reunió encara no ha començat.",
             "noVisitorLobby": "No podeu unir-vos mentre hi hagi una sala d'espera habilitada per a la reunió.",
-            "notAllowedPromotion": "Un participant ha de permetre primer la vostra sol·licitud.",
             "requestToJoin": "Mà aixecada",
-            "requestToJoinDescription": "S'ha enviat la vostra sol·licitud als moderadors. Espereu!",
             "title": "Sou un espectador de la reunió"
         },
         "waitingMessage": "Entrareu a la reunió tan aviat com estigui en directe!"
-    },
-    "voiceAgents": {
-        "allow": "Permet",
-        "consentDescription": "L'agent només escolta els participants que ho permeten. Si ho permeteu, us escoltarà i sentireu les seves respostes.",
-        "consentDescriptionMuted": "L'agent només escolta els participants que ho permeten. Si ho permeteu, us escoltarà i sentireu les seves respostes. Esteu silenciat fins que decidiu.",
-        "consentTitle": "{{name}} s'ha unit com a agent d'IA",
-        "e2eeUnsupportedDescription": "Els agents d'IA no poden participar en reunions xifrades d'extrem a extrem. Desactiveu el xifratge d'extrem a extrem per a permetre que l'agent escolti i sigui escoltat.",
-        "e2eeUnsupportedTitle": "{{name}} no està disponible",
-        "labelTooltip": "Agent d'IA a la reunió: {{names}}",
-        "labelTooltipAllow": "Agent d'IA a la reunió: {{names}}. Feu clic per a deixar que us escolti.",
-        "labelTooltipE2EE": "Agent d'IA a la reunió: {{names}}. No disponible mentre la reunió estigui xifrada d'extrem a extrem.",
-        "nativeTitle": "Agent d'IA a la reunió",
-        "notNow": "Ara no",
-        "thumbnailTooltip": "Agent d'IA"
     },
     "volumeSlider": "Control lliscant de volum",
     "welcomepage": {

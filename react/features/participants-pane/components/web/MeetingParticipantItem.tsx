@@ -9,8 +9,7 @@ import {
     getParticipantByIdOrUndefined,
     getParticipantDisplayName,
     hasRaisedHand,
-    isParticipantModerator,
-    isVoiceAgentParticipant
+    isParticipantModerator
 } from '../../../base/participants/functions';
 import { IParticipant } from '../../../base/participants/types';
 import {
@@ -20,7 +19,6 @@ import {
     isParticipantVideoMuted
 } from '../../../base/tracks/functions.web';
 import { ITrack } from '../../../base/tracks/types';
-import { hasVoiceAgentMenuItems } from '../../../video-menu/functions.web';
 import { ACTION_TRIGGER, MEDIA_STATE, type MediaState } from '../../constants';
 import {
     getParticipantAudioMediaState,
@@ -54,11 +52,6 @@ interface IProps {
      * The display name of the participant.
      */
     _displayName: string;
-
-    /**
-     * Whether a voice agent's context menu would have anything in it here.
-     */
-    _hasAgentMenu: boolean;
 
     /**
      * Whether or not moderation is supported.
@@ -180,7 +173,6 @@ function MeetingParticipantItem({
     _audioTrack,
     _disableModeratorIndicator,
     _displayName,
-    _hasAgentMenu,
     _local,
     _localVideoOwner,
     _matchesSearch,
@@ -239,9 +231,7 @@ function MeetingParticipantItem({
         <ParticipantItem
             actionsTrigger = { ACTION_TRIGGER.HOVER }
             {
-                // An agent is a participant without a transport: its mic (and later video) state shows like
-                // anyone's, unlike shared video's.
-                ...(_participant?.fakeParticipant && !isVoiceAgentParticipant(_participant) ? {} : {
+                ...(_participant?.fakeParticipant ? {} : {
                     audioMediaState,
                     videoMediaState: _videoMediaState
                 })
@@ -252,8 +242,7 @@ function MeetingParticipantItem({
             isModerator = { isParticipantModerator(_participant) }
             local = { _local }
             onLeave = { onLeave }
-            openDrawerForParticipant = {
-                isVoiceAgentParticipant(_participant) && !_hasAgentMenu ? undefined : openDrawerForParticipant }
+            openDrawerForParticipant = { openDrawerForParticipant }
             overflowDrawer = { overflowDrawer }
             participantID = { _participantID }
             raisedHand = { _raisedHand }
@@ -274,8 +263,7 @@ function MeetingParticipantItem({
                 </>
             }
 
-            {!overflowDrawer && _participant?.fakeParticipant
-                && (isVoiceAgentParticipant(_participant) ? _hasAgentMenu : _localVideoOwner) && (
+            {!overflowDrawer && (_localVideoOwner && _participant?.fakeParticipant) && (
                 <ParticipantActionEllipsis
                     accessibilityLabel = { participantActionEllipsisLabel }
                     onClick = { onContextMenu } />
@@ -316,7 +304,6 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
         _audioTrack,
         _disableModeratorIndicator: Boolean(disableModeratorIndicator),
         _displayName,
-        _hasAgentMenu: hasVoiceAgentMenuItems(state, false),
         _local: Boolean(participant?.local),
         _localVideoOwner: Boolean(ownerId === localParticipantId),
         _matchesSearch,

@@ -46,10 +46,7 @@
         "errorLimitReached": "No se pudo traducir a todos a la vez. Active la traducción para participantes individuales.",
         "errorRoomDisabled": "La traducción de audio está desactivada para esta reunión. Actívala en los ajustes del moderador.",
         "errorSpeakerUnavailable": "No se puede traducir a este participante: ya no está en la reunión.",
-        "labelTooltip": "Traducción en progreso",
-        "labelTooltipPlaying": "El audio traducido aún se está reproduciendo — espere antes de hablar",
-        "stoppedForE2EE": "La traducción de audio ha sido desactivada porque el cifrado de extremo a extremo está activado.",
-        "unavailableWithE2EE": "La traducción de audio no está disponible mientras el cifrado de extremo a extremo esté activado."
+        "labelTooltip": "Traducción en progreso"
     },
     "bandwidthSettings": {
         "assumedBandwidthBps": "por ejemplo 10000000 para 10 Mbps",
@@ -118,15 +115,7 @@
         }
     },
     "chat": {
-        "copy": "Copiar",
-        "delete": "Eliminar",
-        "deleteMessage": "Eliminar",
-        "deletedMessage": "Este mensaje se ha eliminado.",
-        "deletedMessageByMe": "Ha eliminado este mensaje.",
         "disabled": "El envío de mensajes de chat está desactivado.",
-        "edit": "Editar",
-        "edited": "(editado)",
-        "editingMessage": "Editando",
         "enter": "Entrar en la sala",
         "error": "Error: su mensaje no se envió. Motivo: {{error}}",
         "everyone": "Todos",
@@ -139,11 +128,8 @@
         "message": "Mensaje",
         "messageAccessibleTitle": "{{user}} dice:",
         "messageAccessibleTitleMe": "yo digo:",
-        "messageCopied": "Mensaje copiado",
         "messageTo": "Mensaje privado para {{recipient}}",
         "messagebox": "Escriba un mensaje",
-        "moderatedMessage": "Eliminado por un moderador.",
-        "moderationReason": "Motivo: {{reason}}",
         "newMessages": "Mensajes nuevos",
         "nickname": {
             "featureChat": "chat",
@@ -162,17 +148,7 @@
             "titleWithPollsAndCCAndFileSharing": "Introduzca un apodo para usar el chat, las encuestas, los subtítulos y los archivos"
         },
         "noMessagesMessage": "No hay mensajes en la reunión. ¡Inicie una conversación!",
-        "privateMessage": "Mensaje privado",
         "privateNotice": "Mensaje privado para {{recipient}}",
-        "search": {
-            "close": "Cerrar búsqueda",
-            "next": "Siguiente coincidencia",
-            "noResults": "Sin resultados",
-            "open": "Buscar mensajes",
-            "placeholder": "Buscar en el chat",
-            "previous": "Coincidencia anterior",
-            "resultsCount": "{{current}}/{{total}}"
-        },
         "sendButton": "Enviar",
         "smileysPanel": "Panel de Emojis",
         "systemDisplayName": "Sistema",
@@ -195,13 +171,6 @@
         "close": "Cerrar",
         "dontShowAgain": "No mostrar nuevamente",
         "installExtensionText": "Instalar la extensión para la integración con Google Calendar y Office 365"
-    },
-    "clientRequirements": {
-        "rejectDescription": "Esta versión de la aplicación no puede enviar ni recibir audio o vídeo en esta reunión.",
-        "rejectTitle": "Se requiere una actualización",
-        "seeDetails": "Vea los detalles aquí",
-        "warnDescription": "A esta versión de la aplicación le falta una función que utiliza esta reunión. Actualícela, por favor.",
-        "warnTitle": "Se recomienda una actualización"
     },
     "closedCaptionsTab": {
         "emptyState": "Los subtítulos estarán disponibles cuando un moderador los inicie",
@@ -265,8 +234,7 @@
         "yes": "sí"
     },
     "customPanel": {
-        "close": "Cerrar",
-        "title": "Asistente de IA"
+        "close": "Cerrar"
     },
     "dateUtils": {
         "earlier": "Anterior",
@@ -305,6 +273,12 @@
         "microphonePermission": "Error al obtener permiso del micrófono"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Control de llamadas",
+            "connectedDevices": "Dispositivos conectados:",
+            "deleteDevice": "Eliminar dispositivo",
+            "pairDevice": "Emparejar dispositivo"
+        },
         "noPermission": "Permiso no concedido",
         "previewUnavailable": "Vista previa no disponible",
         "selectADevice": "Seleccionar un dispositivo",
@@ -386,8 +360,6 @@
         "done": "Listo",
         "e2eeDescription": "El cifrado de extremo a extremo es actualmente EXPERIMENTAL. Tenga en cuenta que activarlo puede desactivar servicios como: grabación, transmisión en vivo y participación telefónica. Además, esta reunión solo funcionará con personas que se unan con un navegador.",
         "e2eeDisabledDueToMaxModeDescription": "No se puede activar el cifrado de extremo a extremo debido al gran número de participantes en la conferencia.",
-        "e2eeDisabledDueToTranscriptionDescription": "No se puede activar el cifrado de extremo a extremo mientras se está transcribiendo la reunión.",
-        "e2eeDisabledDueToTranslationDescription": "No se puede activar el cifrado de extremo a extremo mientras la traducción de audio está en uso.",
         "e2eeLabel": "Habilitar cifrado de extremo a extremo",
         "e2eeWarning": "ATENCIÓN: No todos los participantes de esta reunión admiten el cifrado de extremo a extremo. Si activa esta opción, no podrán verle ni oírle.",
         "e2eeWillDisableDueToMaxModeDescription": "ATENCIÓN: El cifrado de extremo a extremo se desactivará automáticamente si se unen más participantes a la reunión.",
@@ -422,7 +394,6 @@
         "lockTitle": "El bloqueo falló",
         "login": "Iniciar sesión",
         "loginFailed": "Error de inicio de sesión.",
-        "loginNotCompleted": "El inicio de sesión no se ha completado, por lo que no está conectado a esta reunión.",
         "loginOnResume": "Su sesión de autenticación ha expirado. Necesita iniciar sesión de nuevo para continuar en la reunión.",
         "loginPopupBlocked": "Su navegador ha bloqueado la ventana de inicio de sesión.",
         "loginQuestion": "¿Seguro que quiere iniciar sesión y salir de la conferencia?",
@@ -430,8 +401,6 @@
         "logoutTitle": "Cerrar sesión",
         "maxUsersLimitReached": "Se ha alcanzado el límite máximo de participantes. La conferencia está completa. Por favor, contacte con el organizador de la reunión o inténtelo más tarde.",
         "maxUsersLimitReachedTitle": "La reunión está llena.",
-        "meetingTimeLimitReached": "Esta reunión ha finalizado porque ha alcanzado su límite de tiempo. Inicie una nueva reunión para continuar.",
-        "meetingTimeLimitReachedTitle": "Límite de tiempo de la reunión alcanzado",
         "micConstraintFailedError": "El micrófono no satisface algunos de los requerimientos.",
         "micNotFoundError": "No se encontró el micrófono.",
         "micNotSendingData": "Vaya a los ajustes de su ordenador para activar el micrófono y ajustar su nivel",
@@ -553,14 +522,11 @@
         "sharedVideoLinkPlaceholder": "Enlace de YouTube o enlace de vídeo directo",
         "show": "Mostrar",
         "start": "Iniciar",
-        "startBoth": "Iniciar ambos",
         "startLiveStreaming": "Iniciar transmisión en vivo",
         "startRecording": "Iniciar grabación",
         "startRemoteControlErrorMessage": "Se produjo un error al intentar iniciar la sesión de control remoto.",
         "startTranscribing": "Iniciar transcripción",
         "startTranscription": "Iniciar transcripción",
-        "stop": "Detener",
-        "stopBoth": "Detener ambos",
         "stopLiveStreaming": "Detener transmisión en vivo",
         "stopRecording": "Detener grabación",
         "stopRecordingWarning": "¿Está seguro de que desea detener la grabación?",
@@ -985,8 +951,6 @@
         "screenSharingAudioOnlyDescription": "Tenga en cuenta que, al compartir su pantalla, afecta al modo \"Mejor rendimiento\" y usará más ancho de banda.",
         "screenSharingAudioOnlyTitle": "Modo \"Mejor rendimiento\"",
         "selfViewTitle": "Siempre puede reactivar la vista propia en los ajustes",
-        "settingsIncompleteDescription": "No se han podido cargar algunos ajustes de la reunión y se han usado los valores predeterminados.",
-        "settingsIncompleteTitle": "Es posible que los ajustes de la reunión estén incompletos",
         "somebody": "Alguien",
         "startSilentDescription": "Vuelva a unirse a la reunión para activar el audio",
         "startSilentTitle": "¡Se ha unido sin salida de audio!",
@@ -1054,14 +1018,6 @@
             "visitors": "Visitantes ({{count}})",
             "visitorsList": "Espectadores ({{count}})",
             "waitingLobby": "Esperando en la sala de espera ({{count}})"
-        },
-        "indicators": {
-            "audioDominantSpeaker": "Orador activo",
-            "audioForceMuted": "Audio silenciado, no puede quitar el silencio",
-            "audioMuted": "Audio silenciado",
-            "raisedHand": "Mano levantada",
-            "videoForceMuted": "Cámara desactivada, no puede activarla",
-            "videoMuted": "Cámara desactivada"
         },
         "search": "Buscar participantes",
         "searchDescription": "Empiece a escribir para filtrar los participantes",
@@ -1218,8 +1174,6 @@
         "busy": "Estamos trabajando para liberar recursos de grabación. Vuelva a intentarlo en unos minutos.",
         "busyTitle": "Todas las grabadoras están actualmente ocupadas",
         "copyLink": "Copiar enlace",
-        "dropbox": "Dropbox",
-        "dropboxSignInPrompt": "Conéctese para guardar su grabación",
         "error": "Error de grabación. Vuelva a intentarlo.",
         "errorFetchingLink": "Error en la obtención del enlace de grabación.",
         "expandedOff": "Grabación detenida",
@@ -1234,9 +1188,6 @@
         "highlightMomentSucessDescription": "Su momento destacado se añadirá al resumen de la reunión.",
         "inProgress": "Grabación o transmisión en vivo en curso",
         "linkGenerated": "Hemos generado un enlace a su grabación.",
-        "linkNotShared": "Enlace no compartido",
-        "linkShared": "Enlace compartido con los participantes",
-        "localRecording": "Grabación local",
         "localRecordingNoNotificationWarning": "La grabación no se anunciará al resto de participantes. Tendrá que informarles de que la reunión se está grabando.",
         "localRecordingNoVideo": "El vídeo no se está grabando",
         "localRecordingStartWarning": "Por favor, asegúrese de detener la grabación antes de abandonar la reunión para guardarla.",
@@ -1247,7 +1198,6 @@
         "loggedIn": "Sesión iniciada como {{userName}}",
         "noMicPermission": "No se pudo crear la pista de micrófono. Por favor, otorgue permiso para usar el micrófono.",
         "noStreams": "No se ha detectado ninguna señal de audio o vídeo.",
-        "notSignedIn": "Sesión no iniciada",
         "off": "Grabación detenida",
         "offBy": "{{name}} detuvo la grabación",
         "offByWithTranscription": "{{name}} detuvo la grabación y la transcripción",
@@ -1261,7 +1211,6 @@
         "policyError": "Ha intentado iniciar una grabación demasiado rápido. Inténtelo de nuevo más tarde.",
         "recordAudioAndVideo": "Grabar audio y vídeo",
         "recordTranscription": "Grabar transcripción",
-        "recordingOptions": "Opciones de grabación",
         "saveLocalRecording": "Guardar archivo de grabación localmente (Beta)",
         "serviceDescriptionCloud": "Grabación en la nube",
         "serviceDescriptionCloudInfo": "Las reuniones grabadas se eliminan automáticamente 24 horas después de su grabación.",
@@ -1269,11 +1218,8 @@
         "sessionAlreadyActive": "Esta sesión ya está siendo grabada o transmitida en vivo.",
         "signIn": "Iniciar sesión",
         "signOut": "Cerrar sesión",
-        "storageLocation": "Ubicación de almacenamiento",
         "surfaceError": "Por favor, seleccione la pestaña actual.",
         "title": "Grabando",
-        "transcriptionLanguage": "Idioma de la transcripción",
-        "transcriptionOptions": "Opciones de transcripción",
         "unavailable": "¡Uy! {{serviceName}} actualmente no está disponible. Estamos trabajando para resolver el problema. Vuelva a intentarlo más tarde.",
         "unavailableTitle": "Grabación no disponible"
     },
@@ -1309,7 +1255,6 @@
         "desktopShareHighFpsWarning": "Una mayor velocidad de fotogramas para la pantalla compartida podría afectar a su ancho de banda. Es necesario reiniciar la pantalla compartida para que los nuevos ajustes surtan efecto.",
         "desktopShareWarning": "Es necesario reiniciar la pantalla compartida para que los nuevos ajustes surtan efecto.",
         "devices": "Dispositivos",
-        "enableCtrlAltReactionShortcuts": "Activar las alternativas con Ctrl+Alt para los atajos de reacciones",
         "followMe": "Todos me siguen",
         "followMeRecorder": "El grabador me sigue",
         "framesPerSecond": "fotogramas por segundo",
@@ -1328,7 +1273,6 @@
         "participantKnocking": "Un participante ha entrado en la sala de espera",
         "participantLeft": "Un participante se ha ido",
         "playSounds": "Reproducir sonido",
-        "privateChatWithPermissions": "Desactivar el chat privado para los no moderadores",
         "reactions": "Reacciones de la reunión",
         "sameAsSystem": "Igual que el sistema ({{label}})",
         "selectAudioOutput": "Salida de audio",
@@ -1401,9 +1345,7 @@
         "seconds": "{{count}} s",
         "speakerStats": "Estadísticas de participantes",
         "speakerTime": "Tiempo hablado",
-        "surprised": "Sorprendido",
-        "timelineEnd": "Fin",
-        "timelineStart": "Inicio"
+        "surprised": "Sorprendido"
     },
     "startupoverlay": {
         "genericTitle": "La reunión debe utilizar su micrófono y su cámara.",
@@ -1414,10 +1356,6 @@
         "rejoinKeyTitle": "Reconectar",
         "text": "Pulse el botón <i>Reconectar</i> para volver a conectarse.",
         "title": "La videollamada se interrumpió porque este ordenador se suspendió."
-    },
-    "systemWideUserNotification": {
-        "button": "Más información",
-        "dontShowAgain": "No volver a mostrar"
     },
     "termsView": {
         "title": "Términos"
@@ -1483,7 +1421,6 @@
             "mute": "Silenciar micrófono",
             "muteEveryone": "Silenciar a todos",
             "muteEveryoneElse": "Silenciar a todos los demás",
-            "muteEveryoneElsesDesktopStream": "Detener el uso compartido de pantalla de todos los demás",
             "muteEveryoneElsesVideoStream": "Detener el vídeo del resto",
             "muteEveryonesVideoStream": "Detener el vídeo de todos",
             "muteGUMPending": "Conectando su micrófono",
@@ -1540,7 +1477,6 @@
                 "label": "Estéreo"
             }
         },
-        "aiAssist": "Asistente de IA",
         "audioRoute": "Seleccione el dispositivo de sonido",
         "audioSettings": "Ajustes de audio",
         "audioTranslation": "Traducir audio",
@@ -1555,6 +1491,7 @@
         "closeParticipantsPane": "Cerrar panel de participantes",
         "closeReactionsMenu": "Cerrar el menú de reacciones",
         "closedCaptions": "Subtítulos",
+        "copilot": "Copiloto",
         "disableNoiseSuppression": "Desactivar supresión de ruido",
         "disableReactionSounds": "Puede desactivar los sonidos de reacción para esta reunión",
         "documentClose": "Cerrar documento compartido",
@@ -1653,7 +1590,6 @@
         "alsoRecord": "¿También grabar esta reunión?",
         "ccButtonTooltip": "Iniciar o detener subtítulos",
         "expandedLabel": "Transcripción encendida",
-        "expandedOff": "La transcripción se ha detenido",
         "failed": "Error en la transcripción",
         "labelTooltip": "Esta reunión está siendo transcrita.",
         "labelTooltipExtra": "Además, una transcripción estará disponible más tarde.",
@@ -1667,12 +1603,10 @@
         "sourceLanguageHere": "aquí",
         "start": "Mostrar subtítulos",
         "stop": "Dejar de mostrar subtítulos",
-        "stoppedForE2EE": "Los subtítulos han sido desactivados porque el cifrado de extremo a extremo está activado.",
         "subtitles": "Subtítulos",
         "subtitlesOff": "Desactivados",
         "tr": "TR",
-        "translateTo": "Traducir a",
-        "unavailableWithE2EE": "La transcripción no está disponible mientras el cifrado de extremo a extremo esté activado."
+        "translateTo": "Traducir a"
     },
     "unpinParticipant": "{{participantName}} - Dejar de fijar",
     "userMedia": {
@@ -1728,10 +1662,16 @@
         "mute": "Se silenció el participante",
         "muted": "Silenciado",
         "pinToStage": "Fijar en el escenario",
+        "receivingTranslatedAudio": "Está recibiendo audio traducido",
         "remoteControl": "Iniciar / detener el control remoto",
         "screenSharing": "El participante está compartiendo su pantalla",
         "show": "Mostrar en primer plano",
         "showSelfView": "Mostrar vista propia",
+        "translationEnabledForYou": "Traducción activada para usted",
+        "translationOnAndReceiving": "Traducción activada · recibiendo",
+        "translationStillListening": "{{count}} participante aún está escuchando la traducción: espere antes de hablar",
+        "translationStillListeningShort": "{{num}} aún escuchando",
+        "translationStillListening_plural": "{{count}} participantes aún están escuchando la traducción: espere antes de hablar",
         "unpinFromStage": "Dejar de fijar",
         "verify": "Verificar participante",
         "videoMuted": "Cámara desactivada",

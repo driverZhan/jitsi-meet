@@ -108,8 +108,6 @@ class MessageRecipient extends AbstractMessageRecipient<IProps> {
                         }) }
                     </Text>
                     <TouchableHighlight
-                        accessibilityLabel = { t('dialog.close') }
-                        accessibilityRole = 'button'
                         onPress = { this._onResetLobbyMessageRecipient }>
                         <Icon
                             src = { IconCloseLarge }
@@ -133,8 +131,6 @@ class MessageRecipient extends AbstractMessageRecipient<IProps> {
                     }) }
                 </Text>
                 <TouchableHighlight
-                    accessibilityLabel = { t('dialog.close') }
-                    accessibilityRole = 'button'
                     id = 'message-recipient-cancel-button'
                     onPress = { this._onResetPrivateMessageRecipient }
                     underlayColor = { 'transparent' }>

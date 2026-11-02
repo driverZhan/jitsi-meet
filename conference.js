@@ -132,7 +132,6 @@ import {
     getLocalJitsiAudioTrack,
     getLocalJitsiVideoTrack,
     getLocalVideoTrack,
-    getTrackByJitsiTrack,
     isLocalTrackMuted,
     isUserInteractionRequiredForUnmute
 } from './react/features/base/tracks/functions';
@@ -192,22 +191,6 @@ function sendData(command, value) {
 
     room.removeCommand(command);
     room.sendCommand(command, { value });
-}
-
-/**
- * Checks if the recorder must skip a remote track of a participant.
- *
- * @param {JitsiParticipant} participant - The participant who owns the track.
- * @param {JitsiRemoteTrack} track - The remote track.
- * @returns {boolean}
- */
-function isTrackHiddenFromRecorder(participant, track) {
-    if (participant.isHiddenFromRecorder()) {
-        return true;
-    }
-
-    // Only the video of this participant is hidden from the recorder. Its audio is still recorded.
-    return Boolean(participant.isVideoHiddenFromRecorder?.() && track.isVideoTrack());
 }
 
 /**
@@ -1393,28 +1376,10 @@ export default {
                 return;
             }
 
-            // A participant whose video is hidden from the recorder is handled like a hidden participant: it is not
-            // added to the state, so it gets no tile. Its audio tracks are still added (see TRACK_ADDED below), and
-            // they are played and recorded. The optional call keeps this working with a lib-jitsi-meet release
-            // which does not have the method yet.
-            const videoHiddenFromRecorder = config.iAmRecorder && user.isVideoHiddenFromRecorder?.();
+            // The logic shared between RN and web.
+            commonUserJoinedHandling(APP.store, room, user);
 
-            if (!videoHiddenFromRecorder) {
-                // The logic shared between RN and web.
-                commonUserJoinedHandling(APP.store, room, user);
-            }
-
-            // Add the tracks which the recorder skipped because their source signaling arrived before this presence
-            // (see TRACK_ADDED below). lib-jitsi-meet does not emit TRACK_ADDED again for them.
-            if (config.iAmRecorder) {
-                const tracks = APP.store.getState()['features/base/tracks'];
-
-                user.getTracks()
-                    .filter(track => !isTrackHiddenFromRecorder(user, track) && !getTrackByJitsiTrack(tracks, track))
-                    .forEach(track => APP.store.dispatch(trackAdded(track)));
-            }
-
-            if (user.isHidden() || videoHiddenFromRecorder) {
+            if (user.isHidden()) {
                 return;
             }
 
@@ -1424,14 +1389,10 @@ export default {
         });
 
         room.on(JitsiConferenceEvents.USER_LEFT, (id, user) => {
-            const videoHiddenFromRecorder = config.iAmRecorder && user.isVideoHiddenFromRecorder?.();
+            // The logic shared between RN and web.
+            commonUserLeftHandling(APP.store, room, user);
 
-            if (!videoHiddenFromRecorder) {
-                // The logic shared between RN and web.
-                commonUserLeftHandling(APP.store, room, user);
-            }
-
-            if (user.isHidden() || videoHiddenFromRecorder) {
+            if (user.isHidden()) {
                 return;
             }
 
@@ -1470,15 +1431,7 @@ export default {
             if (config.iAmRecorder) {
                 const participant = room.getParticipantById(track.getParticipantId());
 
-                // The source signaling can arrive before the presence of the participant. Then we cannot know yet
-                // if the participant is hidden from the recorder. The track is added on USER_JOINED.
-                if (!participant) {
-                    logger.info(`Track ${track.getSourceName()} added before presence, waiting for USER_JOINED`);
-
-                    return;
-                }
-
-                if (isTrackHiddenFromRecorder(participant, track)) {
+                if (participant.isHiddenFromRecorder()) {
                     return;
                 }
             }

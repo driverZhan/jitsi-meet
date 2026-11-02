@@ -15,7 +15,6 @@ export enum DeviceTier {
 
 export interface IDeviceCapabilities {
     backend: BackendType;
-    hardwareTier: DeviceTier;
     segHeight: number;
     segWidth: number;
     targetFps: number;
@@ -116,7 +115,6 @@ export async function detectDeviceTier(
     const profile = TIER_PROFILES[hardwareTier];
     const caps: IDeviceCapabilities = {
         ...profile,
-        hardwareTier,
         tier: hardwareTier
     };
 

@@ -381,7 +381,7 @@ const ChatMessage = ({
                 <span
                     className = { classes.cancelEdit }
                     onClick = { onCancelEdit }>
-                    {t('dialog.Cancel')}
+                    {t('chat.cancel', 'Cancel')}
                 </span>
             </div>
         );
@@ -453,19 +453,15 @@ const ChatMessage = ({
         );
     }, [ message?.reactions, isHovered, isReactionsOpen ]);
 
-    // A moderation is shown over a retraction, as its reason is shown as well.
-    const messageText = message.isModerated
-        ? t('chat.moderatedMessage')
-        : message.isDeleted
-            ? (
-                message.messageType === MESSAGE_TYPE_LOCAL
-                    ? t<string>('chat.deletedMessageByMe')
-                    : t<string>('chat.deletedMessage')
-            )
+    const messageText = message.isDeleted
+        ? (
+            message.messageType === MESSAGE_TYPE_LOCAL
+                ? t<string>('chat.deletedMessageByMe')
+                : t<string>('chat.deletedMessage')
+        )
+        : message.isModerated
+            ? t('chat.moderatedMessage')
             : getMessageText(message);
-
-    // A removed file message shows the text placeholder instead of the file.
-    const showFile = !message.isDeleted && !message.isModerated && isFileMessage(message);
 
     const canEdit = message.messageType === MESSAGE_TYPE_LOCAL
         && !message.lobbyChat
@@ -483,7 +479,7 @@ const ChatMessage = ({
             <div className = { classes.sideBySideContainer }>
                 {!shouldDisplayMenuOnRight && (
                     <div className = { classes.optionsButtonContainer }>
-                        {isHovered && !message.isDeleted && !message.isModerated && <MessageMenu
+                        {isHovered && !message.isModerated && <MessageMenu
                             canEdit = { canEdit }
                             displayName = { message.displayName }
                             enablePrivateChat = { Boolean(enablePrivateChat) }
@@ -503,15 +499,15 @@ const ChatMessage = ({
                         className,
                         message.privateMessage && 'privatemessage',
                         message.lobbyChat && !knocking && 'lobbymessage',
-                        showFile && 'file',
+                        isFileMessage(message) && 'file',
                         isActiveSearchMatch && classes.searchMatchActive
                     ) }
                     ref = { messageRef }>
                     <div className = { classes.replyWrapper }>
                         <div className = { cx('messagecontent', classes.messageContent) }>
                             {showDisplayName && _renderDisplayName()}
-                            <div className = { cx('usermessage', classes.userMessage, (message.isDeleted || message.isModerated) && classes.deletedMessage) }>
-                                {showFile ? (
+                            <div className = { cx('usermessage', classes.userMessage, message.isDeleted && message.isModerated && classes.deletedMessage) }>
+                                {!message.isModerated && isFileMessage(message) ? (
                                     <FileMessage
                                         message = { message }
                                         screenReaderHelpText = { message.messageType === MESSAGE_TYPE_LOCAL
@@ -548,7 +544,7 @@ const ChatMessage = ({
                                             </>
                                         )}
                                     </div>
-                                    {message.isEdited && !message.isDeleted && !message.isModerated && (
+                                    {message.isEdited && (
                                         <div className = { classes.editedLabel }>
                                             {t('chat.edited', '(edited)')}
                                         </div>
@@ -623,8 +619,7 @@ function _mapStateToProps(state: IReduxState, { message }: IProps) {
         shouldDisplayMenuOnRight,
         enablePrivateChat,
         isActiveSearchMatch,
-        // A deleted or moderated message shows a placeholder, which is not searched, so do not highlight it.
-        searchQuery: message.isDeleted || message.isModerated ? '' : getChatSearchQuery(state),
+        searchQuery: getChatSearchQuery(state),
         knocking,
         state
     };

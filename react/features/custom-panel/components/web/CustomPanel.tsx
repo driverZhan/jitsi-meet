@@ -1,14 +1,11 @@
-import React, { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { throttle } from 'lodash-es';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
 
 import { IReduxState } from '../../../app/types';
-import { isTouchDevice, shouldEnableResize } from '../../../base/environment/utils.web';
-import { IconCloseLarge } from '../../../base/icons/svg';
-import ClickableIcon from '../../../base/ui/components/web/ClickableIcon';
-import usePanelResize from '../../../base/ui/hooks/usePanelResize.web';
-import { close, setCustomPanelIsResizing, setUserCustomPanelWidth } from '../../actions.web';
+import { isTouchDevice, shouldEnableResize } from '../../../base/environment/utils';
+import { setCustomPanelIsResizing, setUserCustomPanelWidth } from '../../actions.web';
 import {
     CUSTOM_PANEL_DRAG_HANDLE_HEIGHT,
     CUSTOM_PANEL_DRAG_HANDLE_OFFSET,
@@ -16,7 +13,7 @@ import {
     CUSTOM_PANEL_TOUCH_HANDLE_SIZE,
     DEFAULT_CUSTOM_PANEL_WIDTH
 } from '../../constants';
-import { getCustomPanelMaxSize, getCustomPanelOpen, isCustomPanelEnabled } from '../../functions.web';
+import { getCustomPanelMaxSize, getCustomPanelOpen, isCustomPanelEnabled } from '../../functions';
 
 import CustomPanelContent from './CustomPanelContent';
 
@@ -76,16 +73,6 @@ const useStyles = makeStyles<IStylesProps>()((theme, { isResizing, isTouch, resi
                 width: '100%',
                 zIndex: 301
             }
-        },
-
-        header: {
-            alignItems: 'center',
-            boxSizing: 'border-box',
-            display: 'flex',
-            flexShrink: 0,
-            height: '60px',
-            justifyContent: 'flex-end',
-            padding: `0 ${theme.spacing(3)}`
         },
 
         contentContainer: {
@@ -154,6 +141,7 @@ const useStyles = makeStyles<IStylesProps>()((theme, { isResizing, isTouch, resi
  * @returns {JSX.Element | null} The custom panel or null if not open.
  */
 export default function CustomPanel(): JSX.Element | null {
+    const dispatch = useDispatch();
     const enabled = useSelector(isCustomPanelEnabled);
     const paneOpen = useSelector(getCustomPanelOpen);
     const panelWidth = useSelector((state: IReduxState) =>
@@ -161,25 +149,91 @@ export default function CustomPanel(): JSX.Element | null {
     const isResizing = useSelector((state: IReduxState) =>
         state['features/custom-panel']?.isResizing ?? false);
     const maxPanelWidth = useSelector(getCustomPanelMaxSize);
-    const dispatch = useDispatch();
-    const { t } = useTranslation();
 
     const isTouch = isTouchDevice();
     const resizeEnabled = shouldEnableResize();
     const { classes, cx } = useStyles({ isResizing, width: panelWidth, isTouch, resizeEnabled });
 
-    const { isMouseDown, onDragHandlePointerDown } = usePanelResize({
-        edge: 'left',
-        maxWidth: maxPanelWidth,
-        minWidth: DEFAULT_CUSTOM_PANEL_WIDTH,
-        setIsResizing: setCustomPanelIsResizing,
-        setWidth: setUserCustomPanelWidth,
-        width: panelWidth
-    });
+    const [ isMouseDown, setIsMouseDown ] = useState(false);
+    const [ mousePosition, setMousePosition ] = useState<number | null>(null);
+    const [ dragPanelWidth, setDragPanelWidth ] = useState<number | null>(null);
 
-    const onClick = useCallback(() => {
-        dispatch(close());
-    }, [ dispatch ]);
+    /**
+     * Handles pointer down on the drag handle.
+     * Supports both mouse and touch events via Pointer Events API.
+     *
+     * @param {React.PointerEvent} e - The pointer down event.
+     * @returns {void}
+     */
+    const onDragHandlePointerDown = useCallback((e: React.PointerEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // Capture the pointer to ensure we receive all pointer events
+        // even if the pointer moves outside the element.
+        (e.target as HTMLElement).setPointerCapture(e.pointerId);
+
+        setIsMouseDown(true);
+        setMousePosition(e.clientX);
+        setDragPanelWidth(panelWidth);
+
+        dispatch(setCustomPanelIsResizing(true));
+
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+    }, [ panelWidth, dispatch ]);
+
+    /**
+     * Handles pointer up to end drag resize.
+     *
+     * @returns {void}
+     */
+    const onDragPointerUp = useCallback(() => {
+        if (isMouseDown) {
+            setIsMouseDown(false);
+            dispatch(setCustomPanelIsResizing(false));
+
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+    }, [ isMouseDown, dispatch ]);
+
+    /**
+     * Handles pointer move during drag resize.
+     * Handle is on the LEFT edge, so dragging left (negative diff) widens the panel.
+     *
+     * @param {PointerEvent} e - The pointermove event.
+     * @returns {void}
+     */
+    const onPanelResize = useCallback(throttle((e: PointerEvent) => {
+        if (isMouseDown && mousePosition !== null && dragPanelWidth !== null) {
+            const diff = e.clientX - mousePosition;
+
+            // Handle is on LEFT edge: dragging left (negative diff) increases width.
+            const newWidth = Math.max(
+                Math.min(dragPanelWidth - diff, maxPanelWidth),
+                DEFAULT_CUSTOM_PANEL_WIDTH
+            );
+
+            if (newWidth !== panelWidth) {
+                dispatch(setUserCustomPanelWidth(newWidth));
+            }
+        }
+    }, 50, {
+        leading: true,
+        trailing: false
+    }), [ isMouseDown, mousePosition, dragPanelWidth, panelWidth, maxPanelWidth, dispatch ]);
+
+    // Set up global event listeners for drag tracking.
+    useEffect(() => {
+        document.addEventListener('pointerup', onDragPointerUp);
+        document.addEventListener('pointermove', onPanelResize);
+
+        return () => {
+            document.removeEventListener('pointerup', onDragPointerUp);
+            document.removeEventListener('pointermove', onPanelResize);
+        };
+    }, [ onDragPointerUp, onPanelResize ]);
 
     if (!enabled || !paneOpen) {
         return null;
@@ -197,12 +251,6 @@ export default function CustomPanel(): JSX.Element | null {
                 ) }
                 onPointerDown = { onDragHandlePointerDown }>
                 <div className = { cx(classes.dragHandle, 'customPanelDragHandle') } />
-            </div>
-            <div className = { classes.header }>
-                <ClickableIcon
-                    accessibilityLabel = { t('customPanel.close') }
-                    icon = { IconCloseLarge }
-                    onClick = { onClick } />
             </div>
             <div className = { classes.contentContainer }>
                 <CustomPanelContent />

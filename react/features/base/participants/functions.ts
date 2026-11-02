@@ -1,7 +1,7 @@
 import { getGravatarURL } from '@jitsi/js-utils/avatar';
 
 import { IReduxState, IStore } from '../../app/types';
-import { isSendPrivateChatDisabled, isVisitorChatParticipant } from '../../chat/functions';
+import { isVisitorChatParticipant } from '../../chat/functions';
 import { isStageFilmstripAvailable } from '../../filmstrip/functions';
 import { isAddPeopleEnabled, isDialOutEnabled } from '../../invite/functions';
 import { toggleShareDialog } from '../../share-room/actions';
@@ -22,7 +22,6 @@ import {
     JIGASI_PARTICIPANT_ICON,
     MAX_DISPLAY_NAME_LENGTH,
     PARTICIPANT_ROLE,
-    VOICE_AGENT_PARTICIPANT_ICON,
     WHITEBOARD_PARTICIPANT_ICON
 } from './constants';
 import { preloadImage } from './preloadImage';
@@ -41,9 +40,6 @@ const AVATAR_CHECKER_FUNCTIONS = [
     },
     (participant: IParticipant) => {
         return isWhiteboardParticipant(participant) ? WHITEBOARD_PARTICIPANT_ICON : null;
-    },
-    (participant: IParticipant) => {
-        return isVoiceAgentParticipant(participant) ? VOICE_AGENT_PARTICIPANT_ICON : null;
     },
     (participant: IParticipant) => {
         return participant?.avatarURL ? participant.avatarURL : null;
@@ -290,16 +286,6 @@ export function isSharedVideoParticipant(participant?: IParticipant): boolean {
  */
 export function isWhiteboardParticipant(participant?: IParticipant): boolean {
     return participant?.fakeParticipant === FakeParticipant.Whiteboard;
-}
-
-/**
- * Returns whether the fake participant is a voice agent.
- *
- * @param {IParticipant|undefined} participant - The participant entity.
- * @returns {boolean} - True if it's a voice agent participant.
- */
-export function isVoiceAgentParticipant(participant?: IParticipant): boolean {
-    return participant?.fakeParticipant === FakeParticipant.Agent;
 }
 
 /**
@@ -799,13 +785,6 @@ export function isPrivateChatEnabled(
     const isLocal = !isVisitorChatParticipant(participant) && participant?.local;
 
     if (isLocal && !checkSelf) {
-        return false;
-    }
-
-    // The moderator restricted private messages for this room and the local
-    // participant does not hold the permission that lifts the restriction. The
-    // server applies the same check, this only keeps the controls out of the UI.
-    if (isSendPrivateChatDisabled(state)) {
         return false;
     }
 

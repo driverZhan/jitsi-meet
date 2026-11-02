@@ -197,10 +197,8 @@ export const microsoftCalendarApi = {
              * @private
              * @returns {void}
              */
-            function handleAuth({ data, origin, source }: MessageEvent) {
-                if (source !== popupAuthWindow
-                        || origin !== new URL(MS_API_CONFIGURATION.REDIRECT_URI).origin
-                        || data?.type !== 'ms-login') {
+            function handleAuth({ data }: any) {
+                if (!data || data.type !== 'ms-login') {
                     return;
                 }
 

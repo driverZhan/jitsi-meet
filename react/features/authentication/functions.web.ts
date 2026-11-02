@@ -75,7 +75,7 @@ export const getTokenAuthUrl = (
         return Promise.resolve(undefined);
     }
 
-    if (url.includes('{state}')) {
+    if (url.indexOf('{state}')) {
         const state = _getTokenAuthState(
             locationURL,
             {
@@ -99,7 +99,7 @@ export const getTokenAuthUrl = (
 
     url = url.replace('{room}', roomName);
 
-    if (url.includes('{code_challenge}')) {
+    if (url.indexOf('{code_challenge}')) {
         let codeVerifier = '';
 
         // random string
@@ -130,12 +130,6 @@ export const getTokenAuthUrl = (
 
                 return url ? url.replace('{code_challenge}', codeChallenge) : undefined;
             });
-    }
-
-    try {
-        window.sessionStorage.removeItem('code_verifier');
-    } catch (error) {
-        logger.error('Unable to remove code verifier from session storage', error);
     }
 
     return Promise.resolve(url);

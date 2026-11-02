@@ -4,7 +4,6 @@ import { makeStyles } from 'tss-react/mui';
 
 import Avatar from '../../../base/avatar/components/Avatar';
 import { translate } from '../../../base/i18n/functions';
-import Icon from '../../../base/icons/components/Icon';
 import ListItem from '../../../base/ui/components/web/ListItem';
 import {
     ACTION_TRIGGER,
@@ -174,29 +173,11 @@ function ParticipantItem({
         </>
     );
 
-    const audioIconData = audioMediaState ? AudioStateIcons[audioMediaState] : null;
-    const videoIconData = videoMediaState ? VideoStateIcons[videoMediaState] : null;
-
     const indicators = (
         <>
             {raisedHand && <RaisedHandIndicator />}
-            {videoIconData && (
-                <Icon
-                    alt = { videoIconData.labelKey ? t(videoIconData.labelKey) : undefined }
-                    color = { videoIconData.color }
-                    id = { videoIconData.id }
-                    size = { 16 }
-                    src = { videoIconData.src } />
-            )}
-            {audioIconData && (
-                <Icon
-                    alt = { audioIconData.labelKey ? t(audioIconData.labelKey) : undefined }
-                    className = { audioIconData.className }
-                    color = { audioIconData.color }
-                    id = { audioIconData.id }
-                    size = { 16 }
-                    src = { audioIconData.src } />
-            )}
+            {VideoStateIcons[videoMediaState]}
+            {AudioStateIcons[audioMediaState]}
         </>
     );
 

@@ -13,7 +13,6 @@ export const screen = {
             }
         },
         container: 'Conference container',
-        customPanel: 'AI Assist',
         gifsMenu: 'GIPHY',
         invite: 'Invite',
         liveStream: 'Live stream',

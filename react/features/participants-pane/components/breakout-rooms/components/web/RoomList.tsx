@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector, useStore } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { makeStyles } from 'tss-react/mui';
 
 import { isMobileBrowser } from '../../../../../base/environment/utils';
@@ -12,7 +12,6 @@ import {
     getBreakoutRoomsConfig,
     getCurrentRoomId,
     isAutoAssignParticipantsVisible,
-    isBreakoutRoomJoinAllowed,
     isInBreakoutRoom
 } from '../../../../../breakout-rooms/functions';
 import { IRoom } from '../../../../../breakout-rooms/types';
@@ -52,7 +51,6 @@ export const RoomList = ({ searchString }: IProps) => {
     const isLocalModerator = useSelector(isLocalParticipantModerator);
     const showAutoAssign = useSelector(isAutoAssignParticipantsVisible);
     const { hideJoinRoomButton } = useSelector(getBreakoutRoomsConfig);
-    const store = useStore();
     const [ lowerMenu, raiseMenu, toggleMenu, menuEnter, menuLeave, raiseContext ] = useContextMenu<IRoom>();
     const [ lowerParticipantMenu, raiseParticipantMenu, toggleParticipantMenu,
         participantMenuEnter, participantMenuLeave, raiseParticipantContext ] = useContextMenu<{
@@ -60,13 +58,7 @@ export const RoomList = ({ searchString }: IProps) => {
         participantName: string;
         room: IRoom;
     }>();
-    const onRaiseMenu = useCallback(room => (target: HTMLElement) => {
-        // Joining is the only action of a participant who is not a moderator, thus with the join restriction the menu
-        // of a breakout room would be empty.
-        if (isBreakoutRoomJoinAllowed(store.getState(), room)) {
-            raiseMenu(room, target);
-        }
-    }, [ raiseMenu, store ]);
+    const onRaiseMenu = useCallback(room => (target: HTMLElement) => raiseMenu(room, target), [ raiseMenu ]);
 
     // close the menu when the room vanishes
     useEffect(() => {

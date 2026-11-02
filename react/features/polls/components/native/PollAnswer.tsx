@@ -44,7 +44,6 @@ const PollAnswer = (props: AbstractProps) => {
                 </View>
                 {
                     pollSaved && <IconButton
-                        accessibilityLabel = { t('polls.closeButton') }
                         onPress = { () => dispatch(removePoll(poll)) }
                         src = { IconCloseLarge } />
                 }

@@ -19,6 +19,7 @@ const NotificationsSection = () => {
         soundsParticipantKnocking,
         soundsParticipantLeft,
         soundsReactions,
+        soundsTalkWhileMuted,
         enableReactions,
         enabledNotifications,
         disabledSounds,
@@ -50,6 +51,11 @@ const NotificationsSection = () => {
                 name: 'soundsParticipantLeft'
             },
             {
+                label: 'settings.talkWhileMuted',
+                state: soundsTalkWhileMuted,
+                name: 'soundsTalkWhileMuted'
+            },
+            {
                 label: 'settings.participantKnocking',
                 state: soundsParticipantKnocking,
                 name: 'soundsParticipantKnocking'
@@ -66,6 +72,7 @@ const NotificationsSection = () => {
         soundsIncomingMessage,
         soundsParticipantJoined,
         soundsParticipantLeft,
+        soundsTalkWhileMuted,
         soundsParticipantKnocking,
         enableReactions ]);
 

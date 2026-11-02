@@ -7,7 +7,6 @@ import {
 } from '../base/config/actions';
 import { buildConfigURL } from '../base/config/functions.any';
 import { setLocationURL } from '../base/connection/actions.web';
-import { stripJwtSignatures } from '../base/jwt/functions';
 import { loadConfig } from '../base/lib-jitsi-meet/functions.web';
 import { isEmbedded } from '../base/util/embedUtils';
 import { parseURIString } from '../base/util/uri';
@@ -188,7 +187,7 @@ export function reloadNow() {
         const { locationURL } = state['features/base/connection'];
 
         const reloadAction = () => {
-            logger.info(`Reloading the conference using URL: ${stripJwtSignatures(locationURL)}`);
+            logger.info(`Reloading the conference using URL: ${locationURL}`);
 
             // Fire videoConferenceLeft before navigation so it is delivered
             // while the postis channel is still active. postMessage sent from

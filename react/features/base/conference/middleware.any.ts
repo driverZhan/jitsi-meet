@@ -18,12 +18,7 @@ import { isTokenAuthEnabled } from '../../authentication/functions.any';
 import { removeLobbyChatParticipant } from '../../chat/actions.any';
 import { openDisplayNamePrompt } from '../../display-name/actions';
 import { isVpaasMeeting } from '../../jaas/functions';
-import {
-    clearNotifications,
-    showErrorNotification,
-    showNotification,
-    showWarningNotification
-} from '../../notifications/actions';
+import { clearNotifications, showErrorNotification, showNotification } from '../../notifications/actions';
 import { NOTIFICATION_TIMEOUT_TYPE } from '../../notifications/constants';
 import { INotificationProps } from '../../notifications/types';
 import { hasDisplayName } from '../../prejoin/utils';
@@ -39,23 +34,16 @@ import { validateJwt } from '../jwt/functions';
 import { JitsiConferenceErrors, JitsiConferenceEvents, JitsiConnectionErrors } from '../lib-jitsi-meet';
 import { loadConfig } from '../lib-jitsi-meet/functions';
 import { MEDIA_TYPE } from '../media/constants';
-import {
-    PARTICIPANT_LEFT,
-    PARTICIPANT_ROLE_CHANGED,
-    PARTICIPANT_UPDATED,
-    PIN_PARTICIPANT
-} from '../participants/actionTypes';
+import { PARTICIPANT_UPDATED, PIN_PARTICIPANT } from '../participants/actionTypes';
 import { PARTICIPANT_ROLE } from '../participants/constants';
 import {
     getLocalParticipant,
     getParticipantById,
-    getPinnedParticipant,
-    isLocalParticipantModerator
+    getPinnedParticipant
 } from '../participants/functions';
 import MiddlewareRegistry from '../redux/MiddlewareRegistry';
 import StateListenerRegistry from '../redux/StateListenerRegistry';
-import { TRACK_ADDED, TRACK_CREATE_CANCELED, TRACK_REMOVED } from '../tracks/actionTypes';
-import { getLocalTrack } from '../tracks/functions.any';
+import { TRACK_ADDED, TRACK_REMOVED } from '../tracks/actionTypes';
 import { parseURIString } from '../util/uri';
 
 import {
@@ -67,8 +55,7 @@ import {
     SEND_TONES,
     SET_ASSUMED_BANDWIDTH_BPS,
     SET_PENDING_SUBJECT_CHANGE,
-    SET_ROOM,
-    UPDATE_CONFERENCE_METADATA
+    SET_ROOM
 } from './actionTypes';
 import {
     authStatusChanged,
@@ -99,11 +86,6 @@ let beforeUnloadHandler: ((e?: any) => void) | undefined;
  * A simple flag to avoid retrying more than once to join as a visitor when hitting max occupants reached.
  */
 let retryAsVisitorOnMaxError = true;
-
-/**
- * A simple flag to avoid showing the "settings incomplete" notification more than once per conference.
- */
-let settingsIncompleteNotificationShown = false;
 
 /**
  * Implements the middleware of the feature base/conference.
@@ -140,12 +122,6 @@ MiddlewareRegistry.register(store => next => action => {
     case P2P_STATUS_CHANGED:
         return _p2pStatusChanged(next, action);
 
-    case PARTICIPANT_LEFT:
-        return _participantLeft(store, next, action);
-
-    case PARTICIPANT_ROLE_CHANGED:
-        return _participantRoleChanged(store, next, action);
-
     case PARTICIPANT_UPDATED:
         return _updateLocalParticipantInConference(store, next, action);
 
@@ -164,9 +140,6 @@ MiddlewareRegistry.register(store => next => action => {
 
     case SET_ASSUMED_BANDWIDTH_BPS:
         return _setAssumedBandwidthBps(store, next, action);
-
-    case UPDATE_CONFERENCE_METADATA:
-        return _conferenceMetadataUpdated(store, next, action);
     }
 
     return next(action);
@@ -404,7 +377,6 @@ function _conferenceJoined({ dispatch, getState }: IStore, next: Function, actio
     } = getState()['features/base/config'];
 
     retryAsVisitorOnMaxError = true;
-    settingsIncompleteNotificationShown = false;
 
     dispatch(removeLobbyChatParticipant(true));
 
@@ -442,131 +414,7 @@ function _conferenceJoined({ dispatch, getState }: IStore, next: Function, actio
         }));
     }
 
-    _maybeNotifySettingsIncomplete({ dispatch, getState });
-
     return result;
-}
-
-/**
- * Notifies the feature base/conference that the action {@code PARTICIPANT_LEFT}
- * is being dispatched within a specific redux store. Reports the implicit unpin
- * of a pinned participant who leaves.
- *
- * @param {Store} store - The redux store in which the specified {@code action}
- * is being dispatched.
- * @param {Dispatch} next - The redux {@code dispatch} function to dispatch the
- * specified {@code action} to the specified {@code store}.
- * @param {Action} action - The redux action {@code PARTICIPANT_LEFT} which is
- * being dispatched in the specified {@code store}.
- * @private
- * @returns {Object} The value returned by {@code next(action)}.
- */
-function _participantLeft({ getState }: IStore, next: Function, action: AnyAction) {
-    const state = getState();
-    const { conference } = state['features/base/conference'];
-    const pinnedParticipant = getPinnedParticipant(state);
-    const { conference: leftConference, id } = action.participant;
-
-    // The reducer drops the pin together with the participant, so the id is only known before next(). A remote
-    // id is unique per JitsiConference (a leave for a previous conference may carry a current id), so match the
-    // conference as the reducer does; the local participant has no such scope.
-    if (conference && pinnedParticipant && pinnedParticipant.id === id
-            && (pinnedParticipant.local || pinnedParticipant.conference === leftConference)) {
-        sendAnalytics(createPinnedEvent(
-            ACTION_UNPINNED,
-            pinnedParticipant.id,
-            {
-                local: pinnedParticipant.local,
-                'participant_count': conference.getParticipantCount()
-            }));
-    }
-
-    return next(action);
-}
-
-/**
- * Notifies the feature base/conference that the action {@code PARTICIPANT_ROLE_CHANGED} is being
- * dispatched within a specific redux store. Used to re-check whether the "settings incomplete"
- * notification should be shown, in case the local participant's moderator role is confirmed after
- * the conference was already joined and the metadata already received.
- *
- * @param {Store} store - The redux store in which the specified {@code action} is being dispatched.
- * @param {Dispatch} next - The redux {@code dispatch} function to dispatch the specified
- * {@code action} to the specified {@code store}.
- * @param {Action} action - The redux action {@code PARTICIPANT_ROLE_CHANGED} which is being
- * dispatched in the specified {@code store}.
- * @private
- * @returns {Object} The value returned by {@code next(action)}.
- */
-function _participantRoleChanged(store: IStore, next: Function, action: AnyAction) {
-    const result = next(action);
-    const { dispatch, getState } = store;
-
-    if (action.participant?.id === getLocalParticipant(getState)?.id) {
-        _maybeNotifySettingsIncomplete({ dispatch, getState });
-    }
-
-    return result;
-}
-
-/**
- * Notifies the feature base/conference that the action {@code UPDATE_CONFERENCE_METADATA} is being
- * dispatched within a specific redux store. Used to re-check whether the "settings incomplete"
- * notification should be shown, in case the metadata arrives after the conference was already
- * joined and the local participant's moderator role already known.
- *
- * @param {Store} store - The redux store in which the specified {@code action} is being dispatched.
- * @param {Dispatch} next - The redux {@code dispatch} function to dispatch the specified
- * {@code action} to the specified {@code store}.
- * @param {Action} action - The redux action {@code UPDATE_CONFERENCE_METADATA} which is being
- * dispatched in the specified {@code store}.
- * @private
- * @returns {Object} The value returned by {@code next(action)}.
- */
-function _conferenceMetadataUpdated(store: IStore, next: Function, action: AnyAction) {
-    const result = next(action);
-
-    _maybeNotifySettingsIncomplete(store);
-
-    return result;
-}
-
-/**
- * Shows a one-time warning notification to a moderator when the settings service applied
- * hardcoded defaults (e.g. for the lobby) because it could not retrieve the real meeting
- * settings in time. Only fires once conference join, the metadata, and the local participant's
- * moderator role are all known - whichever of those three arrives last triggers it. Non-moderators
- * never see it, since they cannot act on it.
- *
- * @param {Store} store - The redux store.
- * @private
- * @returns {void}
- */
-function _maybeNotifySettingsIncomplete({ dispatch, getState }: IStore) {
-    if (settingsIncompleteNotificationShown) {
-        return;
-    }
-
-    const state = getState();
-
-    if (!getCurrentConference(state)) {
-        return;
-    }
-
-    if (!state['features/base/conference'].metadata?.settingsIncomplete) {
-        return;
-    }
-
-    if (!isLocalParticipantModerator(state)) {
-        return;
-    }
-
-    settingsIncompleteNotificationShown = true;
-
-    dispatch(showWarningNotification({
-        descriptionKey: 'notify.settingsIncompleteDescription',
-        titleKey: 'notify.settingsIncompleteTitle'
-    }, NOTIFICATION_TIMEOUT_TYPE.STICKY));
 }
 
 /**
@@ -826,11 +674,6 @@ function _pinParticipant({ getState }: IStore, next: Function, action: AnyAction
             = actionName === ACTION_PINNED ? id : pinnedParticipant?.id;
     }
 
-    // Nobody is pinned (or the pinned participant already left), so there is no unpin to report.
-    if (!participantIdForEvent) {
-        return next(action);
-    }
-
     sendAnalytics(createPinnedEvent(
         actionName,
         participantIdForEvent,
@@ -959,24 +802,7 @@ async function _trackAddedOrRemoved(store: IStore, next: Function, action: AnyAc
                             await conference.replaceTrack(null, jitsiTrack);
                         }
                     } else {
-                        try {
-                            await _addLocalTracksToConference(conference, [ jitsiTrack ]);
-                        } catch (error) {
-                            logger.error(
-                                `Conference refused local ${track.mediaType} track, discarding it`, error);
-
-                            jitsiTrack.dispose?.().catch(() => { /* may already be disposed */ });
-
-                            // Clears a pending TRACK_WILL_CREATE stub when no ready track of this type remains.
-                            if (!getLocalTrack(getState()['features/base/tracks'], track.mediaType)) {
-                                store.dispatch({
-                                    type: TRACK_CREATE_CANCELED,
-                                    trackType: track.mediaType
-                                });
-                            }
-
-                            return;
-                        }
+                        await _addLocalTracksToConference(conference, [ jitsiTrack ]);
                     }
                 }
             } else {

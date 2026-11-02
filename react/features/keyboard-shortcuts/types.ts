@@ -20,7 +20,6 @@ export interface IKeyboardShortcut {
 }
 
 export interface IKeyboardShortcutsState {
-    ctrlAltReactionShortcutsEnabled: boolean;
     enabled: boolean;
     shortcuts: Map<string, IKeyboardShortcut>;
     shortcutsHelp: Map<string, string>;

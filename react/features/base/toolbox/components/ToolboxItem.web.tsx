@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 
 import Icon from '../../icons/components/Icon';
-import DisabledReasonTooltip from '../../tooltip/components/DisabledReasonTooltip';
 import Tooltip from '../../tooltip/components/Tooltip';
 import ContextMenuItem from '../../ui/components/web/ContextMenuItem';
 
@@ -90,7 +89,6 @@ export default class ToolboxItem extends AbstractToolboxItem<IProps> {
         const buttonAttribute = isMenuButton ? 'aria-expanded' : 'aria-pressed';
         const props = {
             [buttonAttribute]: toggled,
-            'aria-description': this.disabledReason,
             'aria-disabled': disabled,
             'aria-label': this.accessibilityLabel,
             className: className + (disabled ? ' disabled' : ''),
@@ -102,24 +100,19 @@ export default class ToolboxItem extends AbstractToolboxItem<IProps> {
         };
 
         const elementType = showLabel ? 'li' : 'div';
-        const tooltip = this.disabledReason ?? this.tooltip;
-        const useTooltip = !disableTooltip && tooltip && tooltip.length > 0;
+        const useTooltip = !disableTooltip && this.tooltip && this.tooltip.length > 0;
 
         if (contextMenu) {
-            // A menu item shows its label rather than a tooltip, unless it is disabled and says why.
             return (
-                <DisabledReasonTooltip reason = { this.disabledReason }>
-                    <ContextMenuItem
-                        accessibilityLabel = { this.accessibilityLabel }
-                        backgroundColor = { backgroundColor }
-                        description = { this.disabledReason }
-                        disabled = { disabled }
-                        icon = { icon }
-                        onClick = { onClick }
-                        onKeyDown = { onKeyDown }
-                        onKeyPress = { this._onKeyPress }
-                        text = { this.label } />
-                </DisabledReasonTooltip>
+                <ContextMenuItem
+                    accessibilityLabel = { this.accessibilityLabel }
+                    backgroundColor = { backgroundColor }
+                    disabled = { disabled }
+                    icon = { icon }
+                    onClick = { onClick }
+                    onKeyDown = { onKeyDown }
+                    onKeyPress = { this._onKeyPress }
+                    text = { this.label } />
             );
         }
         let children = (
@@ -135,7 +128,7 @@ export default class ToolboxItem extends AbstractToolboxItem<IProps> {
         if (useTooltip) {
             children = (
                 <Tooltip
-                    content = { tooltip ?? '' }
+                    content = { this.tooltip ?? '' }
                     position = { tooltipPosition }>
                     { children }
                 </Tooltip>

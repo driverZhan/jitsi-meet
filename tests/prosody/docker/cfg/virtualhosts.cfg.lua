@@ -4,11 +4,6 @@ VirtualHost "localhost"
     authentication = "token"
     app_id = "jitsi"
     asap_key_server = "http://localhost:5280/test-observer/asap-keys"
-    -- The login key is also served as JWKS, as deployments that use both
-    -- options do. The system HTTP API modules on this host (kick, jigasi
-    -- invite, system chat, end meeting) must still accept only tokens from
-    -- prosody_password_public_key_repo_url.
-    cache_keys_url = "http://localhost:5280/test-observer/asap-jwks.json"
     signature_algorithm = "RS256"
     allow_empty_token = true
 
@@ -28,9 +23,6 @@ VirtualHost "localhost"
         "conference_duration";
         "filter_iq_rayo";    -- priority 1 on pre-iq/full; listed before filter_iq_jibri (matches prod)
         "filter_iq_jibri";
-        -- Adds the initiator and the room's meetingId (session_id) to the
-        -- app_data of a client's jibri start iq.
-        "jibri_session";
         "muc_lobby_rooms";
         "jiconop";
         "muc_kick_participant";
@@ -51,8 +43,6 @@ VirtualHost "localhost"
         -- test-only
         "muc_password_check";
         "muc_breakout_rooms";
-        -- Rejects a message that a client addresses to the JID of an account.
-        "filter_direct_messages";
     }
 
     -- mod_muc_password_check: verify Bearer tokens with the login ASAP key server.
@@ -83,17 +73,8 @@ VirtualHost "localhost"
     lobby_muc = "lobby.conference.localhost"
     breakout_rooms_muc = "breakout.conference.localhost"
 
-    -- mod_filter_iq_rayo: per-session rate (per minute) and per-user
-    -- concurrency limit for Rayo dials. Kept low so the limit can be hit
-    -- in tests with a few dials.
-    max_number_outgoing_calls = 2
-
     -- Clients on whitelist.localhost bypass the lobby.
     muc_lobby_whitelist = { "whitelist.localhost" }
-
-    -- mod_filter_iq_jibri: every test client connects from the same IP, and
-    -- the jibri specs send more start/stop iqs than the default 9 per minute.
-    max_number_ip_attempts_per_minute = 100
 
 -- VirtualHost for the focus (jicofo) test helper.
 -- Clients authenticate with username "focus" and password "focussecret".
@@ -125,9 +106,7 @@ VirtualHost "hs256.localhost"
     app_secret = "testsecret"
     signature_algorithm = "HS256"
     allow_empty_token = false
-    -- muc_kick_participant: a system HTTP API module on a host that has only
-    -- app_secret; it verifies tokens from prosody_password_public_key_repo_url.
-    modules_enabled = { "presence_identity"; "muc_kick_participant" }
+    modules_enabled = { "presence_identity" }
 
 -- Second VirtualHost whose domain is listed in muc_access_whitelist on the
 -- MUC component below. Clients connecting here get JIDs like

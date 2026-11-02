@@ -64,7 +64,6 @@ module:hook("iq/full", function(event)
             to             = stanza.attr.to;
             action         = jibri.attr.action;
             recording_mode = jibri.attr.recording_mode;
-            app_data       = jibri.attr.app_data;
         });
     end
     local dial = stanza:get_child('dial', 'urn:xmpp:rayo:1');

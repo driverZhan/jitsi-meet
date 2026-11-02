@@ -10,7 +10,6 @@ import {
 import { getConferenceState } from '../base/conference/functions';
 import { hangup } from '../base/connection/actions.web';
 import { openDialog } from '../base/dialog/actions';
-import { storeUserSelectedLanguage } from '../base/i18n/functions';
 import i18next from '../base/i18n/i18next';
 import { setJWT } from '../base/jwt/actions';
 import { browser } from '../base/lib-jitsi-meet';
@@ -20,11 +19,7 @@ import { IAudioSettings } from '../base/settings/reducer';
 import { getLocalVideoTrack } from '../base/tracks/functions.web';
 import { appendURLHashParam } from '../base/util/uri';
 import { setFollowMe, setFollowMeRecorder } from '../follow-me/actions';
-import {
-    disableKeyboardShortcuts,
-    enableKeyboardShortcuts,
-    setCtrlAltReactionShortcutsEnabled
-} from '../keyboard-shortcuts/actions';
+import { disableKeyboardShortcuts, enableKeyboardShortcuts } from '../keyboard-shortcuts/actions';
 import { toggleBackgroundEffect } from '../virtual-background/actions';
 import virtualBackgroundLogger from '../virtual-background/logger';
 
@@ -37,7 +32,6 @@ import {
 import LogoutDialog from './components/web/LogoutDialog';
 import SettingsDialog from './components/web/SettingsDialog';
 import {
-    getExperimentalTabProps,
     getModeratorTabProps,
     getMoreTabProps,
     getNotificationsTabProps,
@@ -45,7 +39,6 @@ import {
     getShortcutsTabProps
 } from './functions.web';
 import logger from './logger';
-import { IConfigOptionValues, IExperimentalTabState } from './types';
 
 /**
  * Opens {@code LogoutDialog}.
@@ -162,7 +155,6 @@ export function submitMoreTab(newState: any) {
 
         if (newState.currentLanguage !== currentState.currentLanguage) {
             i18next.changeLanguage(newState.currentLanguage);
-            storeUserSelectedLanguage(newState.currentLanguage);
 
             const { conference } = getConferenceState(state);
 
@@ -172,39 +164,6 @@ export function submitMoreTab(newState: any) {
         if (newState.showSubtitlesOnStage !== currentState.showSubtitlesOnStage) {
             dispatch(updateSettings({ showSubtitlesOnStage: newState.showSubtitlesOnStage }));
         }
-    };
-}
-
-/**
- * Submits the settings from the "Experimental" tab of the settings dialog. Only the options whose value the user
- * changed are stored, so an option they leave alone keeps following the config.
- *
- * @param {IExperimentalTabState} newState - The new settings.
- * @returns {Function}
- */
-export function submitExperimentalTab(newState: IExperimentalTabState) {
-    return (dispatch: IStore['dispatch'], getState: IStore['getState']) => {
-        const state = getState();
-        const { values: currentValues } = getExperimentalTabProps(state);
-        const newValues = newState.values ?? {};
-        const changedValues: IConfigOptionValues = {};
-
-        for (const optionId of Object.keys(newValues)) {
-            if (newValues[optionId] !== currentValues[optionId]) {
-                changedValues[optionId] = newValues[optionId];
-            }
-        }
-
-        if (Object.keys(changedValues).length === 0) {
-            return;
-        }
-
-        dispatch(updateSettings({
-            userSelectedConfig: {
-                ...state['features/base/settings'].userSelectedConfig,
-                ...changedValues
-            }
-        }));
     };
 }
 
@@ -240,23 +199,14 @@ export function submitModeratorTab(newState: any) {
                 newState.startAudioMuted, newState.startVideoMuted));
         }
 
-        if (newState.chatWithPermissionsEnabled !== currentState.chatWithPermissionsEnabled
-            || newState.privateChatWithPermissionsEnabled !== currentState.privateChatWithPermissionsEnabled
-            || newState.sharedVideoWithPermissionsEnabled !== currentState.sharedVideoWithPermissionsEnabled
-            || newState.breakoutRoomJoinWithPermissionsEnabled
-                !== currentState.breakoutRoomJoinWithPermissionsEnabled) {
+        if (newState.chatWithPermissionsEnabled !== currentState.chatWithPermissionsEnabled) {
             const { conference } = getState()['features/base/conference'];
 
             const currentPermissions = conference?.getMetadataHandler().getMetadata().permissions || {};
 
-            // One update for all the restrictions. The metadata changes only when the server
-            // confirms it, thus a second update here would not see the first one.
             conference?.getMetadataHandler().setMetadata('permissions', {
                 ...currentPermissions,
-                breakoutRoomJoinRestricted: newState.breakoutRoomJoinWithPermissionsEnabled,
-                groupChatRestricted: newState.chatWithPermissionsEnabled,
-                privateChatRestricted: newState.privateChatWithPermissionsEnabled,
-                sharedVideoRestricted: newState.sharedVideoWithPermissionsEnabled
+                groupChatRestricted: newState.chatWithPermissionsEnabled
             });
         }
 
@@ -378,11 +328,6 @@ export function submitShortcutsTab(newState: any) {
             } else {
                 dispatch(disableKeyboardShortcuts());
             }
-        }
-
-        if (currentState.showCtrlAltReactionShortcuts
-                && newState.ctrlAltReactionShortcutsEnabled !== currentState.ctrlAltReactionShortcutsEnabled) {
-            dispatch(setCtrlAltReactionShortcutsEnabled(newState.ctrlAltReactionShortcutsEnabled));
         }
     };
 }

@@ -4,11 +4,13 @@ import { debounce } from 'lodash-es';
 import React, { Component, KeyboardEvent, RefObject, createRef } from 'react';
 import { WithTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
+import { keyframes } from 'tss-react';
 import { withStyles } from 'tss-react/mui';
 
 import { createScreenSharingIssueEvent } from '../../../analytics/AnalyticsEvents';
 import { sendAnalytics } from '../../../analytics/functions';
 import { IReduxState, IStore } from '../../../app/types';
+import { isTranslationDeliveryPending } from '../../../audio-translation/functions';
 import Avatar from '../../../base/avatar/components/Avatar';
 import { isMobileBrowser } from '../../../base/environment/utils';
 import { translate } from '../../../base/i18n/functions';
@@ -22,7 +24,6 @@ import {
     hasRaisedHand,
     isLocalScreenshareParticipant,
     isScreenShareParticipant,
-    isVoiceAgentParticipant,
     isWhiteboardParticipant
 } from '../../../base/participants/functions';
 import { IParticipant } from '../../../base/participants/types';
@@ -64,8 +65,8 @@ import {
 import ThumbnailAudioIndicator from './ThumbnailAudioIndicator';
 import ThumbnailBottomIndicators from './ThumbnailBottomIndicators';
 import ThumbnailTopIndicators from './ThumbnailTopIndicators';
+import TranslationPendingChip from './TranslationPendingChip';
 import VirtualScreenshareParticipant from './VirtualScreenshareParticipant';
-import VoiceAgentIndicator from './VoiceAgentIndicator';
 
 /**
  * Module-scoped so the second-screen trigger's click handler stays stable
@@ -214,6 +215,12 @@ export interface IProps extends WithTranslation {
     _thumbnailType: string;
 
     /**
+     * Whether translated audio from this participant is still reaching other participants, so anyone about to
+     * speak should wait. Takes precedence over the dominant-speaker ring.
+     */
+    _translationDeliveryPending: boolean;
+
+    /**
      * The video object position for the participant.
      */
     _videoObjectPosition: string;
@@ -350,6 +357,29 @@ const defaultStyles = (theme: Theme) => {
         activeSpeaker: {
             '& .active-speaker-indicator': {
                 boxShadow: `inset 0px 0px 0px 3px ${theme.palette.action01Hover} !important`
+            }
+        },
+
+        translationPending: {
+            '& .translation-pending-border': {
+                animation: `${keyframes`
+                    0% {
+                        opacity: 0.45;
+                    }
+                    50% {
+                        opacity: 1;
+                    }
+                    100% {
+                        opacity: 0.45;
+                    }
+                `} 1.6s ease-in-out infinite`,
+                outline: '3px dashed #F8AE1A',
+                outlineOffset: '-1.5px',
+
+                '@media (prefers-reduced-motion: reduce)': {
+                    animation: 'none',
+                    opacity: 0.85
+                }
             }
         },
 
@@ -920,7 +950,10 @@ class Thumbnail extends Component<IProps, IState> {
             className += ` ${classes.raisedHand}`;
         }
 
-        if (!_isDominantSpeakerDisabled && _participant?.dominantSpeaker) {
+        if (this.props._translationDeliveryPending) {
+            // Others are still hearing this speaker translated; this ring replaces the dominant-speaker one.
+            className += ` ${classes.translationPending}`;
+        } else if (!_isDominantSpeakerDisabled && _participant?.dominantSpeaker) {
             className += ` ${classes.activeSpeaker} dominant-speaker`;
         }
         if (_thumbnailType !== THUMBNAIL_TYPE.TILE && _participant?.pinned) {
@@ -1026,8 +1059,7 @@ class Thumbnail extends Component<IProps, IState> {
         const video = _videoTrack && <VideoTrack
             className = { local ? videoTrackClassName : '' }
             eventHandlers = { videoEventListeners }
-            id = { local ? 'localVideo_container'
-                : isVoiceAgentParticipant(_participant) ? `participant_${id}` : `remoteVideo_${videoTrackId || ''}` }
+            id = { local ? 'localVideo_container' : `remoteVideo_${videoTrackId || ''}` }
             muted = { local ? undefined : true }
             style = { styles.video }
             videoTrack = { _videoTrack } />;
@@ -1091,8 +1123,7 @@ class Thumbnail extends Component<IProps, IState> {
                         _thumbnailType === THUMBNAIL_TYPE.TILE && 'tile-view-mode'
                     ) }>
                     <ThumbnailTopIndicators
-                        disableConnectionIndicator = { isWhiteboardParticipant(_participant)
-                            || isVoiceAgentParticipant(_participant) }
+                        disableConnectionIndicator = { isWhiteboardParticipant(_participant) }
                         hidePopover = { this._hidePopover }
                         indicatorsClassName = { classes.indicatorsBackground }
                         isHovered = { isHovered }
@@ -1103,7 +1134,6 @@ class Thumbnail extends Component<IProps, IState> {
                         thumbnailType = { _thumbnailType } />
                 </div>
                 {_shouldDisplayTintBackground && <div className = { classes.tintBackground } />}
-                {isVoiceAgentParticipant(_participant) && <VoiceAgentIndicator />}
                 {!_gifSrc && this._renderAvatar(styles.avatar) }
                 { !local && (
                     <div className = 'presence-label-container'>
@@ -1122,6 +1152,13 @@ class Thumbnail extends Component<IProps, IState> {
                     className = { clsx(classes.borderIndicator,
                     _gifSrc && classes.borderIndicatorOnTop,
                     'active-speaker-indicator') } />
+                <div
+                    className = { clsx(classes.borderIndicator,
+                    _gifSrc && classes.borderIndicatorOnTop,
+                    'translation-pending-border') } />
+                <TranslationPendingChip
+                    participantId = { id }
+                    thumbnailType = { _thumbnailType } />
                 {_gifSrc && (
                     <div
                         className = { clsx(classes.borderIndicator, classes.borderIndicatorOnTop) }
@@ -1155,11 +1192,8 @@ class Thumbnail extends Component<IProps, IState> {
             return this._renderParticipant(true);
         }
 
-        // A voice agent is a participant without a transport (a video source may follow later), so it takes the
-        // regular tile like the whiteboard does; the fake-participant tile is shared video's.
         if (fakeParticipant
             && !isWhiteboardParticipant(_participant)
-            && !isVoiceAgentParticipant(_participant)
             && !_isVirtualScreenshareParticipant
         ) {
             return this._renderFakeParticipant();
@@ -1361,6 +1395,7 @@ function _mapStateToProps(state: IReduxState, ownProps: any): Object {
         _stageFilmstripLayout: isStageFilmstripAvailable(state),
         _stageParticipantsVisible: _currentLayout === LAYOUTS.STAGE_FILMSTRIP_VIEW,
         _shouldDisplayTintBackground: !disableTintForeground && shouldDisplayTintBackground,
+        _translationDeliveryPending: isTranslationDeliveryPending(state, id),
         _thumbnailType: tileType,
         _videoObjectPosition: getVideoObjectPosition(state, participant?.id),
         _videoTrack,

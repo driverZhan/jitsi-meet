@@ -302,12 +302,7 @@ export function openTokenAuthUrl(tokenAuthServiceUrl: string): any {
                                     membersOnly?.join();
                                 })
                                 .catch((err: any) => {
-                                    // Keep the token we have just obtained: the connection was given the new token
-                                    // and may still come up with it, while dropping it here would silently put the
-                                    // participant back to being a guest with no way to tell.
-                                    dispatch(showErrorNotification({
-                                        titleKey: 'dialog.loginFailed'
-                                    }));
+                                    dispatch(setJWT());
                                     logger.error(err);
                                 });
                         } else {

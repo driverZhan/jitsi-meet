@@ -8,8 +8,7 @@ import { IGUMPendingState } from '../media/types';
 import {
     getMutedStateByParticipantAndMediaType,
     getVirtualScreenshareParticipantOwnerId,
-    isScreenShareParticipant,
-    isVoiceAgentParticipant
+    isScreenShareParticipant
 } from '../participants/functions';
 import { IParticipant } from '../participants/types';
 
@@ -36,11 +35,6 @@ export function isParticipantMediaMuted(participant: IParticipant | undefined,
         mediaType: MediaType, state: IReduxState) {
     if (!participant) {
         return false;
-    }
-
-    // An agent has no presence to report its mute state: its track is the source of truth.
-    if (isVoiceAgentParticipant(participant)) {
-        return isRemoteTrackMuted(getTrackState(state), mediaType, participant.id);
     }
 
     if (getSsrcRewritingFeatureFlag(state)) {

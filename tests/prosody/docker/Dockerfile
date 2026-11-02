@@ -21,7 +21,9 @@ USER root
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         lua-cjson \
+        lua-inspect \
         lua-luaossl \
+    && mv /usr/share/lua/5.3/inspect.lua /usr/share/lua/5.4/ \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy luarocks-installed pure-Lua libs from builder.
@@ -31,6 +33,10 @@ COPY --from=builder /usr/local/share/lua/5.4 /usr/local/share/lua/5.4
 # The tests/ directory is also copied but Prosody only loads explicitly named modules.
 COPY --chown=prosody:prosody resources/prosody-plugins/ /opt/prosody-jitsi-plugins/
 
+# inspect.lua is required by several Jitsi plugins for debug logging.
+# Provide a minimal stub so those modules load without needing luarocks.
+COPY --chown=prosody:prosody tests/prosody/docker/inspect.lua /opt/prosody-jitsi-plugins/inspect.lua
+
 COPY --chown=prosody:prosody tests/prosody/docker/prosody.cfg.lua /etc/prosody/prosody.cfg.lua
 COPY --chown=prosody:prosody tests/prosody/docker/cfg/ /etc/prosody/cfg/
 
@@ -38,8 +44,6 @@ COPY --chown=prosody:prosody tests/prosody/docker/cfg/ /etc/prosody/cfg/
 # Two separate key pairs are used: one for login tokens (mod_auth_token) and one for system
 # tokens (mod_muc_end_meeting and similar HTTP API modules).
 COPY --chown=prosody:prosody tests/prosody/fixtures/test-asap-public.pem /opt/prosody-jitsi-plugins/test-asap-public.pem
-# The login public key again as JWKS, for cache_keys_url on the main VirtualHost.
-COPY --chown=prosody:prosody tests/prosody/fixtures/test-asap-jwks.json /opt/prosody-jitsi-plugins/test-asap-jwks.json
 COPY --chown=prosody:prosody tests/prosody/fixtures/test-system-asap-public.pem /opt/prosody-jitsi-plugins/test-system-asap-public.pem
 
 # Pre-create the focus admin account (focus@auth.localhost, password "focussecret").

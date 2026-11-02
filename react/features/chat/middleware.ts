@@ -83,9 +83,7 @@ import {
     getFocusedTab,
     getUnreadCount,
     isChatDisabled,
-    isGroupChatRestricted,
     isSendGroupChatDisabled,
-    isSendPrivateChatDisabled,
     isVisitorChatParticipant
 } from './functions';
 import logger from './logger';
@@ -164,7 +162,7 @@ MiddlewareRegistry.register(store => next => action => {
             // source for it is the MESSAGE_MODERATED event from the server (XEP-0425).
             // This endpoint message path only exists so participants can bring late joiners
             // up to date, so honour it just for senders that hold the moderator role, and
-            // cap the reason.
+            // cap the reason the same way an edit is capped.
             if (participant?.isModerator?.()) {
                 _onMessageModerated(
                     store,
@@ -190,18 +188,6 @@ MiddlewareRegistry.register(store => next => action => {
             }
 
             store.dispatch(pushReactions(reactions));
-
-            // A bridge channel message does not go through the MUC, thus the
-            // server does not apply the chat restrictions of the room to it.
-            // Apply the group chat restriction here, otherwise a reaction shows
-            // in the chat of every participant while chat is restricted. The
-            // permissions of a remote participant are not known locally, thus
-            // this uses the moderator role, which is what the server gives the
-            // permissions to. The reaction itself still plays: on-screen
-            // reactions have their own moderation.
-            if (isGroupChatRestricted(state) && !participant?.isModerator?.()) {
-                break;
-            }
 
             _handleReceivedMessage(store, {
                 participantId: participant.getId(),
@@ -256,7 +242,6 @@ MiddlewareRegistry.register(store => next => action => {
 
             if (
                 isSendGroupChatDisabled(state)
-                && !isSendPrivateChatDisabled(state)
                 && privateMessageRecipient
                 && !action.participant
             ) {
@@ -460,7 +445,7 @@ MiddlewareRegistry.register(store => next => action => {
             && messageToEdit.messageType === MESSAGE_TYPE_LOCAL
             && !messageToEdit.isFromVisitor
         ) {
-            const trimmedMessage = String(action.message).trim();
+            const trimmedMessage = String(action.message).trim().slice(0, CHAR_LIMIT);
 
             if (messageToEdit.privateMessage && messageToEdit.recipientId) {
                 conference.sendMessageCorrection(
@@ -611,12 +596,7 @@ function _addChatMsgListener(conference: IJitsiConference, store: IStore) {
                 privateMessage: false
             });
 
-            // Group chat is restricted for this participant, so steer the reply
-            // into a private message. Not when private messages are restricted
-            // too: that would move them into a chat they cannot send in either.
-            if (isSendGroupChatDisabled(store.getState())
-                && !isSendPrivateChatDisabled(store.getState())
-                && participantId) {
+            if (isSendGroupChatDisabled(store.getState()) && participantId) {
                 const participant = getParticipantById(store, participantId);
 
                 store.dispatch(setPrivateMessageRecipient(participant));
@@ -657,7 +637,7 @@ function _addChatMsgListener(conference: IJitsiConference, store: IStore) {
         (participantId: string, messageId: string, message: string, timestamp?: string) => {
             store.dispatch(editMessage({
                 messageId,
-                message: String(message),
+                message: String(message).slice(0, CHAR_LIMIT),
                 editedAt: timestamp ? new Date(timestamp).getTime() : Date.now(),
                 participantId
             }));
@@ -752,12 +732,16 @@ function _onReactionReceived(store: IStore, { participantId, reactionList, messa
  * @returns {void}
  */
 function _onMessageModerated(store: IStore, messageId: string, reason?: string) {
-    if (typeof messageId !== 'string' || !messageId) {
+    const { messages } = store.getState()['features/chat'];
+
+    const originalMessage = messages.find(
+        message => message.messageId === messageId
+    );
+
+    if (!originalMessage) {
         return;
     }
 
-    // The message may not have arrived yet, in which case the reducer keeps the moderation
-    // and applies it once the message arrives.
     store.dispatch(moderateMessage(messageId, reason));
 }
 
@@ -959,11 +943,6 @@ function _handleReceivedMessage({ dispatch, getState }: IStore,
 
     dispatch(addMessage(newMessage));
 
-    // A message moderated before it arrived is added as removed (see the reducer), so its text must
-    // not reach the notification or the external API either.
-    const { pendingModerations } = state['features/chat'];
-    const isModerated = Boolean(messageId && Object.prototype.hasOwnProperty.call(pendingModerations, messageId));
-
     let notificationDisplayName = _displayName;
 
     // source can be 'token' or 'guest'. When it is 'guest', we append a guest indicator
@@ -975,7 +954,7 @@ function _handleReceivedMessage({ dispatch, getState }: IStore,
         notificationDisplayName = `${_displayName} ${getDisplayNameSuffix(newMessage)}`;
     }
 
-    if (shouldShowNotification && !isModerated) {
+    if (shouldShowNotification) {
         dispatch(showMessageNotification({
             title: notificationDisplayName,
             description: message,
@@ -988,7 +967,7 @@ function _handleReceivedMessage({ dispatch, getState }: IStore,
         // Logic for web only:
 
         APP.API.notifyReceivedChatMessage({
-            body: isModerated ? i18next.t('chat.moderatedMessage') : message,
+            body: message,
             from: participantId,
             nick: notificationDisplayName,
             privateMessage,

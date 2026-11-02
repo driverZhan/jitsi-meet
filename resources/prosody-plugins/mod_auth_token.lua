@@ -175,21 +175,6 @@ local function anonymous(self, message)
 
 sasl.registerMechanism("ANONYMOUS", {"anonymous"}, anonymous);
 
--- The <resume> is processed on the async runner of the resuming connection (from_session),
--- and the handler below can wait on it (fetching an ASAP public key that is not cached).
--- While waiting the runner pauses the connection of the session it was created for, and
--- resumes it once done, but by then update_session() has retired from_session and moved
--- the connection to the hibernating session, so the connection stays paused and nothing
--- more is read from it. Point the runner at the session that now owns the connection.
-module:hook_global('c2s-session-updated', function (event)
-    local session, from_session = event.session, event.from_session;
-    local thread = from_session.thread;
-
-    if type(thread) == 'table' and thread.data == from_session then
-        thread.data = session;
-    end
-end, 1000);
-
 -- Fired by Prosody's sessionmanager.update_session() during smacks (XEP-0198) session
 -- resumption. The naming can be counter-intuitive:
 --   event.session      (session)      – the OLD hibernating session being kept alive.
@@ -259,21 +244,16 @@ module:hook_global('c2s-session-updated', function (event)
         return;
     end
 
-    -- copy all the custom fields we set in the session, but only when from_session carries
-    -- them: a connection resumed on an anonymous host holds just the raw token (put there
-    -- by mod_jitsi_session) and no claims, so copying would discard the ones the
-    -- verification above has just put on the session.
-    if from_session._jitsi_auth_done then
-        session.auth_token = from_session.auth_token;
-        session.jitsi_meet_context_user = from_session.jitsi_meet_context_user;
-        session.jitsi_meet_context_group = from_session.jitsi_meet_context_group;
-        session.jitsi_meet_context_features = from_session.jitsi_meet_context_features;
-        session.jitsi_meet_context_room = from_session.jitsi_meet_context_room;
-        session.jitsi_meet_room = from_session.jitsi_meet_room;
-        session.jitsi_meet_str_tenant = from_session.jitsi_meet_str_tenant;
-        session.jitsi_meet_domain = from_session.jitsi_meet_domain;
-        session.jitsi_meet_tenant_mismatch = from_session.jitsi_meet_tenant_mismatch;
-    end
+    -- copy all the custom fields we set in the session
+    session.auth_token = from_session.auth_token;
+    session.jitsi_meet_context_user = from_session.jitsi_meet_context_user;
+    session.jitsi_meet_context_group = from_session.jitsi_meet_context_group;
+    session.jitsi_meet_context_features = from_session.jitsi_meet_context_features;
+    session.jitsi_meet_context_room = from_session.jitsi_meet_context_room;
+    session.jitsi_meet_room = from_session.jitsi_meet_room;
+    session.jitsi_meet_str_tenant = from_session.jitsi_meet_str_tenant;
+    session.jitsi_meet_domain = from_session.jitsi_meet_domain;
+    session.jitsi_meet_tenant_mismatch = from_session.jitsi_meet_tenant_mismatch;
 
     if reverify_rooms then
         local result = prosody.events.fire_event('jitsi-verify-session-rooms', { session = session; });

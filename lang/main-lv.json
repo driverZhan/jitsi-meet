@@ -297,6 +297,12 @@
         "microphonePermission": "Iegūstot mikrofona atļauju, radās kļūdas"
     },
     "deviceSelection": {
+        "hid": {
+            "callControl": "Zvanu kontrole",
+            "connectedDevices": "Pieslēgtās ierīces:",
+            "deleteDevice": "Dzēst ierīci",
+            "pairDevice": "Savienot ierīci pārī"
+        },
         "noPermission": "Atļauja nav piešķirta",
         "previewUnavailable": "Priekšskats nav pieejams",
         "selectADevice": "Ierīces izvēle",
@@ -1510,7 +1516,6 @@
                 "label": "Stereo"
             }
         },
-        "aiAssist": "MI asistents",
         "audioRoute": "Izvēlēties audioierīci",
         "audioSettings": "Audio iestatījumi",
         "audioTranslation": "Tulkot audio",
@@ -1525,6 +1530,7 @@
         "closeParticipantsPane": "Aizvērt dalībnieku paneli",
         "closeReactionsMenu": "Aizvērt reakciju izvēlni",
         "closedCaptions": "Slēgtie subtitri",
+        "copilot": "Copilot",
         "disableNoiseSuppression": "Atspējot trokšņu slāpēšanu",
         "disableReactionSounds": "Šai sapulcei varat atspējot reakcijas skaņas",
         "documentClose": "Aizvērt kopīgoto dokumentu",
@@ -1695,10 +1701,16 @@
         "mute": "Noklusināt",
         "muted": "Noklusināts (bez skaņas)",
         "pinToStage": "Piestiprināt tuvplānā",
+        "receivingTranslatedAudio": "Jūs saņemat tulkoto audio",
         "remoteControl": "Ieslēgt/izslēgt tālvadību",
         "screenSharing": "Dalībnieks kopīgo savu ekrānu",
         "show": "Parādīt tuvplānu",
         "showSelfView": "Rādīt pašskatu",
+        "translationEnabledForYou": "Tulkošana jums ir iespējota",
+        "translationOnAndReceiving": "Tulkošana ieslēgta · tiek saņemta",
+        "translationStillListening": "{{count}} dalībnieks joprojām klausās tulkojumu — uzgaidiet pirms runāšanas",
+        "translationStillListeningShort": "{{num}} joprojām klausās",
+        "translationStillListening_plural": "{{count}} dalībnieki joprojām klausās tulkojumu — uzgaidiet pirms runāšanas",
         "unpinFromStage": "Noņemt no tuvplāna",
         "verify": "Apstiprināt dalībnieku",
         "videoMuted": "Kamera izslēgta",

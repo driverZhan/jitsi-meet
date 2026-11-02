@@ -4,7 +4,6 @@ import { type Image } from '../virtual-background/constants';
 import {
     SET_DYNAMIC_BRANDING_DATA,
     SET_DYNAMIC_BRANDING_FAILED,
-    SET_DYNAMIC_BRANDING_ICONS,
     SET_DYNAMIC_BRANDING_READY,
     UNSET_DYNAMIC_BRANDING
 } from './actionTypes';
@@ -41,16 +40,6 @@ const DEFAULT_STATE = {
      * @type {string}
      */
     backgroundImageUrl: '',
-
-    /**
-     * Whether the branding data asked for custom icons whose content is still being loaded. The
-     * icons are applied separately from the rest of the branding, so this tells when the branded
-     * look is not complete yet.
-     *
-     * @public
-     * @type {boolean}
-     */
-    brandedIconsPending: false,
 
     /**
      * Flag indicating that the branding data can be displayed.
@@ -175,7 +164,6 @@ export interface IDynamicBrandingState {
     backgroundColor: string;
     backgroundImageUrl: string;
     brandedIcons?: Record<string, string>;
-    brandedIconsPending: boolean;
     customizationFailed: boolean;
     customizationReady: boolean;
     defaultBranding: boolean;
@@ -208,7 +196,7 @@ ReducerRegistry.register<IDynamicBrandingState>(STORE_NAME, (state = DEFAULT_STA
             avatarBackgrounds,
             backgroundColor,
             backgroundImageUrl,
-            customIcons,
+            brandedIcons,
             defaultBranding,
             didPageUrl,
             groupChatRequiresPermission,
@@ -231,7 +219,7 @@ ReducerRegistry.register<IDynamicBrandingState>(STORE_NAME, (state = DEFAULT_STA
             avatarBackgrounds,
             backgroundColor,
             backgroundImageUrl,
-            brandedIconsPending: Boolean(customIcons),
+            brandedIcons,
             defaultBranding,
             didPageUrl,
             groupChatRequiresPermission,
@@ -261,13 +249,6 @@ ReducerRegistry.register<IDynamicBrandingState>(STORE_NAME, (state = DEFAULT_STA
             useDynamicBrandingData: true
         };
     }
-    case SET_DYNAMIC_BRANDING_ICONS:
-        return {
-            ...state,
-            brandedIcons: action.icons,
-            brandedIconsPending: false
-        };
-
     case SET_DYNAMIC_BRANDING_READY:
         return {
             ...state,

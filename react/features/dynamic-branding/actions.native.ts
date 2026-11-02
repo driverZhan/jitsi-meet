@@ -21,7 +21,7 @@ import logger from './logger';
 export function fetchCustomBrandingData() {
     return async function(dispatch: IStore['dispatch'], getState: IStore['getState']) {
         const state = getState();
-        const dynamicBrandingUrl = getDynamicBrandingUrl(state);
+        const dynamicBrandingUrl = await getDynamicBrandingUrl(state);
 
         if (dynamicBrandingUrl) {
             try {

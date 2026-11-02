@@ -48,14 +48,12 @@ import '../room-lock/middleware';
 import '../rtcstats/middleware';
 import '../speaker-stats/middleware';
 import '../subtitles/middleware';
-import '../system-wide-user-notification/middleware';
 import '../time-timer/middleware';
 import '../transcribing/middleware';
 import '../video-layout/middleware';
 import '../video-quality/middleware';
 import '../videosipgw/middleware';
 import '../visitors/middleware';
-import '../voice-agents/middleware';
 import '../whiteboard/middleware.any';
 
 import './middleware';
