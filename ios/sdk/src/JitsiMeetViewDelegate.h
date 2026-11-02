@@ -70,9 +70,36 @@
 - (void)participantLeft:(NSDictionary *)data;
 
 /**
- * Called when audioMuted state changed.
+ * Called when a participant's video view is ready.
  *
- * The `data` dictionary contains a `muted` key with state of the audioMuted for the localParticipant.
+ * The `data` dictionary contains:
+ *   - `participantId` (NSString): the endpoint id of the participant whose
+ *     view is now ready. This is always the conference-wide endpoint id, also
+ *     for the local participant, so it can be used directly with
+ *     findParticipantViewByEndpointId:completion:, detachParticipantView:...
+ *     and setParticipantViewLayout:frame:.
+ *   - `isLocal` (BOOL): YES if the view belongs to the local participant.
+ *   - `reactTag` (NSNumber, optional): the React Native tag of the view.
+ *
+ * Since the endpoint id of the local participant is only known once the
+ * conference has been joined, the event for the local participant is delivered
+ * after conferenceJoined:.
+ *
+ * Each view is tagged with a nativeID of the form
+ * "participant-<participantId>". When the custom-layout.enabled feature flag
+ * is set to YES, the default meeting layout is disabled and participant video
+ * views are rendered in a minimal container.
+ */
+- (void)participantViewReady:(NSDictionary *)data;
+
+/**
+ * Called when a participant's audio mute state changes.
+ *
+ * The `data` dictionary contains:
+ *   - `muted` (BOOL): the new audio mute state.
+ *   - `participantId` (NSString): the id of the participant whose audio mute
+ *     state changed. For the local participant, this is the local
+ *     participant's id.
  */
 - (void)audioMutedChanged:(NSDictionary *)data;
 
@@ -105,9 +132,13 @@
 - (void)chatToggled:(NSDictionary *)data;
 
 /**
- * Called when videoMuted state changed.
+ * Called when a participant's video mute state changes.
  *
- * The `data` dictionary contains a `muted` key with state of the videoMuted for the localParticipant.
+ * The `data` dictionary contains:
+ *   - `muted` (BOOL): the new video mute state.
+ *   - `participantId` (NSString): the id of the participant whose video mute
+ *     state changed. For the local participant, this is the local
+ *     participant's id.
  */
 - (void)videoMutedChanged:(NSDictionary *)data;
 
@@ -143,5 +174,27 @@
  * The `data` dictionary contains a `sessionData` key.
  */
 - (void)recordingStatusChanged:(NSDictionary *)data;
+
+/**
+ * Called when a participant's network/connection quality crosses into a
+ * degraded state or recovers from it. Emitted for every participant (local and
+ * remote) on each client, so the host app can decide how to surface a hint such
+ * as "<displayName> 当前网络较差".
+ *
+ * The `data` dictionary contains:
+ *   - `participantId` (NSString): the participant the transition is about.
+ *   - `displayName` (NSString): display name of that participant.
+ *   - `isLocal` (NSNumber/BOOL): whether it is the local participant.
+ *   - `status` (NSString): 'degraded' or 'recovered'.
+ *   - `level` (NSString): 'good' | 'nonoptimal' | 'poor' | 'critical'.
+ *   - `reason` (NSString, present when degraded): 'lowUplink' | 'packetLoss' |
+ *     'videoDegraded' | 'videoCut'.
+ *   - `connectionQuality` (NSNumber 0-100): scalar uplink quality.
+ *   - `metricsJson` (NSString): a JSON string with the nested metrics
+ *     { bitrate, jvbRTT, maxEnabledResolution, packetLoss }. Parse it with
+ *     NSJSONSerialization. (Same field is provided on Android so both platforms
+ *     share one schema.)
+ */
+- (void)participantNetworkQualityChanged:(NSDictionary *)data;
 
 @end

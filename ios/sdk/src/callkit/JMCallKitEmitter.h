@@ -15,21 +15,21 @@
  * limitations under the License.
  */
 
-#import <CallKit/CallKit.h>
-#import <Foundation/Foundation.h>
-#import "JMCallKitListener.h"
+//#import <CallKit/CallKit.h>
+//#import <Foundation/Foundation.h>
+//#import "JMCallKitListener.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface JMCallKitEmitter : NSObject <CXProviderDelegate>
-
-#pragma mark Add/Remove listeners
-- (void)addListener:(id<JMCallKitListener>)listener;
-- (void)removeListener:(id<JMCallKitListener>)listener;
-
-#pragma mark Add mute action
-- (void)addMuteAction:(NSUUID *)actionUUID;
-
-@end
+//@interface JMCallKitEmitter : NSObject <CXProviderDelegate>
+//
+//#pragma mark Add/Remove listeners
+//- (void)addListener:(id<JMCallKitListener>)listener;
+//- (void)removeListener:(id<JMCallKitListener>)listener;
+//
+//#pragma mark Add mute action
+//- (void)addMuteAction:(NSUUID *)actionUUID;
+//
+//@end
 
 NS_ASSUME_NONNULL_END

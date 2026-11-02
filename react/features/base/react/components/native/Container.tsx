@@ -10,6 +10,12 @@ import AbstractContainer, { IProps as AbstractProps } from '../AbstractContainer
 
 interface IProps extends AbstractProps {
 
+    /**
+     * An identifier that can be used to locate this view in the native view
+     * hierarchy (Android). Maps to the view's id/tag.
+     */
+    nativeID?: string;
+
     onClick?: (e: GestureResponderEvent) => void;
 
     /**
@@ -19,6 +25,13 @@ interface IProps extends AbstractProps {
     onLongPress?: (e: GestureResponderEvent) => void;
 
     pointerEvents?: string;
+
+    /**
+     * An identifier that maps to {@code accessibilityIdentifier} on iOS,
+     * allowing the host app to locate this view via recursive view-hierarchy
+     * search.
+     */
+    testID?: string;
 }
 
 /**

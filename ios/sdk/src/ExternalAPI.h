@@ -22,6 +22,12 @@ static NSString * const sendEventNotificationName = @"org.jitsi.meet.SendEvent";
 
 + (ExternalAPI *)sharedInstance;
 
+/**
+ * Remembers the avatar-hidden value when it is set before the React Native
+ * module exists; replayed once the JS side starts observing events.
+ */
++ (void)setPendingAvatarHidden:(BOOL)hidden;
+
 - (void)sendHangUp;
 - (void)sendSetAudioMuted:(BOOL)muted;
 - (void)sendEndpointTextMessage:(NSString*)message :(NSString*)to;
@@ -39,5 +45,9 @@ static NSString * const sendEventNotificationName = @"org.jitsi.meet.SendEvent";
 - (void)stopRecording:(NSString*)mode :(BOOL)transcription;
 - (void)overwriteConfig:(NSDictionary*)config;
 - (void)sendCameraFacingModeMessage:(NSString*)to :(NSString*)facingMode;
+- (void)sendSetParticipantViewLayout:(NSString*)participantId frame:(CGRect)frame;
+- (void)sendClearParticipantViewLayout:(NSString*)participantId;
+- (void)sendSetAvatarHidden:(BOOL)hidden;
+- (void)sendSetAudioDevice:(NSString*)device;
 
 @end

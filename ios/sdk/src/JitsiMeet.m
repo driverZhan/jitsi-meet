@@ -166,22 +166,39 @@
 }
 
 - (JitsiMeetConferenceOptions *)getInitialConferenceOptions {
-    if (_launchOptions[UIApplicationLaunchOptionsURLKey]) {
-        NSURL *url = _launchOptions[UIApplicationLaunchOptionsURLKey];
-        return [JitsiMeetConferenceOptions fromBuilder:^(JitsiMeetConferenceOptionsBuilder *builder) {
-            builder.room = [url absoluteString];
+    
+    return [JitsiMeetConferenceOptions fromBuilder:^(JitsiMeetConferenceOptionsBuilder * _Nonnull builder) {
+        builder.serverURL = [NSURL URLWithString:@"https://tmeeting.maesgroup.com:8443"];
+        builder.room = @"78901234";
+        JitsiMeetUserInfo *userInfo = [[JitsiMeetUserInfo alloc] init];
+        userInfo.displayName = @"testName";
+        userInfo.avatar = [NSURL URLWithString:@"https://video.melinked.com/2026/06/b0867701-415a-4f49-83fb-3a043598292d.jpg?imageView2/2/w/400/q/75/format/webp|imageslim"];
+        builder.userInfo = userInfo;
+        
+        [builder setConfigOverride:@"prejoinConfig" withDictionary:@{
+            @"enabled": @(NO),
+            @"hideDisplayName": @(YES),
+            @"hideExtraJoinButtons": @[@"no-audio",@"by-phone"]
         }];
-    } else {
-        NSDictionary *userActivityDictionary
-            = _launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey];
-        NSUserActivity *userActivity
-            = [userActivityDictionary objectForKey:@"UIApplicationLaunchOptionsUserActivityKey"];
-        if (userActivity != nil) {
-            return [self optionsFromUserActivity:userActivity];
-        }
-    }
-
-    return nil;
+//        [builder setFeatureFlag:@"custom-layout.enabled" withBoolean:YES];
+    }];
+    
+//    if (_launchOptions[UIApplicationLaunchOptionsURLKey]) {
+//        NSURL *url = _launchOptions[UIApplicationLaunchOptionsURLKey];
+//        return [JitsiMeetConferenceOptions fromBuilder:^(JitsiMeetConferenceOptionsBuilder *builder) {
+//            builder.room = [url absoluteString];
+//        }];
+//    } else {
+//        NSDictionary *userActivityDictionary
+//            = _launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey];
+//        NSUserActivity *userActivity
+//            = [userActivityDictionary objectForKey:@"UIApplicationLaunchOptionsUserActivityKey"];
+//        if (userActivity != nil) {
+//            return [self optionsFromUserActivity:userActivity];
+//        }
+//    }
+//
+//    return nil;
 }
 
 - (BOOL)isCrashReportingDisabled {

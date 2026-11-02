@@ -21,20 +21,61 @@ import UIKit
 
 import JitsiMeetSDK
 
+
 @objcMembers
 class ViewController: UIViewController {
     
-    override func loadView() {
-        let jitsiView = JitsiMeetView(frame: UIScreen.main.bounds)
-        self.view = jitsiView
-    }
+    var meet: JitsiMeetView!
+    
+    lazy var main: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .red
+        return view
+    }()
+    
+    lazy var strip: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .orange
+        return view
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        guard let view = self.view as? JitsiMeetView else { return }
-        view.delegate = self
-        view.join(JitsiMeet.sharedInstance().getInitialConferenceOptions())
+        let btn = UIButton(type: .system)
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        btn.setTitle("开始", for: .normal)
+        view.addSubview(btn)
+        btn.backgroundColor = .systemCyan
+        btn.addTarget(self, action: #selector(self.start), for: .touchUpInside)
+        
+        NSLayoutConstraint.activate([
+            btn.widthAnchor.constraint(equalToConstant: 100),
+            btn.heightAnchor.constraint(equalToConstant: 100),
+            btn.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            btn.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+        ])
+        
+
+//        
+//        
+//        
+//        
+//        let jitsiView = JitsiMeetView(frame: UIScreen.main.bounds)
+////        view.addSubview(jitsiView)
+//        jitsiView.delegate = self
+//        jitsiView.join(JitsiMeet.sharedInstance().getInitialConferenceOptions())
+//        meet = jitsiView
+//        meet.setAvatarHidden(true)
+        
+    }
+    
+    func start() {
+        let meetVc = MeetController()
+        meetVc.modalPresentationStyle  = .fullScreen
+        present(meetVc, animated: true)
     }
     
     // MARK: - Helper Methods
@@ -86,9 +127,49 @@ extension ViewController: @preconcurrency JitsiMeetViewDelegate {
             self.userActivity = userActivity
             userActivity.becomeCurrent()
         }
+        
+    
     }
     
     func ready(toClose data: [AnyHashable: Any]) {
         onJitsiMeetViewDelegateEvent("READY_TO_CLOSE", withData: data)
     }
+    
+    func participantViewReady(_ data: [AnyHashable : Any]!) {
+        guard let info = data as? [String: Any] else { return }
+        print("custom delegate participantViewReady  \(String(describing: data))");
+        if let participantId = info["participantId"] as? String, let isLocal: Bool = info["isLocal"] as? Bool {
+
+            if (isLocal) {
+                meet.detachParticipantView(participantId, container: strip) { view in
+                    guard view != nil else {
+                        print("custom delegate detach 失败: \(participantId)  isLocal:\(isLocal)")
+                        return
+                    }
+                }
+            }else {
+                meet.detachParticipantView(participantId, container: main) { view in
+                    guard view != nil else {
+                        print("custom delegate detach 失败: \(participantId)  isLocal:\(isLocal)")
+                        return
+                    }
+                }
+            }
+        }
+        
+    }
+    
+    
+    func videoMutedChanged(_ data: [AnyHashable : Any]!) {
+        print("custom delegate videoMutedChanged  \(String(describing: data))");
+    }
+    
+    func audioMutedChanged(_ data: [AnyHashable : Any]!) {
+        print("custom delegate audioMutedChanged  \(String(describing: data))");
+    }
+    
+    func printViewIdenti(_ view: UIView) {
+        print("custom delegate  accessibilityIdentifier = \(String(describing: view.accessibilityIdentifier))")
+    }
+    
 }

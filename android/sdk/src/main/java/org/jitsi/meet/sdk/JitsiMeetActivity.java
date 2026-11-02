@@ -330,6 +330,86 @@ public class JitsiMeetActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Called when a participant's video view is ready in custom layout mode.
+     * The host app can override this to handle the event and use the
+     * participantId to locate the corresponding native View via
+     * {@code findViewById} using the nativeID
+     * {@code "participant-<participantId>"}.
+     *
+     * @param extraData - A {@link HashMap} containing the participantId.
+     */
+    protected void onParticipantViewReady(HashMap<String, Object> extraData) {
+        try {
+            JitsiMeetLogger.i("Participant view ready: ", extraData);
+        } catch (Exception e) {
+            JitsiMeetLogger.w("Invalid participant view ready extraData", e);
+        }
+    }
+
+    /**
+     * Called when a participant's audio mute state changes.
+     *
+     * @param data - A {@link HashMap} containing:
+     *               {@code muted} (boolean) - the new mute state, and
+     *               {@code participantId} (String) - the id of the participant.
+     *               For the local participant, {@code participantId} is the
+     *               local participant's id.
+     */
+    protected void onAudioMutedChanged(HashMap<String, Object> data) {
+        try {
+            JitsiMeetLogger.i("Audio muted changed: ", data);
+        } catch (Exception e) {
+            JitsiMeetLogger.w("Invalid audio muted changed data", e);
+        }
+    }
+
+    /**
+     * Called when a participant's video mute state changes.
+     *
+     * @param data - A {@link HashMap} containing:
+     *               {@code muted} (boolean) - the new mute state, and
+     *               {@code participantId} (String) - the id of the participant.
+     *               For the local participant, {@code participantId} is the
+     *               local participant's id.
+     */
+    protected void onVideoMutedChanged(HashMap<String, Object> data) {
+        try {
+            JitsiMeetLogger.i("Video muted changed: ", data);
+        } catch (Exception e) {
+            JitsiMeetLogger.w("Invalid video muted changed data", e);
+        }
+    }
+
+    /**
+     * Called when a participant's network/connection quality crosses into a
+     * degraded state or recovers from it. Emitted for every participant (local
+     * and remote), so the host app can surface a hint such as
+     * "&lt;displayName&gt; 当前网络较差".
+     *
+     * Note: the SDK's broadcast bridge stringifies each extra, so scalar values
+     * (e.g. {@code connectionQuality}) arrive as strings and nested metrics are
+     * carried in {@code metricsJson} as a JSON string (parse it with
+     * {@code new JSONObject(...)}) so Android hosts get the same structured data
+     * as iOS hosts.
+     *
+     * @param data - A {@link HashMap} containing: {@code participantId},
+     *               {@code displayName}, {@code isLocal}, {@code status}
+     *               ('degraded' | 'recovered'), {@code level}
+     *               ('good' | 'nonoptimal' | 'poor' | 'critical'), {@code reason}
+     *               ('lowUplink' | 'packetLoss' | 'videoDegraded' | 'videoCut'),
+     *               {@code connectionQuality} (0-100), and {@code metricsJson}
+     *               (JSON string of bitrate, jvbRTT, maxEnabledResolution,
+     *               packetLoss).
+     */
+    protected void onParticipantNetworkQualityChanged(HashMap<String, Object> data) {
+        try {
+            JitsiMeetLogger.i("Participant network quality changed: ", data);
+        } catch (Exception e) {
+            JitsiMeetLogger.w("Invalid participant network quality changed data", e);
+        }
+    }
+
     protected void onReadyToClose() {
         JitsiMeetLogger.i("SDK is ready to close");
         isReadyToClose = true;
@@ -431,6 +511,18 @@ public class JitsiMeetActivity extends AppCompatActivity
                     break;
                 case PARTICIPANT_LEFT:
                     onParticipantLeft(event.getData());
+                    break;
+                case PARTICIPANT_VIEW_READY:
+                    onParticipantViewReady(event.getData());
+                    break;
+                case AUDIO_MUTED_CHANGED:
+                    onAudioMutedChanged(event.getData());
+                    break;
+                case VIDEO_MUTED_CHANGED:
+                    onVideoMutedChanged(event.getData());
+                    break;
+                case PARTICIPANT_NETWORK_QUALITY_CHANGED:
+                    onParticipantNetworkQualityChanged(event.getData());
                     break;
                 case READY_TO_CLOSE:
                     onReadyToClose();

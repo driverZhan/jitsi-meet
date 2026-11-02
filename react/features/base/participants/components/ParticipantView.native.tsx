@@ -1,5 +1,13 @@
 import React, { Component } from 'react';
-import { GestureResponderEvent, Text, TextStyle, View, ViewStyle } from 'react-native';
+import {
+    findNodeHandle,
+    GestureResponderEvent,
+    NativeModules,
+    Text,
+    TextStyle,
+    View,
+    ViewStyle
+} from 'react-native';
 import { connect } from 'react-redux';
 
 import { IReduxState } from '../../../app/types';
@@ -11,6 +19,7 @@ import SharedVideo from '../../../shared-video/components/native/SharedVideo';
 import { isSharedVideoEnabled } from '../../../shared-video/functions';
 import { IStateful } from '../../app/types';
 import Avatar from '../../avatar/components/Avatar';
+import { getCurrentConference } from '../../conference/functions';
 import { translate } from '../../i18n/functions';
 import VideoTrack from '../../media/components/native/VideoTrack';
 import { shouldRenderVideoTrack } from '../../media/functions';
@@ -25,9 +34,39 @@ import { getParticipantById, getParticipantDisplayName, isSharedVideoParticipant
 import styles from './styles';
 
 /**
+ * Module-level set of endpoint IDs for which a PARTICIPANT_VIEW_READY event
+ * has already been sent. Prevents duplicate notifications when ParticipantView
+ * re-mounts due to layout switches.
+ */
+const _notifiedParticipants = new Set<string>();
+
+/**
  * The type of the React {@link Component} props of {@link ParticipantView}.
  */
 interface IProps {
+
+    /**
+     * Whether participant avatars (shown when the video is off) should be
+     * hidden, as requested by the native host app via setAvatarHidden.
+     */
+    _avatarHidden: boolean;
+
+    /**
+     * The endpoint id of the participant which this component represents, i.e.
+     * the conference-wide stable id. Undefined until it is known (the local
+     * participant only gets one once the conference has been joined).
+     *
+     * @private
+     */
+    _endpointId?: string;
+
+    /**
+     * Whether the participant which this component represents is the local
+     * one.
+     *
+     * @private
+     */
+    _isLocal: boolean;
 
     /**
      * Whether the connection is inactive or not.
@@ -132,6 +171,59 @@ interface IProps {
 class ParticipantView extends Component<IProps> {
 
     /**
+     * Implements React's {@link Component#componentDidMount()}.
+     *
+     * @inheritdoc
+     * @returns {void}
+     */
+    override componentDidMount() {
+        this._maybeNotifyViewReady();
+    }
+
+    /**
+     * Implements React's {@link Component#componentDidUpdate()}.
+     *
+     * The endpoint id of the local participant is only known once the
+     * conference has been joined, so the notification may have to wait for a
+     * later render.
+     *
+     * @inheritdoc
+     * @returns {void}
+     */
+    override componentDidUpdate() {
+        this._maybeNotifyViewReady();
+    }
+
+    /**
+     * Fires a PARTICIPANT_VIEW_READY event via the ExternalAPI native module
+     * once the view has been rendered and the participant's endpoint id is
+     * known. The event includes the endpoint id (as participantId), whether
+     * the participant is the local one and the native reactTag so the host app
+     * can locate the view directly via RCTUIManager (iOS) or UIHierarchy
+     * search (Android).
+     *
+     * @private
+     * @returns {void}
+     */
+    _maybeNotifyViewReady() {
+        const { _endpointId, _isLocal } = this.props;
+
+        if (!_endpointId || _notifiedParticipants.has(_endpointId)) {
+            return;
+        }
+
+        _notifiedParticipants.add(_endpointId);
+
+        const reactTag = findNodeHandle(this);
+
+        NativeModules.ExternalAPI?.sendEvent?.('PARTICIPANT_VIEW_READY', {
+            isLocal: _isLocal,
+            participantId: _endpointId,
+            reactTag: reactTag ?? undefined
+        });
+    }
+
+    /**
      * Renders the inactive connection status label.
      *
      * @private
@@ -170,6 +262,7 @@ class ParticipantView extends Component<IProps> {
      */
     override render() {
         const {
+            _avatarHidden,
             _isConnectionInactive,
             _isSharedVideoParticipant,
             _renderVideo: renderVideo,
@@ -188,11 +281,13 @@ class ParticipantView extends Component<IProps> {
 
         return (
             <Container
+                nativeID = { `positioned-participant-${this.props.participantId}` }
                 onClick = { renderVideo || renderSharedVideo ? undefined : onPress }
                 style = {{
                     ...styles.participantView,
                     ...this.props.style
                 }}
+                testID = { `positioned-participant-${this.props.participantId}` }
                 touchFeedback = { false }>
 
                 <TestHint
@@ -210,7 +305,7 @@ class ParticipantView extends Component<IProps> {
                         zOrder = { this.props.zOrder }
                         zoomEnabled = { this.props.zoomEnabled } /> }
 
-                { !renderSharedVideo && !renderVideo
+                { !renderSharedVideo && !renderVideo && !_avatarHidden
                     && <View style = { styles.avatarContainer as ViewStyle }>
                         <Avatar
                             participantId = { this.props.participantId }
@@ -238,9 +333,20 @@ function _mapStateToProps(state: IReduxState, ownProps: any) {
     const { disableVideo, participantId } = ownProps;
     const participant = getParticipantById(state, participantId);
     const videoTrack = getVideoTrackByParticipant(state, participant);
+    const isLocal = Boolean(participant?.local);
+
+    // The local participant only gets its endpoint id once the conference has
+    // been joined (until then it is LOCAL_PARTICIPANT_DEFAULT_ID), while the id
+    // of a remote participant already is its endpoint id.
+    const endpointId = isLocal
+        ? getCurrentConference(state)?.myUserId()
+        : participantId;
 
     return {
+        _avatarHidden: state['features/mobile/external-api']?.avatarHidden ?? false,
+        _endpointId: endpointId,
         _isConnectionInactive: isTrackStreamingStatusInactive(videoTrack),
+        _isLocal: isLocal,
         _isSharedVideoParticipant: isSharedVideoParticipant(participant),
         _participantName: getParticipantDisplayName(state, participantId),
         _renderVideo: shouldRenderParticipantVideo(state, participantId) && !disableVideo,

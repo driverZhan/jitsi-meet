@@ -68,7 +68,9 @@ function _setMuted(store: IStore, { ensureTrack, muted }: {
 
         if (jitsiTrack) {
             setTrackMuted(jitsiTrack, muted, state, dispatch)
-                .catch(() => dispatch(trackMuteUnmuteFailed(localTrack, muted)));
+                .catch((error: Error) => {
+                    dispatch(trackMuteUnmuteFailed(localTrack, muted));
+                });
         }
     } else if (!muted && ensureTrack) {
         dispatch(createLocalTracksA({ devices: [ MEDIA_TYPE.AUDIO ] }));

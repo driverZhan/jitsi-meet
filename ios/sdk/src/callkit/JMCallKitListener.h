@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-#import <AVKit/AVKit.h>
-#import <CallKit/CallKit.h>
-#import <Foundation/Foundation.h>
-
-@protocol JMCallKitListener <NSObject>
-
-@optional
-- (void)providerDidReset;
-- (void)performAnswerCallWithUUID:(nonnull NSUUID *)UUID;
-- (void)performEndCallWithUUID:(nonnull NSUUID *)UUID;
-- (void)performSetMutedCallWithUUID:(nonnull NSUUID *)UUID isMuted:(BOOL)isMuted;
-- (void)performStartCallWithUUID:(nonnull NSUUID *)UUID isVideo:(BOOL)isVideo;
-- (void)providerDidActivateAudioSessionWithSession:(nonnull AVAudioSession *)session;
-- (void)providerDidDeactivateAudioSessionWithSession:(nonnull AVAudioSession *)session;
-- (void)providerTimedOutPerformingActionWithAction:(nonnull CXAction *)action;
-
-@end
+//#import <AVKit/AVKit.h>
+////#import <CallKit/CallKit.h>
+//#import <Foundation/Foundation.h>
+//
+//@protocol JMCallKitListener <NSObject>
+//
+//@optional
+//- (void)providerDidReset;
+//- (void)performAnswerCallWithUUID:(nonnull NSUUID *)UUID;
+//- (void)performEndCallWithUUID:(nonnull NSUUID *)UUID;
+//- (void)performSetMutedCallWithUUID:(nonnull NSUUID *)UUID isMuted:(BOOL)isMuted;
+//- (void)performStartCallWithUUID:(nonnull NSUUID *)UUID isVideo:(BOOL)isVideo;
+//- (void)providerDidActivateAudioSessionWithSession:(nonnull AVAudioSession *)session;
+//- (void)providerDidDeactivateAudioSessionWithSession:(nonnull AVAudioSession *)session;
+//- (void)providerTimedOutPerformingActionWithAction:(nonnull CXAction *)action;
+//
+//@end

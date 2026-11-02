@@ -19,20 +19,28 @@ package org.jitsi.meet.sdk;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.facebook.react.ReactHost;
 import com.facebook.react.runtime.ReactSurfaceImpl;
+import com.facebook.react.uimanager.util.ReactFindViewUtil;
 
 import org.jitsi.meet.sdk.log.JitsiMeetLogger;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class JitsiMeetView extends FrameLayout {
@@ -46,6 +54,47 @@ public class JitsiMeetView extends FrameLayout {
      * React Native surface.
      */
     private ReactSurfaceImpl reactSurface;
+
+    /**
+     * Callback used to deliver the result of an asynchronous participant
+     * view lookup.
+     */
+    public interface ParticipantViewCallback {
+
+        /**
+         * Invoked on the main thread with the resolved view, or null if the
+         * view could not be found in time.
+         */
+        void onComplete(@Nullable View view);
+    }
+
+    /**
+     * Number of lookup attempts before giving up. Native views are mounted
+     * asynchronously after the JS commit, so the view may not exist yet when
+     * the lookup starts.
+     */
+    private static final int PARTICIPANT_VIEW_LOOKUP_MAX_ATTEMPTS = 30;
+
+    /**
+     * Delay in milliseconds between lookup attempts.
+     */
+    private static final long PARTICIPANT_VIEW_LOOKUP_RETRY_DELAY_MS = 100;
+
+    /**
+     * Participant views detached into native containers, keyed by participant
+     * id. Held weakly: React Native still owns the views and may destroy them
+     * at any time (e.g. participant left).
+     */
+    private final Map<String, WeakReference<View>> detachedParticipantViews = new HashMap<>();
+
+    /**
+     * The original React Native parents of detached participant views, keyed
+     * by participant id, so views can be given back to React Native before
+     * they are unmounted.
+     */
+    private final Map<String, WeakReference<ViewGroup>> detachedParticipantParents = new HashMap<>();
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     /**
      * Helper method to recursively merge 2 {@link Bundle} objects representing React Native props.
@@ -158,6 +207,165 @@ public class JitsiMeetView extends FrameLayout {
                 JitsiMeetLogger.e(re, "Failed to enter PiP mode");
             }
         }
+    }
+
+    /**
+     * Finds the native view rendering the given participant's video, waiting
+     * for it to be mounted if necessary (native views are mounted
+     * asynchronously after the JS commit).
+     *
+     * Do NOT manually reparent or resize the returned view: React Native owns
+     * it and will undo such changes. Use
+     * {@link #detachParticipantView(String, ViewGroup, ParticipantViewCallback)}
+     * to host the view in a native container.
+     *
+     * @param participantId the participant id, e.g. from the
+     * PARTICIPANT_VIEW_READY event.
+     * @param callback invoked on the main thread with the view, or null.
+     */
+    public void findParticipantView(String participantId, ParticipantViewCallback callback) {
+        findViewWithNativeId(
+            "participant-" + participantId,
+            PARTICIPANT_VIEW_LOOKUP_MAX_ATTEMPTS,
+            callback);
+    }
+
+    /**
+     * Detaches a participant's video view from the in-meeting layout and moves
+     * it into the given native container.
+     *
+     * Internally this asks the JavaScript side to render the participant in a
+     * standalone wrapper sized like the container (so React Native keeps
+     * applying a layout which is correct inside the container), waits for the
+     * wrapper to be mounted and then reparents it into the container.
+     *
+     * Requires the custom-layout.enabled feature flag and a laid out
+     * container. If the container is resized, call this method again to update
+     * the view's size. Call {@link #reattachParticipantView(String)} before
+     * removing the container, and do not keep strong references to the
+     * returned view: React Native still owns it and destroys it when the
+     * participant leaves.
+     *
+     * @param participantId the participant id.
+     * @param container the native view group which should host the
+     * participant view.
+     * @param callback invoked on the main thread with the detached view
+     * (already added to the container, filling it), or null if the view could
+     * not be found in time.
+     */
+    public void detachParticipantView(
+            String participantId, ViewGroup container, ParticipantViewCallback callback) {
+        if (!container.isLaidOut()) {
+            // The container has no size yet; wait for its first layout pass.
+            container.post(() -> detachParticipantView(participantId, container, callback));
+            return;
+        }
+
+        // 1. Ask the JS side to move this participant into a standalone,
+        // absolutely positioned wrapper sized like the container. Using origin
+        // (0, 0) means any subsequent React Native layout pass produces a
+        // layout which is also correct inside the native container.
+        float density = getResources().getDisplayMetrics().density;
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(
+            BroadcastIntentHelper.buildSetParticipantViewLayoutIntent(
+                participantId,
+                0,
+                0,
+                container.getWidth() / density,
+                container.getHeight() / density));
+
+        // 2. Wait for the wrapper (positioned-participant-<id>) to be mounted,
+        // then move it into the native container. The wrapper id is distinct
+        // from the grid views so the old grid view can never be picked up.
+        findViewWithNativeId(
+            "positioned-participant-" + participantId,
+            PARTICIPANT_VIEW_LOOKUP_MAX_ATTEMPTS,
+            view -> {
+                if (view == null) {
+                    callback.onComplete(null);
+                    return;
+                }
+
+                ViewGroup parent = (ViewGroup) view.getParent();
+
+                // Guard: the wrapper must be the only child of its dedicated
+                // holder view. If it is not (e.g. the holder got flattened
+                // away), reparenting it would shift the mounting indices of
+                // unrelated sibling views. Refuse to detach in that case.
+                if (parent != null && parent != container && parent.getChildCount() != 1) {
+                    JitsiMeetLogger.w(
+                        "detachParticipantView: unexpected parent with "
+                            + parent.getChildCount() + " children, refusing to detach "
+                            + participantId);
+                    callback.onComplete(null);
+                    return;
+                }
+
+                if (parent != container) {
+                    // Remember the React Native parent so the view can be
+                    // given back before React Native unmounts it.
+                    if (parent != null) {
+                        detachedParticipantParents.put(participantId, new WeakReference<>(parent));
+                        parent.removeView(view);
+                    }
+
+                    container.addView(
+                        view,
+                        new ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT));
+                }
+
+                detachedParticipantViews.put(participantId, new WeakReference<>(view));
+
+                callback.onComplete(view);
+            });
+    }
+
+    /**
+     * Returns a participant view previously detached with
+     * {@link #detachParticipantView(String, ViewGroup, ParticipantViewCallback)}
+     * back to the in-meeting layout (default grid).
+     *
+     * @param participantId the participant id.
+     */
+    public void reattachParticipantView(String participantId) {
+        WeakReference<View> viewRef = detachedParticipantViews.remove(participantId);
+        WeakReference<ViewGroup> parentRef = detachedParticipantParents.remove(participantId);
+        View view = viewRef != null ? viewRef.get() : null;
+        ViewGroup parent = parentRef != null ? parentRef.get() : null;
+
+        // Give the view back to its React Native parent so the unmount caused
+        // by clearing the layout finds the view where React Native expects it.
+        if (view != null && parent != null && view.getParent() != parent) {
+            ViewGroup current = (ViewGroup) view.getParent();
+            if (current != null) {
+                current.removeView(view);
+            }
+            parent.addView(view);
+        }
+
+        LocalBroadcastManager.getInstance(getContext()).sendBroadcast(
+            BroadcastIntentHelper.buildClearParticipantViewLayoutIntent(participantId));
+    }
+
+    /**
+     * Recursively searches this view's hierarchy for a view with the given
+     * nativeID, retrying on the main thread until found or the attempts are
+     * exhausted.
+     */
+    private void findViewWithNativeId(
+            String nativeId, int attempts, ParticipantViewCallback callback) {
+        View view = ReactFindViewUtil.findView(this, nativeId);
+
+        if (view != null || attempts <= 1) {
+            callback.onComplete(view);
+            return;
+        }
+
+        mainHandler.postDelayed(
+            () -> findViewWithNativeId(nativeId, attempts - 1, callback),
+            PARTICIPANT_VIEW_LOOKUP_RETRY_DELAY_MS);
     }
 
     /**

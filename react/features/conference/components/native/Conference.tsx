@@ -14,6 +14,8 @@ import { appNavigate } from '../../../app/actions.native';
 import { IReduxState, IStore } from '../../../app/types';
 import { CONFERENCE_BLURRED, CONFERENCE_FOCUSED } from '../../../base/conference/actionTypes';
 import { isDisplayNameVisible } from '../../../base/config/functions.native';
+import { CUSTOM_LAYOUT_ENABLED } from '../../../base/flags/constants';
+import { getFeatureFlag } from '../../../base/flags/functions';
 import Container from '../../../base/react/components/native/Container';
 import LoadingIndicator from '../../../base/react/components/native/LoadingIndicator';
 import TintedView from '../../../base/react/components/native/TintedView';
@@ -48,6 +50,7 @@ import {
 import { isConnecting } from '../functions.native';
 
 import AlwaysOnLabels from './AlwaysOnLabels';
+import CustomLayout from './CustomLayout';
 import ExpandedLabelPopup from './ExpandedLabelPopup';
 import LonelyMeetingExperience from './LonelyMeetingExperience';
 import TitleBar from './TitleBar';
@@ -63,6 +66,11 @@ interface IProps extends AbstractProps {
      * Application's aspect ratio.
      */
     _aspectRatio: Symbol;
+
+    /**
+     * Whether custom layout is enabled, disabling the default layout.
+     */
+    _customLayoutEnabled: boolean;
 
     /**
      * Branding styles for conference.
@@ -370,6 +378,7 @@ class Conference extends AbstractConference<IProps, State> {
         const {
             _aspectRatio,
             _connecting,
+            _customLayoutEnabled,
             _filmstripVisible,
             _isDisplayNameVisible,
             _largeVideoParticipantId,
@@ -383,6 +392,10 @@ class Conference extends AbstractConference<IProps, State> {
 
         if (_reducedUI) {
             return this._renderContentForReducedUi();
+        }
+
+        if (_customLayoutEnabled) {
+            return this._renderContentForCustomLayout();
         }
 
         if (_aspectRatio === ASPECT_RATIO_WIDE) {
@@ -508,6 +521,31 @@ class Conference extends AbstractConference<IProps, State> {
     }
 
     /**
+     * Renders the content for the Conference container when custom layout is
+     * enabled. Only participant video views are rendered (no Toolbox,
+     * Filmstrip, TitleBar, etc.). Each participant view is tagged with a
+     * nativeID so the host app can locate it, and a PARTICIPANT_VIEW_READY
+     * event is fired for each participant.
+     *
+     * @private
+     * @returns {React$Element}
+     */
+    _renderContentForCustomLayout() {
+        const { _connecting } = this.props;
+
+        return (
+            <>
+                <CustomLayout onClick = { this._onClick } />
+
+                {_connecting
+                    && <TintedView>
+                        <LoadingIndicator />
+                    </TintedView>}
+            </>
+        );
+    }
+
+    /**
      * Renders the content for the Conference container when in "reduced UI" mode.
      *
      * @private
@@ -600,6 +638,7 @@ function _mapStateToProps(state: IReduxState, _ownProps: any) {
         ...abstractMapStateToProps(state),
         _aspectRatio: aspectRatio,
         _lowBandwidthModeEnabled: Boolean(lowBandwidthModeEnabled),
+        _customLayoutEnabled: Boolean(getFeatureFlag(state, CUSTOM_LAYOUT_ENABLED, false)),
         _brandingStyles: brandingStyles,
         _calendarEnabled: isCalendarEnabled(state),
         _connecting: isConnecting(state),

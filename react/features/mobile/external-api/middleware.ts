@@ -49,8 +49,14 @@ import {
 import MiddlewareRegistry from '../../base/redux/MiddlewareRegistry';
 import StateListenerRegistry from '../../base/redux/StateListenerRegistry';
 import { toggleScreensharing } from '../../base/tracks/actions.native';
+import { TRACK_ADDED, TRACK_REMOVED, TRACK_UPDATED } from '../../base/tracks/actionTypes';
 import { CAMERA_FACING_MODE_MESSAGE } from '../../base/tracks/constants';
-import { getLocalTracks, isLocalTrackMuted } from '../../base/tracks/functions.native';
+import {
+    getLocalTracks,
+    isLocalTrackMuted,
+    isParticipantAudioMuted,
+    isParticipantVideoMuted
+} from '../../base/tracks/functions.native';
 import { ITrack } from '../../base/tracks/types';
 import { CLOSE_CHAT, OPEN_CHAT } from '../../chat/actionTypes';
 import { closeChat, openChat, sendMessage, setPrivateMessageRecipient } from '../../chat/actions.native';
@@ -68,7 +74,7 @@ import { ENTER_PICTURE_IN_PICTURE } from '../picture-in-picture/actionTypes';
 import { isExternalAPIAvailable } from '../react-native-sdk/functions';
 
 import { READY_TO_CLOSE } from './actionTypes';
-import { setParticipantsWithScreenShare } from './actions';
+import { clearParticipantViewLayouts, setAvatarHidden, setParticipantViewLayout, setParticipantsWithScreenShare } from './actions';
 import { participantToParticipantInfo, sendEvent } from './functions';
 import logger from './logger';
 
@@ -113,6 +119,15 @@ const RECORDING_STATUS_CHANGED = 'RECORDING_STATUS_CHANGED';
 
 const externalAPIEnabled = isExternalAPIAvailable();
 
+/**
+ * The last muted state reported to the native host app for remote
+ * participants, keyed by {@code `${participantId}:${mediaType}`}. Used to
+ * avoid duplicate events, since a single mute change can be reflected by
+ * several redux actions (a remote track is added/removed rather than muted
+ * depending on how the remote endpoint signals it).
+ */
+const _remoteMuteStates = new Map<string, boolean>();
+
 let eventEmitter: any;
 
 const { ExternalAPI } = NativeModules;
@@ -129,9 +144,19 @@ if (externalAPIEnabled) {
  * @returns {Function}
  */
 externalAPIEnabled && MiddlewareRegistry.register(store => next => action => {
-    const oldAudioMuted = store.getState()['features/base/media'].audio.muted;
-    const result = next(action);
     const { type } = action;
+    const oldAudioMuted = store.getState()['features/base/media'].audio.muted;
+
+    // Capture the track state before the action is processed so we can
+    // detect muted-state changes for remote participants. TRACK_REMOVED only
+    // carries the jitsiTrack, so the stored track is needed for its
+    // mediaType/participantId as well.
+    const oldTrack = type === TRACK_UPDATED || type === TRACK_REMOVED
+        ? store.getState()['features/base/tracks'].find(
+            (t: ITrack) => t.jitsiTrack === action.track?.jitsiTrack)
+        : undefined;
+
+    const result = next(action);
 
     switch (type) {
     case APP_WILL_MOUNT:
@@ -162,12 +187,14 @@ externalAPIEnabled && MiddlewareRegistry.register(store => next => action => {
     }
 
     case CONFERENCE_LEFT:
+        _remoteMuteStates.clear();
         _sendConferenceEvent(store, action);
         break;
 
     case CONFERENCE_JOINED:
         _sendConferenceEvent(store, action);
         _registerForEndpointTextMessages(store);
+        _sendInitialMuteStates(store);
         break;
 
     case CONFERENCE_BLURRED:
@@ -268,6 +295,11 @@ externalAPIEnabled && MiddlewareRegistry.register(store => next => action => {
 
         const { participant } = action;
 
+        if (action.type === PARTICIPANT_LEFT) {
+            _remoteMuteStates.delete(`${participant.id}:${MEDIA_TYPE.AUDIO}`);
+            _remoteMuteStates.delete(`${participant.id}:${MEDIA_TYPE.VIDEO}`);
+        }
+
         const isVirtualScreenshareParticipant = isScreenShareParticipantById(store.getState(), participant.id);
 
         if (isVirtualScreenshareParticipant) {
@@ -279,6 +311,14 @@ externalAPIEnabled && MiddlewareRegistry.register(store => next => action => {
             action.type,
             participantToParticipantInfo(participant) /* data */
         );
+
+        if (action.type === PARTICIPANT_JOINED) {
+            // Report the initial mute states of the participant, so the host
+            // app does not have to wait for the first change. Muted media is
+            // not signalled by a track at all, hence it cannot be derived from
+            // the TRACK_ADDED handling below.
+            _sendParticipantMuteStates(store, participant.id);
+        }
         break;
     }
 
@@ -323,27 +363,166 @@ externalAPIEnabled && MiddlewareRegistry.register(store => next => action => {
 
     case SET_AUDIO_MUTED:
         if (action.muted !== oldAudioMuted) {
+            const localParticipant = getLocalParticipant(store.getState());
+
             sendEvent(
                 store,
                 'AUDIO_MUTED_CHANGED',
                 /* data */ {
-                    muted: action.muted
+                    muted: action.muted,
+                    participantId: localParticipant?.id
                 });
         }
         break;
 
-    case SET_VIDEO_MUTED:
+    case SET_VIDEO_MUTED: {
+        const localParticipant = getLocalParticipant(store.getState());
+
         sendEvent(
             store,
             'VIDEO_MUTED_CHANGED',
             /* data */ {
-                muted: action.muted
+                muted: action.muted,
+                participantId: localParticipant?.id
             });
         break;
     }
 
+    case TRACK_ADDED: {
+        // A remote participant turning their camera/microphone on may result
+        // in a brand new track rather than an unmute of an existing one (e.g.
+        // when they joined with the camera off), so the added track's muted
+        // state has to be reported as well.
+        const { local, mediaType, muted, participantId } = action.track ?? {};
+
+        if (!local) {
+            _maybeSendRemoteMuteChangedEvent(store, participantId, mediaType, Boolean(muted));
+        }
+        break;
+    }
+
+    case TRACK_UPDATED: {
+        // Fire mute-changed events for REMOTE participants only.
+        // Local participant mute changes are already covered by
+        // SET_AUDIO_MUTED / SET_VIDEO_MUTED above.
+        if (oldTrack && !oldTrack.local && action.track?.muted !== undefined) {
+            _maybeSendRemoteMuteChangedEvent(
+                store, oldTrack.participantId, oldTrack.mediaType, Boolean(action.track.muted));
+        }
+        break;
+    }
+
+    case TRACK_REMOVED: {
+        // A remote participant turning their camera/microphone off may result
+        // in the track being removed instead of muted, which is equivalent to
+        // being muted from the host app's point of view.
+        if (oldTrack && !oldTrack.local) {
+            _maybeSendRemoteMuteChangedEvent(store, oldTrack.participantId, oldTrack.mediaType, true);
+        }
+        break;
+    }
+    }
+
     return result;
 });
+
+/**
+ * Sends AUDIO_MUTED_CHANGED / VIDEO_MUTED_CHANGED events reflecting the
+ * current mute states of every participant of the conference, so the host app
+ * knows the state of the participants which were already in the room when the
+ * local participant joined.
+ *
+ * @param {Store} store - The redux store.
+ * @private
+ * @returns {void}
+ */
+function _sendInitialMuteStates(store: IStore) {
+    const state = store.getState();
+    const localParticipant = getLocalParticipant(state);
+
+    if (localParticipant) {
+        const tracks = state['features/base/tracks'];
+
+        sendEvent(
+            store,
+            'AUDIO_MUTED_CHANGED',
+            /* data */ {
+                muted: isLocalTrackMuted(tracks, MEDIA_TYPE.AUDIO),
+                participantId: localParticipant.id
+            });
+        sendEvent(
+            store,
+            'VIDEO_MUTED_CHANGED',
+            /* data */ {
+                muted: isLocalTrackMuted(tracks, MEDIA_TYPE.VIDEO),
+                participantId: localParticipant.id
+            });
+    }
+
+    getRemoteParticipants(state).forEach(participant => {
+        if (!participant.fakeParticipant) {
+            _sendParticipantMuteStates(store, participant.id);
+        }
+    });
+}
+
+/**
+ * Sends AUDIO_MUTED_CHANGED / VIDEO_MUTED_CHANGED events reflecting the current
+ * mute states of a single remote participant.
+ *
+ * @param {Store} store - The redux store.
+ * @param {string} participantId - The ID of the remote participant.
+ * @private
+ * @returns {void}
+ */
+function _sendParticipantMuteStates(store: IStore, participantId: string) {
+    const state = store.getState();
+    const participant = getParticipantById(state, participantId);
+
+    if (!participant || participant.local || participant.fakeParticipant) {
+        return;
+    }
+
+    _maybeSendRemoteMuteChangedEvent(
+        store, participantId, MEDIA_TYPE.AUDIO, isParticipantAudioMuted(participant, state));
+    _maybeSendRemoteMuteChangedEvent(
+        store, participantId, MEDIA_TYPE.VIDEO, isParticipantVideoMuted(participant, state));
+}
+
+/**
+ * Sends an AUDIO_MUTED_CHANGED / VIDEO_MUTED_CHANGED event for a remote
+ * participant, unless the very same state has already been reported.
+ *
+ * @param {Store} store - The redux store.
+ * @param {string} participantId - The ID of the remote participant.
+ * @param {string} mediaType - The media type of the track which changed.
+ * @param {boolean} muted - Whether the media of the participant is muted.
+ * @private
+ * @returns {void}
+ */
+function _maybeSendRemoteMuteChangedEvent(
+        store: IStore, participantId?: string, mediaType?: string, muted?: boolean) {
+    if (!participantId
+            || (mediaType !== MEDIA_TYPE.AUDIO && mediaType !== MEDIA_TYPE.VIDEO)) {
+        return;
+    }
+
+    const key = `${participantId}:${mediaType}`;
+
+    if (_remoteMuteStates.get(key) === muted) {
+        return;
+    }
+
+    _remoteMuteStates.set(key, Boolean(muted));
+
+    sendEvent(
+        store,
+        mediaType === MEDIA_TYPE.AUDIO ? 'AUDIO_MUTED_CHANGED' : 'VIDEO_MUTED_CHANGED',
+        /* data */ {
+            muted,
+            participantId
+        });
+}
 
 /**
  * Listen for changes to the known media tracks and look
@@ -398,6 +577,12 @@ function _registerForNativeEvents(store: IStore) {
     const { getState, dispatch } = store;
 
     eventEmitter.addListener(ExternalAPI.HANG_UP, () => {
+        // Release all participant view layouts requested by the native host
+        // app so the custom layout's positioned views don't accumulate
+        // across conferences. The local participant id changes on
+        // join/leave, so PARTICIPANT_LEFT can't reliably clear entries keyed
+        // by endpoint id; clear them explicitly on hang up.
+        dispatch(clearParticipantViewLayouts());
         dispatch(appNavigate(undefined));
     });
 
@@ -475,6 +660,36 @@ function _registerForNativeEvents(store: IStore) {
 
     eventEmitter.addListener(ExternalAPI.TOGGLE_CAMERA, () => {
         dispatch(toggleCameraFacingMode());
+    });
+
+    eventEmitter.addListener(ExternalAPI.SET_PARTICIPANT_VIEW_LAYOUT,
+        ({ participantId, x, y, width, height }: any) => {
+            if (typeof participantId !== 'string') {
+                logger.error('SET_PARTICIPANT_VIEW_LAYOUT: invalid participantId');
+
+                return;
+            }
+
+            const layout = [ x, y, width, height ].every(v => typeof v === 'number')
+                ? { height, width, x, y }
+                : undefined;
+
+            dispatch(setParticipantViewLayout(participantId, layout));
+        });
+
+    eventEmitter.addListener(ExternalAPI.SET_AVATAR_HIDDEN, ({ hidden }: any) => {
+        dispatch(setAvatarHidden(Boolean(hidden)));
+    });
+
+    eventEmitter.addListener(ExternalAPI.SET_AUDIO_DEVICE, ({ device }: any) => {
+        if (typeof device !== 'string') {
+            logger.error('SET_AUDIO_DEVICE: invalid device');
+
+            return;
+        }
+
+        NativeModules.AudioMode?.setAudioDevice?.(device)
+            ?.catch?.((e: any) => logger.error(`SET_AUDIO_DEVICE failed for "${device}"`, e));
     });
 
     eventEmitter.addListener(ExternalAPI.SHOW_NOTIFICATION,

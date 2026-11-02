@@ -15,6 +15,7 @@
  */
 
 #import "ExternalAPI.h"
+#import <React/RCTLog.h>
 
 // Events
 static NSString * const hangUpAction = @"org.jitsi.meet.HANG_UP";
@@ -34,10 +35,23 @@ static NSString * const startRecordingAction = @"org.jitsi.meet.START_RECORDING"
 static NSString * const stopRecordingAction = @"org.jitsi.meet.STOP_RECORDING";
 static NSString * const overwriteConfigAction = @"org.jitsi.meet.OVERWRITE_CONFIG";
 static NSString * const sendCameraFacingModeMessageAction = @"org.jitsi.meet.SEND_CAMERA_FACING_MODE_MESSAGE";
+static NSString * const setParticipantViewLayoutAction = @"org.jitsi.meet.SET_PARTICIPANT_VIEW_LAYOUT";
+static NSString * const setAvatarHiddenAction = @"org.jitsi.meet.SET_AVATAR_HIDDEN";
+static NSString * const setAudioDeviceAction = @"org.jitsi.meet.SET_AUDIO_DEVICE";
 
 @implementation ExternalAPI
 
 static NSMapTable<NSString*, void (^)(NSArray* participantsInfo)> *participantInfoCompletionHandlers;
+
+/**
+ * Last avatar-hidden value requested by the host app. Kept at file scope so
+ * the value survives when it is set before the React Native module exists or
+ * before the JS side registered its listeners, and can be replayed once JS
+ * starts observing.
+ */
+static NSNumber *pendingAvatarHidden = nil;
+static NSNumber *pendingAudioMuted = nil;
+static NSNumber *pendingVideoMuted = nil;
 
 __attribute__((constructor))
 static void initializeViewsMap(void) {
@@ -79,7 +93,10 @@ static __weak ExternalAPI *_sharedExternalAPI = nil;
         @"START_RECORDING": startRecordingAction,
         @"STOP_RECORDING": stopRecordingAction,
         @"OVERWRITE_CONFIG": overwriteConfigAction,
-        @"SEND_CAMERA_FACING_MODE_MESSAGE": sendCameraFacingModeMessageAction
+        @"SEND_CAMERA_FACING_MODE_MESSAGE": sendCameraFacingModeMessageAction,
+        @"SET_PARTICIPANT_VIEW_LAYOUT": setParticipantViewLayoutAction,
+        @"SET_AVATAR_HIDDEN": setAvatarHiddenAction,
+        @"SET_AUDIO_DEVICE": setAudioDeviceAction
     };
 };
 
@@ -93,6 +110,71 @@ static __weak ExternalAPI *_sharedExternalAPI = nil;
 + (BOOL)requiresMainQueueSetup {
     return NO;
 }
+
++ (void)setPendingAvatarHidden:(BOOL)hidden {
+    pendingAvatarHidden = @(hidden);
+}
+
++ (void)setPendingAudioMuted:(BOOL)muted {
+    pendingAudioMuted = @(muted);
+}
+
++ (void)setPendingVideoMuted:(BOOL)muted {
+    pendingVideoMuted = @(muted);
+}
+
+- (void)startObserving {
+    NSLog(@"[ExternalAPI] startObserving: JS side is now listening for events");
+    [super startObserving];
+
+    // Replay state set by the host app before the JS side was listening
+    // (events sent while no listeners are registered are dropped by
+    // RCTEventEmitter). Dispatch asynchronously so the whole batch of
+    // addListener calls is processed first.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (pendingAvatarHidden != nil) {
+            [self sendEventWithName:setAvatarHiddenAction
+                               body:@{ @"hidden": pendingAvatarHidden }];
+        }
+        if (pendingAudioMuted != nil) {
+            NSLog(@"[ExternalAPI] startObserving: replaying pending audio muted = %@", pendingAudioMuted);
+            [self sendEventWithName:setAudioMutedAction
+                               body:@{ @"muted": pendingAudioMuted }];
+        }
+        if (pendingVideoMuted != nil) {
+            NSLog(@"[ExternalAPI] startObserving: replaying pending video muted = %@", pendingVideoMuted);
+            [self sendEventWithName:setVideoMutedAction
+                               body:@{ @"muted": pendingVideoMuted }];
+        }
+    });
+}
+
+// /**
+//  * Override sendEventWithName:body: to bypass the _listenerCount check in
+//  * RCTEventEmitter. In React Native 0.85+ bridgeless mode, when a second
+//  * conference is started (new RCTRootView or module invalidation),
+//  * _listenerCount may be 0 even though the JS side has active
+//  * NativeEventEmitter listeners. The parent class silently drops events when
+//  * _listenerCount == 0. We bypass this by calling _callableJSModules directly.
+//  */
+// - (void)sendEventWithName:(NSString *)eventName body:(id)body {
+//     if (RCT_DEBUG && ![[self supportedEvents] containsObject:eventName]) {
+//         RCTLogError(
+//             @"`%@` is not a supported event type for %@. Supported events are: `%@`",
+//             eventName,
+//             [self class],
+//             [[self supportedEvents] componentsJoinedByString:@"`, `"]);
+//         return;
+//     }
+
+//     if (self.callableJSModules) {
+//         [self.callableJSModules invokeModule:@"RCTDeviceEventEmitter"
+//                                       method:@"emit"
+//                                     withArgs:body ? @[ eventName, body ] : @[ eventName ]];
+//     } else {
+//         NSLog(@"[ExternalAPI] sendEventWithName: callableJSModules is nil, event %@ dropped", eventName);
+//     }
+// }
 
 - (NSArray<NSString *> *)supportedEvents {
     return @[ hangUpAction,
@@ -111,8 +193,60 @@ static __weak ExternalAPI *_sharedExternalAPI = nil;
               startRecordingAction,
               stopRecordingAction,
               overwriteConfigAction,
-              sendCameraFacingModeMessageAction
-    ];
+              sendCameraFacingModeMessageAction,
+              setParticipantViewLayoutAction,
+              setAvatarHiddenAction,
+              setAudioDeviceAction
+    ]
+;
+}
+
+// Track listener count for debugging (parent's _listenerCount is private)
+static volatile NSInteger _externalListenerCount = 0;
+
+- (void)addListener:(NSString *)eventName {
+    [super addListener:eventName];
+    _externalListenerCount++;
+    NSLog(@"[ExternalAPI] addListener: %@, listenerCount=%ld", eventName, (long)_externalListenerCount);
+}
+
+- (void)removeListeners:(double)count {
+    [super removeListeners:count];
+    _externalListenerCount = MAX(_externalListenerCount - (NSInteger)count, 0);
+    NSLog(@"[ExternalAPI] removeListeners: count=%.0f, listenerCount=%ld", count, (long)_externalListenerCount);
+}
+
+/**
+ * Allows the JS side to query and replay any pending mute state that may
+ * have been set before event listeners were registered or while the bridge
+ * was temporarily unavailable.
+ */
+RCT_EXPORT_METHOD(syncMuteState:(RCTResponseSenderBlock)callback) {
+    NSMutableDictionary *result = [NSMutableDictionary dictionary];
+
+    if (pendingAudioMuted != nil) {
+        result[@"audioMuted"] = pendingAudioMuted;
+    }
+    if (pendingVideoMuted != nil) {
+        result[@"videoMuted"] = pendingVideoMuted;
+    }
+
+    NSLog(@"[ExternalAPI] syncMuteState: returning %@", result);
+
+    callback(@[ result ]);
+}
+
+/**
+ * Called by the JS side to acknowledge that a mute state event was received,
+ * allowing the native side to clear the pending value and stop retrying.
+ */
+RCT_EXPORT_METHOD(clearPendingMuteState:(NSString *)type) {
+    NSLog(@"[ExternalAPI] clearPendingMuteState: type=%@", type);
+    if ([type isEqualToString:@"audio"]) {
+        pendingAudioMuted = nil;
+    } else if ([type isEqualToString:@"video"]) {
+        pendingVideoMuted = nil;
+    }
 }
 
 /**
@@ -149,9 +283,51 @@ RCT_EXPORT_METHOD(sendEvent:(NSString *)name
 }
 
 - (void)sendSetAudioMuted:(BOOL)muted {
+    NSLog(@"[ExternalAPI] sendSetAudioMuted called, muted=%d", muted);
     NSDictionary *data = @{ @"muted": [NSNumber numberWithBool:muted]};
 
+    // Store as pending so it can be replayed if the JS side misses the event
+//    pendingAudioMuted = [NSNumber numberWithBool:muted];
+
+    // In React Native 0.85+ bridgeless mode, self.bridge is always nil.
+    // sendEventWithName:body: uses _callableJSModules (set by TurboModule
+    // system), NOT self.bridge. Just call it directly.
     [self sendEventWithName:setAudioMutedAction body:data];
+//    NSLog(@"[ExternalAPI] sendSetAudioMuted event sent: %@", setAudioMutedAction);
+
+    // Schedule retries — if JS doesn't clear pending, the event was lost
+    // (e.g. no listeners registered yet, or _callableJSModules not ready)
+//    NSNumber *expectedValue = pendingAudioMuted;
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingAudioMuted != nil && [pendingAudioMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetAudioMuted: retry 1 (0.3s), pending not cleared");
+//            [self sendEventWithName:setAudioMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingAudioMuted != nil && [pendingAudioMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetAudioMuted: retry 2 (0.6s), pending not cleared");
+//            [self sendEventWithName:setAudioMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.9 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingAudioMuted != nil && [pendingAudioMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetAudioMuted: retry 3 (0.9s), pending not cleared");
+//            [self sendEventWithName:setAudioMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingAudioMuted != nil && [pendingAudioMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetAudioMuted: retry 4 (1.2s), pending not cleared");
+//            [self sendEventWithName:setAudioMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingAudioMuted != nil && [pendingAudioMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetAudioMuted: retry 5 (2s), pending not cleared");
+//            [self sendEventWithName:setAudioMutedAction body:data];
+//        }
+//    });
 }
 
 - (void)sendEndpointTextMessage:(NSString*)message :(NSString*)to {
@@ -198,9 +374,52 @@ RCT_EXPORT_METHOD(sendEvent:(NSString *)name
 }
 
 - (void)sendSetVideoMuted:(BOOL)muted {
+    NSLog(@"[ExternalAPI] sendSetVideoMuted called, muted=%d, externalAPI=%@", muted, self);
     NSDictionary *data = @{ @"muted": [NSNumber numberWithBool:muted]};
 
+    // Store as pending so it can be replayed if the JS side misses the event
+//    pendingVideoMuted = [NSNumber numberWithBool:muted];
+
+    // In React Native 0.85+ bridgeless mode, self.bridge is always nil.
+    // sendEventWithName:body: uses _callableJSModules (set by TurboModule
+    // system), NOT self.bridge. Just call it directly.
     [self sendEventWithName:setVideoMutedAction body:data];
+//    NSLog(@"[ExternalAPI] sendSetVideoMuted event sent: %@", setVideoMutedAction);
+//
+//    // Schedule retries — if JS doesn't clear pending, the event was lost
+//    // (e.g. no listeners registered yet, or _callableJSModules not ready)
+//    NSNumber *expectedValue = pendingVideoMuted;
+//    
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingVideoMuted != nil && [pendingVideoMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetVideoMuted: retry 1 (1s), pending not cleared");
+//            [self sendEventWithName:setVideoMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingVideoMuted != nil && [pendingVideoMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetVideoMuted: retry 2 (2s), pending not cleared");
+//            [self sendEventWithName:setVideoMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingVideoMuted != nil && [pendingVideoMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetVideoMuted: retry 3 (3s), pending not cleared");
+//            [self sendEventWithName:setVideoMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(4.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingVideoMuted != nil && [pendingVideoMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetVideoMuted: retry 4 (4s), pending not cleared");
+//            [self sendEventWithName:setVideoMutedAction body:data];
+//        }
+//    });
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        if (pendingVideoMuted != nil && [pendingVideoMuted isEqualToNumber:expectedValue]) {
+//            NSLog(@"[ExternalAPI] sendSetVideoMuted: retry 5 (5s), pending not cleared");
+//            [self sendEventWithName:setVideoMutedAction body:data];
+//        }
+//    });
 }
 
 - (void)sendSetClosedCaptionsEnabled:(BOOL)enabled {
@@ -271,5 +490,39 @@ RCT_EXPORT_METHOD(sendEvent:(NSString *)name
     };
     
     [self sendEventWithName:sendCameraFacingModeMessageAction body:data];
+}
+
+- (void)sendSetParticipantViewLayout:(NSString*)participantId frame:(CGRect)frame {
+    NSDictionary *data = @{
+        @"participantId": participantId,
+        @"x": @(frame.origin.x),
+        @"y": @(frame.origin.y),
+        @"width": @(frame.size.width),
+        @"height": @(frame.size.height)
+    };
+
+    [self sendEventWithName:setParticipantViewLayoutAction body:data];
+}
+
+- (void)sendClearParticipantViewLayout:(NSString*)participantId {
+    NSDictionary *data = @{
+        @"participantId": participantId
+    };
+
+    [self sendEventWithName:setParticipantViewLayoutAction body:data];
+}
+
+- (void)sendSetAvatarHidden:(BOOL)hidden {
+    pendingAvatarHidden = @(hidden);
+
+    NSDictionary *data = @{ @"hidden": [NSNumber numberWithBool:hidden] };
+
+    [self sendEventWithName:setAvatarHiddenAction body:data];
+}
+
+- (void)sendSetAudioDevice:(NSString*)device {
+    NSDictionary *data = @{ @"device": device };
+
+    [self sendEventWithName:setAudioDeviceAction body:data];
 }
 @end

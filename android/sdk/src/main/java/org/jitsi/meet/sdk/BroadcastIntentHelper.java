@@ -154,4 +154,58 @@ public class BroadcastIntentHelper {
 
         return intent;
     }
+
+    /**
+     * Builds an intent which sets the position and size of a participant's
+     * video view inside the custom layout. All values are in
+     * density-independent pixels (dp); convert from pixels using
+     * {@code value / getResources().getDisplayMetrics().density}.
+     *
+     * @param participantId the participant id from the PARTICIPANT_VIEW_READY
+     * event.
+     * @param x the horizontal position in dp.
+     * @param y the vertical position in dp.
+     * @param width the width in dp.
+     * @param height the height in dp.
+     */
+    public static Intent buildSetParticipantViewLayoutIntent(
+        String participantId, double x, double y, double width, double height) {
+        Intent intent = new Intent(BroadcastAction.Type.SET_PARTICIPANT_VIEW_LAYOUT.getAction());
+        intent.putExtra("participantId", participantId);
+        intent.putExtra("x", x);
+        intent.putExtra("y", y);
+        intent.putExtra("width", width);
+        intent.putExtra("height", height);
+
+        return intent;
+    }
+
+    /**
+     * Builds an intent which removes a layout previously set with
+     * {@link #buildSetParticipantViewLayoutIntent}, returning the
+     * participant's view to the default grid.
+     *
+     * @param participantId the participant id.
+     */
+    public static Intent buildClearParticipantViewLayoutIntent(String participantId) {
+        Intent intent = new Intent(BroadcastAction.Type.SET_PARTICIPANT_VIEW_LAYOUT.getAction());
+        intent.putExtra("participantId", participantId);
+
+        return intent;
+    }
+
+    /**
+     * Builds an intent which sets whether participant avatars (shown when a
+     * participant's video is off) should be hidden. When hidden, the
+     * participant's view shows a plain black background instead of the
+     * avatar. Applies to all participants.
+     *
+     * @param hidden true to hide avatars, false to show them.
+     */
+    public static Intent buildSetAvatarHiddenIntent(boolean hidden) {
+        Intent intent = new Intent(BroadcastAction.Type.SET_AVATAR_HIDDEN.getAction());
+        intent.putExtra("hidden", hidden);
+
+        return intent;
+    }
 }

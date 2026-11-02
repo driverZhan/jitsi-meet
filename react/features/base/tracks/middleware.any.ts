@@ -68,14 +68,23 @@ MiddlewareRegistry.register(store => next => action => {
         _setMuted(store, action, MEDIA_TYPE.SCREENSHARE);
         break;
 
-    case SET_VIDEO_MUTED:
-        if (!action.muted
-                && isUserInteractionRequiredForUnmute(store.getState())) {
+    case SET_VIDEO_MUTED: {
+        const _localTrack = _getLocalTrack(store, MEDIA_TYPE.VIDEO, true);
+        const _state = store.getState();
+        const _requiresInteraction = !action.muted && isUserInteractionRequiredForUnmute(_state);
+
+        // eslint-disable-next-line no-console
+        console.log(`[tracks-middleware] SET_VIDEO_MUTED: muted=${action.muted}, ensureTrack=${action.ensureTrack}, hasLocalTrack=${Boolean(_localTrack)}, hasJitsiTrack=${Boolean(_localTrack?.jitsiTrack)}, requiresUserInteraction=${_requiresInteraction}`);
+
+        if (_requiresInteraction) {
+            // eslint-disable-next-line no-console
+            console.log('[tracks-middleware] SET_VIDEO_MUTED: BLOCKED - user interaction required for unmute');
             return;
         }
 
         _setMuted(store, action, MEDIA_TYPE.VIDEO);
         break;
+    }
 
     case TOGGLE_CAMERA_FACING_MODE: {
         const result = next(action);
@@ -179,6 +188,9 @@ function _setMuted(store: IStore, { ensureTrack, muted }: {
     const localTrack = _getLocalTrack(store, mediaType, /* includePending */ true);
     const state = getState();
 
+    // eslint-disable-next-line no-console
+    console.log(`[tracks-middleware] _setMuted: mediaType=${mediaType}, muted=${muted}, ensureTrack=${ensureTrack}, hasLocalTrack=${Boolean(localTrack)}, hasJitsiTrack=${Boolean(localTrack?.jitsiTrack)}`);
+
     if (localTrack) {
         // The `jitsiTrack` property will have a value only for a localTrack for which `getUserMedia` has already
         // completed. If there's no `jitsiTrack`, then the `muted` state will be applied once the `jitsiTrack` is
@@ -186,10 +198,25 @@ function _setMuted(store: IStore, { ensureTrack, muted }: {
         const { jitsiTrack } = localTrack;
 
         if (jitsiTrack) {
+            // eslint-disable-next-line no-console
+            console.log(`[tracks-middleware] _setMuted: calling ${muted ? 'mute' : 'unmute'} on track`);
             setTrackMuted(jitsiTrack, muted, state, dispatch)
-                .catch(() => dispatch(trackMuteUnmuteFailed(localTrack, muted)));
+                .then(() => {
+                    // eslint-disable-next-line no-console
+                    console.log(`[tracks-middleware] _setMuted: ${muted ? 'mute' : 'unmute'} succeeded for ${mediaType}`);
+                })
+                .catch((e: any) => {
+                    // eslint-disable-next-line no-console
+                    console.log(`[tracks-middleware] _setMuted: ${muted ? 'mute' : 'unmute'} FAILED for ${mediaType}:`, e);
+                    dispatch(trackMuteUnmuteFailed(localTrack, muted));
+                });
+        } else {
+            // eslint-disable-next-line no-console
+            console.log(`[tracks-middleware] _setMuted: localTrack exists but jitsiTrack is null (getUserMedia pending)`);
         }
     } else if (!muted && ensureTrack) {
+        // eslint-disable-next-line no-console
+        console.log(`[tracks-middleware] _setMuted: no track, creating ${mediaType} track`);
         // TODO(saghul): reconcile these 2 types.
         const createMediaType = mediaType === MEDIA_TYPE.SCREENSHARE ? 'desktop' : mediaType;
 
@@ -197,5 +224,8 @@ function _setMuted(store: IStore, { ensureTrack, muted }: {
         dispatch(createLocalTracksA({ devices: [ createMediaType ] })).then(() => {
             typeof APP !== 'undefined' && dispatch(gumPending([ mediaType ], IGUMPendingState.NONE));
         });
+    } else {
+        // eslint-disable-next-line no-console
+        console.log(`[tracks-middleware] _setMuted: no track, ensureTrack=${ensureTrack}, muted=${muted} - doing nothing`);
     }
 }

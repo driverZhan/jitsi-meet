@@ -5,6 +5,20 @@
 export const ADD_PEOPLE_ENABLED = 'add-people.enabled';
 
 /**
+ * Flag indicating if custom layout should be enabled.
+ * When enabled, the default meeting layout (LargeVideo, Filmstrip, TileView,
+ * Toolbox, TitleBar, etc.) is disabled. Participant video views are rendered
+ * in a minimal container, each tagged with a nativeID equal to the participant
+ * ID so the host app can locate them.
+ *
+ * The PARTICIPANT_VIEW_READY event is fired from ParticipantView's
+ * componentDidMount regardless of this flag, so the host app always
+ * receives the callback.
+ * Default: disabled (false).
+ */
+export const CUSTOM_LAYOUT_ENABLED = 'custom-layout.enabled';
+
+/**
  * Flag indicating if the audio device button should be displayed.
  * Default: enabled (true).
  */

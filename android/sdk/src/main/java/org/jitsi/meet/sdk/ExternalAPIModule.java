@@ -103,6 +103,8 @@ class ExternalAPIModule extends ReactContextBaseJavaModule {
         constants.put("STOP_RECORDING", BroadcastAction.Type.STOP_RECORDING.getAction());
         constants.put("OVERWRITE_CONFIG", BroadcastAction.Type.OVERWRITE_CONFIG.getAction());
         constants.put("SEND_CAMERA_FACING_MODE_MESSAGE", BroadcastAction.Type.SEND_CAMERA_FACING_MODE_MESSAGE.getAction());
+        constants.put("SET_PARTICIPANT_VIEW_LAYOUT", BroadcastAction.Type.SET_PARTICIPANT_VIEW_LAYOUT.getAction());
+        constants.put("SET_AVATAR_HIDDEN", BroadcastAction.Type.SET_AVATAR_HIDDEN.getAction());
 
         return constants;
     }

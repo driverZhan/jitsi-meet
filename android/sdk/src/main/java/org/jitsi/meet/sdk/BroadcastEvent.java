@@ -83,6 +83,7 @@ public class BroadcastEvent {
         AUDIO_MUTED_CHANGED("org.jitsi.meet.AUDIO_MUTED_CHANGED"),
         PARTICIPANT_JOINED("org.jitsi.meet.PARTICIPANT_JOINED"),
         PARTICIPANT_LEFT("org.jitsi.meet.PARTICIPANT_LEFT"),
+        PARTICIPANT_VIEW_READY("org.jitsi.meet.PARTICIPANT_VIEW_READY"),
         ENDPOINT_TEXT_MESSAGE_RECEIVED("org.jitsi.meet.ENDPOINT_TEXT_MESSAGE_RECEIVED"),
         SCREEN_SHARE_TOGGLED("org.jitsi.meet.SCREEN_SHARE_TOGGLED"),
         PARTICIPANTS_INFO_RETRIEVED("org.jitsi.meet.PARTICIPANTS_INFO_RETRIEVED"),
@@ -93,7 +94,8 @@ public class BroadcastEvent {
         TRANSCRIPTION_CHUNK_RECEIVED("org.jitsi.meet.TRANSCRIPTION_CHUNK_RECEIVED"),
         CUSTOM_BUTTON_PRESSED("org.jitsi.meet.CUSTOM_BUTTON_PRESSED"),
         CONFERENCE_UNIQUE_ID_SET("org.jitsi.meet.CONFERENCE_UNIQUE_ID_SET"),
-        RECORDING_STATUS_CHANGED("org.jitsi.meet.RECORDING_STATUS_CHANGED");
+        RECORDING_STATUS_CHANGED("org.jitsi.meet.RECORDING_STATUS_CHANGED"),
+        PARTICIPANT_NETWORK_QUALITY_CHANGED("org.jitsi.meet.PARTICIPANT_NETWORK_QUALITY_CHANGED");
 
         private static final String CONFERENCE_BLURRED_NAME = "CONFERENCE_BLURRED";
         private static final String CONFERENCE_FOCUSED_NAME = "CONFERENCE_FOCUSED";
@@ -103,6 +105,7 @@ public class BroadcastEvent {
         private static final String AUDIO_MUTED_CHANGED_NAME = "AUDIO_MUTED_CHANGED";
         private static final String PARTICIPANT_JOINED_NAME = "PARTICIPANT_JOINED";
         private static final String PARTICIPANT_LEFT_NAME = "PARTICIPANT_LEFT";
+        private static final String PARTICIPANT_VIEW_READY_NAME = "PARTICIPANT_VIEW_READY";
         private static final String ENDPOINT_TEXT_MESSAGE_RECEIVED_NAME = "ENDPOINT_TEXT_MESSAGE_RECEIVED";
         private static final String SCREEN_SHARE_TOGGLED_NAME = "SCREEN_SHARE_TOGGLED";
         private static final String PARTICIPANTS_INFO_RETRIEVED_NAME = "PARTICIPANTS_INFO_RETRIEVED";
@@ -114,6 +117,7 @@ public class BroadcastEvent {
         private static final String CUSTOM_BUTTON_PRESSED_NAME = "CUSTOM_BUTTON_PRESSED";
         private static final String CONFERENCE_UNIQUE_ID_SET_NAME = "CONFERENCE_UNIQUE_ID_SET";
         private static final String RECORDING_STATUS_CHANGED_NAME = "RECORDING_STATUS_CHANGED";
+        private static final String PARTICIPANT_NETWORK_QUALITY_CHANGED_NAME = "PARTICIPANT_NETWORK_QUALITY_CHANGED";
 
         private final String action;
 
@@ -152,6 +156,8 @@ public class BroadcastEvent {
                     return PARTICIPANT_JOINED;
                 case PARTICIPANT_LEFT_NAME:
                     return PARTICIPANT_LEFT;
+                case PARTICIPANT_VIEW_READY_NAME:
+                    return PARTICIPANT_VIEW_READY;
                 case ENDPOINT_TEXT_MESSAGE_RECEIVED_NAME:
                     return ENDPOINT_TEXT_MESSAGE_RECEIVED;
                 case SCREEN_SHARE_TOGGLED_NAME:
@@ -174,6 +180,8 @@ public class BroadcastEvent {
                     return CONFERENCE_UNIQUE_ID_SET;
                 case RECORDING_STATUS_CHANGED_NAME:
                     return RECORDING_STATUS_CHANGED;
+                case PARTICIPANT_NETWORK_QUALITY_CHANGED_NAME:
+                    return PARTICIPANT_NETWORK_QUALITY_CHANGED;
             }
 
             return null;

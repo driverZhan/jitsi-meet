@@ -21,7 +21,7 @@
 #import <WebRTC/WebRTC.h>
 
 #import "JitsiAudioSession+Private.h"
-#import "callkit/JMCallKitProxy.h"
+//#import "callkit/JMCallKitProxy.h"
 
 
 // Audio mode
@@ -151,7 +151,7 @@ RCT_EXPORT_METHOD(setDisabled:(BOOL)disabled
     RCTLogInfo(@"[AudioMode] audio disabled: %d", disabled);
 
     audioDisabled = disabled;
-    JMCallKitProxy.enabled = !disabled;
+//    JMCallKitProxy.enabled = !disabled;
 
     RTCAudioSession *session = JitsiAudioSession.rtcAudioSession;
     if (disabled) {
@@ -223,9 +223,16 @@ RCT_EXPORT_METHOD(setAudioDevice:(NSString *)device
         AVAudioSession *_session = [AVAudioSession sharedInstance];
         AVAudioSessionPortDescription *port = nil;
 
+        BOOL isEarpieceRequest = [device isEqualToString:kDeviceTypeEarpiece];
+
         // Find the matching input device.
         for (AVAudioSessionPortDescription *portDesc in _session.availableInputs) {
-            if ([portDesc.UID isEqualToString:device]) {
+            if (isEarpieceRequest) {
+                if ([portDesc.portType isEqualToString:AVAudioSessionPortBuiltInMic]) {
+                    port = portDesc;
+                    break;
+                }
+            } else if ([portDesc.UID isEqualToString:device]) {
                 port = portDesc;
                 break;
             }
@@ -239,6 +246,7 @@ RCT_EXPORT_METHOD(setAudioDevice:(NSString *)device
             
             // Special case for the earpiece.
             if ([port.portType isEqualToString:AVAudioSessionPortBuiltInMic]) {
+                RCTLogInfo(@"[AudioMode] Selected device: %@ success", device);
                 forceEarpiece = YES;
                 [self setConfigWithoutLock:earpieceConfig error:nil];
             } else if (isEarpieceOn) {
